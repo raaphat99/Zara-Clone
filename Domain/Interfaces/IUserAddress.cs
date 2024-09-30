@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace Domain.Interfaces
 {
-    public interface IProductRepository : IGenericRepository<Product>
+    public interface IUserAddressRepository : IGenericRepository<Product>
     {
-        IEnumerable<Product> GetMostExpensiveProducts(int count);
+        
     }
 }
