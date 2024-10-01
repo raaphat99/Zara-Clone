@@ -20,6 +20,11 @@ namespace DataAccess.EFCore.Data
             .Property(product => product.ID)
             .UseIdentityColumn(1001, 1);
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Category>()
+            .HasOne(c => c.ParentCategory)
+            .WithMany(c => c.Subcategories)
+            .HasForeignKey(c => c.ParentCategoryID);
         }
 
         public DbSet<Product> Products { get; set; }

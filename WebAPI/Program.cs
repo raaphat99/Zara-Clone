@@ -22,10 +22,7 @@ namespace WebAPI
                     optionsBuilder => optionsBuilder.MigrationsAssembly(typeof(ApplicationContext).Assembly.FullName));
             });
 
-
-
-            builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-            //builder.Services.AddScoped<IProductRepository, ProductRepository>();
+            builder.Services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             builder.Services.AddControllers();

@@ -7,8 +7,14 @@ using System.Threading.Tasks;
 
 namespace Domain.Interfaces
 {
-    public interface IProductRepository : IGenericRepository<Product>
+    public interface IProductRepository : IGenericRepository<Product, int>
     {
-        IEnumerable<Product> GetMostExpensiveProducts(int count);
+        Task<List<Product>> SearchProductsAsync(
+            string searchTerm,
+            string category = null,
+            decimal? minPrice = null,
+            decimal? maxPrice = null,
+            string color = null,
+            string material = null);
     }
 }
