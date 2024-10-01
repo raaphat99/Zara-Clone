@@ -12,6 +12,9 @@ namespace Domain.Models
     {
         public DateTime? Created { get; set; }
         public DateTime? LastUpdated { get; set; }   
-        public virtual ICollection<UserAddress>? Adresses { get; set; }
+        public virtual ICollection<UserAddress> Adresses { get; set; }
+        public virtual ICollection<UserMeasurement> UserMeasurements { get; set; }
+        public virtual Cart Cart { get; set; }
+        public virtual Wishlist Wishlist { get; set; }
     }
 }
