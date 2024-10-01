@@ -22,7 +22,9 @@ namespace DataAccess.EFCore.Data
             .UseIdentityColumn(1001, 1);
             base.OnModelCreating(modelBuilder);
         }
+        public DbSet<ShippingMethod> ShippingMethods { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
 
-        public DbSet<Product> Products { get; set; }
     }
 }

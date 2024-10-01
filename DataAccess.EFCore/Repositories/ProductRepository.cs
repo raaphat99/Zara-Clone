@@ -10,13 +10,13 @@ using System.Threading.Tasks;
 
 namespace DataAccess.EFCore.Repositories
 {
-    public class ProductRepository : GenericRepository<Product>, IProductRepository
+    public class ProductRepository : GenericRepository<Product>//, IProductRepository
     {
         public ProductRepository(ApplicationContext applicationContext) : base(applicationContext)
         { }
-        public IEnumerable<Product> GetMostExpensiveProducts(int count)
-        {
-            return _dbContext.Products.OrderByDescending(product => product.Price).Take(count).ToList();
-        }
+        //public IEnumerable<Product> GetMostExpensiveProducts(int count)
+        //{
+        //    return _dbContext.Products.OrderByDescending(product => product.Price).Take(count).ToList();
+        //}
     }
 }
