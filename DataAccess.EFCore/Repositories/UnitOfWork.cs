@@ -1,5 +1,6 @@
 ﻿using DataAccess.EFCore.Data;
 using Domain.Interfaces;
+using Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,11 +13,12 @@ namespace DataAccess.EFCore.Repositories
     {
         private readonly ApplicationContext _context;
         public IProductRepository Products { get; private set; }
+        public ICategoryRepository Categorys { get;private set; }
+
 
         public UnitOfWork(ApplicationContext context)
         {
             _context = context;
-           // Products = new ProductRepository(_context);
         }
 
         public async Task<int> Complete()
