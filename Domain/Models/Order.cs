@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,5 +9,42 @@ namespace Domain.Models
 {
     public class Order
     {
+        public int Id { get; set; }
+        //[ForeignKey("User")]
+       // public string UserId { get; set; }
+        //public virtual User User { get; set; }
+        [ForeignKey("ShippingMethod")]
+        public int ShippingMethodId { get; set; }
+        public virtual ShippingMethod ShippingMethod { get; set; }
+        //[ForeignKey("UserAddress")]
+        //public  int UserAddressId { get; set; }
+        //public virtual UserAddress UserAddress { get; set; }
+        //[ForeignKey("Payment")]
+       // public int PaymentId { get; set; }
+        //public virtual Payment Payment { get; set; }
+        public OrderStatus Status { get; set; }
+        public double TotalPrice { get; set; }
+        public DateTime Created { get; set; }
+        public DateTime Updated { get; set; }
+        public virtual ICollection<OrderItem> OrderItems { get; set; } =   new HashSet<OrderItem>();
+
+
+        public enum OrderStatus
+        {
+            Pending,
+            Shipped,
+            Delivered
+        }
+        public void SetShippingMethod()
+        {
+            if (TotalPrice > 4000)
+            {
+                ShippingMethodId = (int)ShippingMethod.ShippingName.Free;
+            }
+            else
+            {
+                ShippingMethodId = (int)ShippingMethod.ShippingName.Standard;
+            }
+        }
     }
 }
