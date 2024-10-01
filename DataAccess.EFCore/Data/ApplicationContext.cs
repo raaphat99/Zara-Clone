@@ -14,14 +14,27 @@ namespace DataAccess.EFCore.Data
         public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
         { }
 
+        public DbSet<Product> Products { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<ProductSize> ProductSizes { get; set; }
+        public DbSet<ProductType> ProductTypes { get; set; }
+        public DbSet<ProductVariant> ProductVariants { get; set; }
+        public DbSet<ProductImage> ProductImages { get; set; }
+        public DbSet<ProductVariantSize> ProductVariantSizes { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Product>()
-            .Property(product => product.ID)
-            .UseIdentityColumn(1001, 1);
+            modelBuilder.Entity<ProductVariantSize>()
+                 .HasKey(pvs => new { pvs.SizeId, pvs.ProductVariantId });
+
+            modelBuilder.Entity<Category>()
+                 .HasOne(c => c.ParentCategory)
+                 .WithMany(c => c.SubCategory)
+                 .HasForeignKey(c => c.ParentCategoryId);
+
+            
             base.OnModelCreating(modelBuilder);
         }
-
-        public DbSet<Product> Products { get; set; }
     }
 }
+

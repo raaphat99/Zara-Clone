@@ -8,5 +8,6 @@ namespace Domain.Models
 {
     public class Wishlist
     {
+
     }
 }
