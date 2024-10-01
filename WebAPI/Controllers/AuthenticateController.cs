@@ -6,6 +6,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Domain.Models;
 
 namespace WebAPI.Controllers
 {
@@ -13,12 +14,12 @@ namespace WebAPI.Controllers
     [ApiController]
     public class AuthenticateController : ControllerBase
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
 
         public AuthenticateController(
-            UserManager<IdentityUser> userManager,
+            UserManager<User> userManager,
             RoleManager<IdentityRole> roleManager,
             IConfiguration configuration)
         {
@@ -64,15 +65,20 @@ namespace WebAPI.Controllers
             if (userExists != null)
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
 
-            IdentityUser user = new()
+            User user = new()
             {
                 Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
-                UserName = model.Name + model.Surname
+                Name = model.Name,
+                Surname = model.Surname,
             };
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
+            {
+                await _userManager.AddToRoleAsync(user,UserRoles.User);
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
+                
+            }
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
         }
         [HttpPost("register-admin")]
@@ -83,11 +89,12 @@ namespace WebAPI.Controllers
             if (userExists != null)
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
 
-            IdentityUser user = new()
+            User user = new()
             {
                 Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
-                UserName = model.Name + model.Surname
+                Name = model.Name,
+                Surname = model.Surname,
             };
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
@@ -106,7 +113,7 @@ namespace WebAPI.Controllers
             {
                 await _userManager.AddToRoleAsync(user, UserRoles.User);
             }
-            return Ok(new Response { Status = "Success", Message = "User created successfully!" });
+            return Ok(new Response { Status = "Success", Message = "Admin created successfully!" });
         }
             private JwtSecurityToken GetToken(List<Claim> authClaims)
             {
