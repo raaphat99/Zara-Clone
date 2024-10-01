@@ -16,7 +16,7 @@ namespace DataAccess.EFCore.Repositories
         public UnitOfWork(ApplicationContext context)
         {
             _context = context;
-            Products = new ProductRepository(_context);
+           // Products = new ProductRepository(_context);
         }
 
         public async Task<int> Complete()
