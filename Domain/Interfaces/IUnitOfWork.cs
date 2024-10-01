@@ -9,7 +9,7 @@ namespace Domain.Interfaces
     public interface IUnitOfWork : IDisposable
     {
         IProductRepository Products { get; }
-        ICategoryRepository Categorys { get; }
+        ICategoryRepository Categories { get; }
         Task<int> Complete();
     }
 }

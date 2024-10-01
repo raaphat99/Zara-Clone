@@ -13,8 +13,7 @@ namespace DataAccess.EFCore.Repositories
     {
         private readonly ApplicationContext _context;
         public IProductRepository Products { get; private set; }
-        public ICategoryRepository Categorys { get;private set; }
-
+        public ICategoryRepository Categorys { get; private set; }
 
         public UnitOfWork(ApplicationContext context)
         {

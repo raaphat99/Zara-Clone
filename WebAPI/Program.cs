@@ -29,30 +29,29 @@ namespace WebAPI
             });
 
 
-
-            builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            builder.Services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             //Identity
             builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<ApplicationContext>().AddDefaultTokenProviders();
 
             // JWT configuration
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-.            AddJwtBearer(options =>
+.AddJwtBearer(options =>
             {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = builder.Configuration["Jwt:ValidIssuer"],
-                        ValidAudience = builder.Configuration["Jwt:ValidAudience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]))
-    
-                    };
-                   
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = builder.Configuration["Jwt:ValidIssuer"],
+                    ValidAudience = builder.Configuration["Jwt:ValidAudience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]))
 
-             });
+                };
+
+
+            });
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -61,7 +60,7 @@ namespace WebAPI
             //swagger docs configuration
             builder.Services.AddSwaggerGen(swagger =>
             {
-                
+
                 swagger.SwaggerDoc("v1", new OpenApiInfo()
                 {
                     Version = "v1",

@@ -61,11 +61,10 @@ namespace Domain.Models
         public int MyProperty { get; set; }
         public virtual Product Product { get; set; }
         // public virtual ICollection<OrderItem> OrderItem { get; set; } = new List<OrderItem>();
-         //public virtual ICollection<CartItem> OrderItem { get; set; } = new List<CartItem>();
+        //public virtual ICollection<CartItem> OrderItem { get; set; } = new List<CartItem>();
 
         public virtual ICollection<ProductImage> ProductImage { get; set; } = new List<ProductImage>();
         public virtual ICollection<ProductVariantSize> ProductVariantSize { get; set; } = new List<ProductVariantSize>();
-
     }
- 
+
 }

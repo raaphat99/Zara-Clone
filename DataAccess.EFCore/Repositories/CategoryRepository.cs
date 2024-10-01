@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 
 namespace DataAccess.EFCore.Repositories
 {
-    public class CategoryRepository: GenericRepository<Category>, ICategoryRepository
+    public class CategoryRepository : GenericRepository<Category>, ICategoryRepository
     {
-        public CategoryRepository(ApplicationContext applicationContext):base(applicationContext)
+        public CategoryRepository(ApplicationContext applicationContext) : base(applicationContext)
         {
-            
+
         }
         public async Task<IEnumerable<Category>> GetSubCategoriesByParentIdAsync(int id)
         {

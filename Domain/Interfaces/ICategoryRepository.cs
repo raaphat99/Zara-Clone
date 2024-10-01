@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace Domain.Interfaces
 {
-    public interface ICategoryRepository: IGenericRepository<Category>
+    public interface ICategoryRepository : IGenericRepository<Category>
     {
         Task<IEnumerable<Category>> GetSubCategoriesByParentIdAsync(int id);
-
     }
 }
