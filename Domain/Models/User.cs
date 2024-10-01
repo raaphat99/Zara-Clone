@@ -8,10 +8,12 @@ using System.Threading.Tasks;
 
 namespace Domain.Models
 {
-    public class User:IdentityUser
+    public class User : IdentityUser
     {
+        public string Name { get; set; }
+        public string Surname { get; set; }
         public DateTime? Created { get; set; }
-        public DateTime? LastUpdated { get; set; }   
+        public DateTime? LastUpdated { get; set; }
         public virtual ICollection<UserAddress> Adresses { get; set; }
         public virtual ICollection<UserMeasurement> UserMeasurements { get; set; }
         public virtual Cart Cart { get; set; }

@@ -1,4 +1,5 @@
 ﻿using DataAccess.EFCore.Data;
+using Domain.Enums;
 using Domain.Interfaces;
 using Domain.Models;
 using Microsoft.EntityFrameworkCore;
@@ -10,28 +11,18 @@ using System.Threading.Tasks;
 
 namespace DataAccess.EFCore.Repositories
 {
-<<<<<<< HEAD
-    public class ProductRepository : GenericRepository<Product>//, IProductRepository
-    {
-        public ProductRepository(ApplicationContext applicationContext) : base(applicationContext)
-        { }
-        //public IEnumerable<Product> GetMostExpensiveProducts(int count)
-        //{
-        //    return _dbContext.Products.OrderByDescending(product => product.Price).Take(count).ToList();
-        //}
-=======
     public class ProductRepository : GenericRepository<Product, int>, IProductRepository
     {
         public ProductRepository(ApplicationContext applicationContext) : base(applicationContext)
         { }
 
-        public async Task<List<Product>> SearchProductsAsync(
+        public async Task<ICollection<Product>> SearchProductsAsync(
             string searchTerm,
             string category = null,
-            decimal? minPrice = null,
-            decimal? maxPrice = null,
-            string color = null,
-            string material = null)
+            double? minPrice = null,
+            double? maxPrice = null,
+            Color? color = null,
+            Material? material = null)
         {
             var query = _dbSet.Include(prd => prd.ProductVariants).AsQueryable();
 
@@ -50,28 +41,27 @@ namespace DataAccess.EFCore.Repositories
             // Filter by price range
             if (minPrice.HasValue)
             {
-                //query = query.Where(prd => prd.ProductVariants.Any(prdVariant => prdVariant.Price >= minPrice.Value));
+                query = query.Where(prd => prd.ProductVariants.Any(prdVariant => prdVariant.Price >= minPrice.Value));
             }
 
             if (maxPrice.HasValue)
             {
-                //query = query.Where(prd => prd.ProductVariants.Any(prdVariant => prdVariant.Price <= maxPrice.Value));
+                query = query.Where(prd => prd.ProductVariants.Any(prdVariant => prdVariant.Price <= maxPrice.Value));
             }
 
             //// Filter by color
-            if (!string.IsNullOrEmpty(color))
+            if (color.HasValue)
             {
-                //query = query.Where(prd => prd.ProductVariants.Any(prdVariant => prdVariant.Color == color));
+                query = query.Where(prd => prd.ProductVariants.Any(prdVariant => prdVariant.ProductColor == color.Value));
             }
 
             // Filter by material
-            if (!string.IsNullOrEmpty(material))
+            if (material.HasValue)
             {
-                //query = query.Where(prd => prd.ProductVariants.Any(prdVariant => prdVariant.Material == material));
+                query = query.Where(prd => prd.ProductVariants.Any(prdVariant => prdVariant.ProductMaterial == material.Value));
             }
 
             return await query.ToListAsync();
         }
->>>>>>> raaphat
     }
 }

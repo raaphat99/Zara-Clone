@@ -12,15 +12,15 @@ namespace Domain.Models
     {
         [Key]
         public int Id { get; set; }
+
         [ForeignKey("Order")]
-        public int OrderId {  get; set; }
+        public int? OrderId { get; set; }
         public virtual Order Order { get; set; }
         public string PaymentMethod { get; set; }
-
-        public string PaymentStatus {  get; set; }  
-        public decimal Amount {  get; set; }
-        public decimal AmountRefunded { get; set; }
-        public DateTime Created {  get; set; }
+        public string PaymentStatus { get; set; }
+        public double Amount { get; set; }
+        public double AmountRefunded { get; set; }
+        public DateTime Created { get; set; }
         public DateTime Updated { get; set; }
     }
 }

@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace Domain.Interfaces
 {
-    public interface IUserRepository : IGenericRepository<Product>
+    public interface IUserRepository : IGenericRepository<User, string>
     {
-        
+
     }
 }

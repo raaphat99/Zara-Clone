@@ -21,7 +21,7 @@ namespace Domain.Models
         public DateTime Updated { get; set; }
 
         [ForeignKey("Category")]
-        public int CategoryID { get; set; }
+        public int? CategoryID { get; set; }
         public virtual Category Category { get; set; }
         public virtual ICollection<ProductVariant> ProductVariants { get; set; }
         public virtual ICollection<Wishlist> Wishlists { get; set; }

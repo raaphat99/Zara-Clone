@@ -1,4 +1,5 @@
-﻿using Domain.Models;
+﻿using Domain.Enums;
+using Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,12 +10,12 @@ namespace Domain.Interfaces
 {
     public interface IProductRepository : IGenericRepository<Product, int>
     {
-        Task<List<Product>> SearchProductsAsync(
+        Task<ICollection<Product>> SearchProductsAsync(
             string searchTerm,
             string category = null,
-            decimal? minPrice = null,
-            decimal? maxPrice = null,
-            string color = null,
-            string material = null);
+            double? minPrice = null,
+            double? maxPrice = null,
+            Color? color = null,
+            Material? material = null);
     }
 }

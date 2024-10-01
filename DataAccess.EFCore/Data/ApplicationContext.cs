@@ -1,10 +1,12 @@
 ﻿using Domain.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,31 +17,31 @@ namespace DataAccess.EFCore.Data
         public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
         { }
 
+        public DbSet<Cart> Carts { get; set; }
+        public DbSet<CartItem> CartItems { get; set; }
+        public DbSet<UserAddress> UserAddresses { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<UserMeasurement> UserMeasurements { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
+        public DbSet<Wishlist> Wishlists { get; set; }
         public DbSet<Product> Products { get; set; }
+        public DbSet<ProductVariant> ProductVariants { get; set; }
+        public DbSet<Payment> Payments { get; set; }
+        public DbSet<ShippingMethod> ShippingMethods { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<ProductImage> ProductImages { get; set; }
         public DbSet<ProductSize> ProductSizes { get; set; }
         public DbSet<ProductType> ProductTypes { get; set; }
-        public DbSet<ProductVariant> ProductVariants { get; set; }
-        public DbSet<ProductImage> ProductImages { get; set; }
-        public DbSet<ProductVariantSize> ProductVariantSizes { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder builder)
         {
-            modelBuilder.Entity<ProductVariantSize>()
-                 .HasKey(pvs => new { pvs.SizeId, pvs.ProductVariantId });
-
-            modelBuilder.Entity<Category>()
-                 .HasOne(c => c.ParentCategory)
-                 .WithMany(c => c.SubCategory)
-                 .HasForeignKey(c => c.ParentCategoryId);
-
-            
-            base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Entity<Category>()
+            builder.Entity<Category>()
             .HasOne(c => c.ParentCategory)
             .WithMany(c => c.Subcategories)
             .HasForeignKey(c => c.ParentCategoryID);
+
+            base.OnModelCreating(builder);
         }
     }
 }

@@ -6,6 +6,7 @@ using Domain.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -28,15 +29,16 @@ namespace WebAPI
                     optionsBuilder => optionsBuilder.MigrationsAssembly(typeof(ApplicationContext).Assembly.FullName));
             });
 
-
-            builder.Services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
-            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             //Identity
             builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<ApplicationContext>().AddDefaultTokenProviders();
 
+            builder.Services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+
             // JWT configuration
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-.AddJwtBearer(options =>
+                .AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
@@ -47,11 +49,9 @@ namespace WebAPI
                     ValidIssuer = builder.Configuration["Jwt:ValidIssuer"],
                     ValidAudience = builder.Configuration["Jwt:ValidAudience"],
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]))
-
                 };
-
-
             });
+
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -94,6 +94,7 @@ namespace WebAPI
                     }
                 });
             });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -104,7 +105,6 @@ namespace WebAPI
             }
 
             app.UseAuthorization();
-
 
             app.MapControllers();
 

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace DataAccess.EFCore.Repositories
 {
-    public class UserRepository : GenericRepository<Product>, IUserRepository
+    public class UserRepository : GenericRepository<User, string>, IUserRepository
     {
         public UserRepository(ApplicationContext applicationContext) : base(applicationContext)
         {

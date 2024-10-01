@@ -11,15 +11,32 @@ namespace DataAccess.EFCore.Repositories
 {
     public class UnitOfWork : IUnitOfWork
     {
+        #region Fields
         private readonly ApplicationContext _context;
-        public IProductRepository Products { get; private set; }
-        public ICategoryRepository Categorys { get; private set; }
+        private readonly Lazy<IProductRepository> products;
+        private readonly Lazy<ICategoryRepository> categories;
+        #endregion
 
+
+        #region Constructor
         public UnitOfWork(ApplicationContext context)
         {
             _context = context;
+            // Lazy<T> class is used to defer the creation of the repositories until they are accessed.
+            products = new Lazy<IProductRepository>(() => new ProductRepository(_context));
+            categories = new Lazy<ICategoryRepository>(() => new CategoryRepository(_context));
         }
+        #endregion
 
+
+        #region Getters
+        //The Value property of Lazy<T> ensures that the repository is instantiated only once and then reused. (Singleton object)
+        public IProductRepository Products => products.Value;
+        public ICategoryRepository Categories => categories.Value;
+        #endregion
+
+
+        #region Methods
         public async Task<int> Complete()
         {
             return await _context.SaveChangesAsync();
@@ -29,5 +46,6 @@ namespace DataAccess.EFCore.Repositories
         {
             _context.Dispose();
         }
+        #endregion
     }
 }

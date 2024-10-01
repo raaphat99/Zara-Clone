@@ -17,7 +17,7 @@ namespace WebAPI.Controllers
         [HttpGet("{id:int}/subcategories")]
         public async Task<IActionResult> GetSubCategoriesByParentId(int id)
         {
-            var subCategories = await _unitOfWork.Categorys.GetSubCategoriesByParentIdAsync(id);
+            var subCategories = await _unitOfWork.Categories.GetSubCategoriesByParentIdAsync(id);
 
             if (subCategories == null || !subCategories.Any())
             {
