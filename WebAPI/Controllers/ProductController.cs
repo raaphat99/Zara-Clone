@@ -47,7 +47,7 @@ namespace WebAPI.Controllers
 
 
 
-        [HttpGet("/api/products/{id: int}")]
+        [HttpGet("/api/products/{id:int}")]
         public async Task<IActionResult> GetProductByID(int id)
         {
             var product = await _unitOfWork.Products.GetByIdAsync(id);
@@ -63,17 +63,17 @@ namespace WebAPI.Controllers
         [HttpGet("/api/products/category/{categoryId}")]
         public IActionResult GetProductsByCategory(int categoryID)
         {
-            var products = _unitOfWork.Products.Find(prd => prd.CategoryID == categoryID);
+            var products = _unitOfWork.Products.Find(prd => prd.CategoryId == categoryID);
             return Ok(products);
         }
 
 
 
-        [HttpGet("/api/products/{id: int}/variants")]
+        [HttpGet("/api/products/{id:int}/variants")]
         public async Task<IActionResult> GetProductVariants(int id)
         {
             var product = await _unitOfWork.Products
-                .Find(prd => prd.ID == id)
+                .Find(prd => prd.Id == id)
                 .Include(prd => prd.ProductVariants)
                 .FirstOrDefaultAsync();
 
@@ -129,16 +129,16 @@ namespace WebAPI.Controllers
             {
                 var subCategory = await _unitOfWork.Categories.GetByIdAsync(subCategoryId.Value);
 
-                if (subCategory == null || subCategory.ParentCategoryID != mainCategoryId)
+                if (subCategory == null || subCategory.ParentCategoryId != mainCategoryId)
                 {
                     return NotFound($"No subcategory found with ID {subCategoryId} under main category ID {mainCategoryId}.");
                 }
 
-                products = _unitOfWork.Products.Find(p => p.CategoryID == subCategoryId);
+                products = _unitOfWork.Products.Find(p => p.CategoryId == subCategoryId);
             }
             else
             {
-                products = _unitOfWork.Products.Find(p => p.CategoryID == mainCategoryId);
+                products = _unitOfWork.Products.Find(p => p.CategoryId == mainCategoryId);
             }
 
             if (products == null || !products.Any())

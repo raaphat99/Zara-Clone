@@ -39,7 +39,7 @@ namespace DataAccess.EFCore.Data
             builder.Entity<Category>()
             .HasOne(c => c.ParentCategory)
             .WithMany(c => c.Subcategories)
-            .HasForeignKey(c => c.ParentCategoryID);
+            .HasForeignKey(c => c.ParentCategoryId);
 
             base.OnModelCreating(builder);
         }

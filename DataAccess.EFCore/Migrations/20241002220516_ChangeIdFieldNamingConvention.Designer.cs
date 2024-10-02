@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.EFCore.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20241001195200_init")]
-    partial class init
+    [Migration("20241002220516_ChangeIdFieldNamingConvention")]
+    partial class ChangeIdFieldNamingConvention
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -30,39 +30,39 @@ namespace DataAccess.EFCore.Migrations
 
             modelBuilder.Entity("Domain.Models.Cart", b =>
                 {
-                    b.Property<int>("ID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("Updated")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UserID")
+                    b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("ID");
+                    b.HasKey("Id");
 
-                    b.HasIndex("UserID")
+                    b.HasIndex("UserId")
                         .IsUnique()
-                        .HasFilter("[UserID] IS NOT NULL");
+                        .HasFilter("[UserId] IS NOT NULL");
 
                     b.ToTable("Carts");
                 });
 
             modelBuilder.Entity("Domain.Models.CartItem", b =>
                 {
-                    b.Property<int>("ID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("CartID")
+                    b.Property<int?>("CartId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ProductVariantID")
+                    b.Property<int?>("ProductVariantId")
                         .HasColumnType("int");
 
                     b.Property<int>("Quantity")
@@ -71,22 +71,22 @@ namespace DataAccess.EFCore.Migrations
                     b.Property<double>("UnitPrice")
                         .HasColumnType("float");
 
-                    b.HasKey("ID");
+                    b.HasKey("Id");
 
-                    b.HasIndex("CartID");
+                    b.HasIndex("CartId");
 
-                    b.HasIndex("ProductVariantID");
+                    b.HasIndex("ProductVariantId");
 
                     b.ToTable("CartItems");
                 });
 
             modelBuilder.Entity("Domain.Models.Category", b =>
                 {
-                    b.Property<int>("ID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -96,12 +96,12 @@ namespace DataAccess.EFCore.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ParentCategoryID")
+                    b.Property<int?>("ParentCategoryId")
                         .HasColumnType("int");
 
-                    b.HasKey("ID");
+                    b.HasKey("Id");
 
-                    b.HasIndex("ParentCategoryID");
+                    b.HasIndex("ParentCategoryId");
 
                     b.ToTable("Categories");
                 });
@@ -220,13 +220,13 @@ namespace DataAccess.EFCore.Migrations
 
             modelBuilder.Entity("Domain.Models.Product", b =>
                 {
-                    b.Property<int>("ID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("CategoryID")
+                    b.Property<int?>("CategoryId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("Created")
@@ -249,9 +249,9 @@ namespace DataAccess.EFCore.Migrations
                     b.Property<DateTime>("Updated")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("ID");
+                    b.HasKey("Id");
 
-                    b.HasIndex("CategoryID");
+                    b.HasIndex("CategoryId");
 
                     b.ToTable("Products");
                 });
@@ -513,11 +513,11 @@ namespace DataAccess.EFCore.Migrations
 
             modelBuilder.Entity("Domain.Models.UserMeasurement", b =>
                 {
-                    b.Property<int>("ID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("Active")
                         .HasColumnType("bit");
@@ -534,38 +534,38 @@ namespace DataAccess.EFCore.Migrations
                     b.Property<DateTime>("Updated")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UserID")
+                    b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("Weight")
                         .HasColumnType("int");
 
-                    b.HasKey("ID");
+                    b.HasKey("Id");
 
-                    b.HasIndex("UserID");
+                    b.HasIndex("UserId");
 
                     b.ToTable("UserMeasurements");
                 });
 
             modelBuilder.Entity("Domain.Models.Wishlist", b =>
                 {
-                    b.Property<int>("ID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UserID")
+                    b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("ID");
+                    b.HasKey("Id");
 
-                    b.HasIndex("UserID")
+                    b.HasIndex("UserId")
                         .IsUnique()
-                        .HasFilter("[UserID] IS NOT NULL");
+                        .HasFilter("[UserId] IS NOT NULL");
 
                     b.ToTable("Wishlists");
                 });
@@ -720,15 +720,15 @@ namespace DataAccess.EFCore.Migrations
 
             modelBuilder.Entity("ProductWishlist", b =>
                 {
-                    b.Property<int>("ProductsID")
+                    b.Property<int>("ProductsId")
                         .HasColumnType("int");
 
-                    b.Property<int>("WishlistsID")
+                    b.Property<int>("WishlistsId")
                         .HasColumnType("int");
 
-                    b.HasKey("ProductsID", "WishlistsID");
+                    b.HasKey("ProductsId", "WishlistsId");
 
-                    b.HasIndex("WishlistsID");
+                    b.HasIndex("WishlistsId");
 
                     b.ToTable("ProductWishlist");
                 });
@@ -737,7 +737,7 @@ namespace DataAccess.EFCore.Migrations
                 {
                     b.HasOne("Domain.Models.User", "User")
                         .WithOne("Cart")
-                        .HasForeignKey("Domain.Models.Cart", "UserID");
+                        .HasForeignKey("Domain.Models.Cart", "UserId");
 
                     b.Navigation("User");
                 });
@@ -746,11 +746,11 @@ namespace DataAccess.EFCore.Migrations
                 {
                     b.HasOne("Domain.Models.Cart", "Cart")
                         .WithMany("CartItems")
-                        .HasForeignKey("CartID");
+                        .HasForeignKey("CartId");
 
                     b.HasOne("Domain.Models.ProductVariant", "ProductVariant")
                         .WithMany("CartItem")
-                        .HasForeignKey("ProductVariantID");
+                        .HasForeignKey("ProductVariantId");
 
                     b.Navigation("Cart");
 
@@ -761,7 +761,7 @@ namespace DataAccess.EFCore.Migrations
                 {
                     b.HasOne("Domain.Models.Category", "ParentCategory")
                         .WithMany("Subcategories")
-                        .HasForeignKey("ParentCategoryID");
+                        .HasForeignKey("ParentCategoryId");
 
                     b.Navigation("ParentCategory");
                 });
@@ -815,7 +815,7 @@ namespace DataAccess.EFCore.Migrations
                 {
                     b.HasOne("Domain.Models.Category", "Category")
                         .WithMany("Products")
-                        .HasForeignKey("CategoryID");
+                        .HasForeignKey("CategoryId");
 
                     b.Navigation("Category");
                 });
@@ -860,7 +860,7 @@ namespace DataAccess.EFCore.Migrations
                 {
                     b.HasOne("Domain.Models.User", "User")
                         .WithMany("UserMeasurements")
-                        .HasForeignKey("UserID");
+                        .HasForeignKey("UserId");
 
                     b.Navigation("User");
                 });
@@ -869,7 +869,7 @@ namespace DataAccess.EFCore.Migrations
                 {
                     b.HasOne("Domain.Models.User", "User")
                         .WithOne("Wishlist")
-                        .HasForeignKey("Domain.Models.Wishlist", "UserID");
+                        .HasForeignKey("Domain.Models.Wishlist", "UserId");
 
                     b.Navigation("User");
                 });
@@ -944,13 +944,13 @@ namespace DataAccess.EFCore.Migrations
                 {
                     b.HasOne("Domain.Models.Product", null)
                         .WithMany()
-                        .HasForeignKey("ProductsID")
+                        .HasForeignKey("ProductsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Domain.Models.Wishlist", null)
                         .WithMany()
-                        .HasForeignKey("WishlistsID")
+                        .HasForeignKey("WishlistsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

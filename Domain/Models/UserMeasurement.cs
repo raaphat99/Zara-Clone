@@ -11,7 +11,7 @@ namespace Domain.Models
     public class UserMeasurement
     {
         [Key]
-        public int ID { get; set; }
+        public int Id { get; set; }
         public int Height { get; set; }
         public int Weight { get; set; }
         public int Age { get; set; }
@@ -20,7 +20,7 @@ namespace Domain.Models
         public DateTime Updated { get; set; }
 
         [ForeignKey("User")]
-        public string? UserID { get; set; }
+        public string? UserId { get; set; }
         public virtual User User { get; set; }
     }
 }
