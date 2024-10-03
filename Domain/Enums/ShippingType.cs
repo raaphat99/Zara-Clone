@@ -8,7 +8,8 @@ namespace Domain.Enums
 {
     public enum ShippingType
     {
-        Standard,
+        StandardHome,
+        DropPoint,
         Free,
     }
 }
