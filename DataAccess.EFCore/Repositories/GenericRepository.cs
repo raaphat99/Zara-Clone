@@ -19,7 +19,10 @@ namespace DataAccess.EFCore.Repositories
             _dbContext = applicationContext;
             _dbSet = _dbContext.Set<TEntity>();
         }
-
+        public async Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>> expression)
+        {
+            return await _dbSet.Where(expression).ToListAsync();
+        }
         public IQueryable<TEntity> GetAll()
         {
             return _dbSet.AsQueryable();

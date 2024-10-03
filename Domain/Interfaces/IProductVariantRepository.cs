@@ -9,5 +9,11 @@ namespace Domain.Interfaces
 {
     public interface IProductVariantRepository : IGenericRepository<ProductVariant, int>
     {
+        Task<List<ProductVariant>> GetAllAsync(); // تأكد من أن هذا النوع يتطابق
+        Task<IEnumerable<ProductVariant>> GetVariantsByProductIdAsync(int productId);
+        Task<ProductVariant> GetVariantByIdAsync(int variantId);
+        Task AddVariantAsync(ProductVariant productVariant);
+        Task UpdateVariantAsync(ProductVariant productVariant);
+        Task DeleteVariantAsync(ProductVariant productVariant);
     }
 }

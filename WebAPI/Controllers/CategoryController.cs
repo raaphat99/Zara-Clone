@@ -1,6 +1,8 @@
 using Domain.Interfaces;
+using Domain.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using WebAPI.DTOs;
 
 namespace WebAPI.Controllers
 {
@@ -25,6 +27,105 @@ namespace WebAPI.Controllers
             }
 
             return Ok(subCategories);
+        }
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetCategoryById(int id)
+        {
+            var category = await _unitOfWork.Categories.GetByIdAsync(id);
+
+            if (category == null)
+            {
+                return NotFound($"Category with ID {id} not found.");
+            }
+            var categorydto = new CategoryDto()
+            {
+                Id = category.Id,
+                Name = category.Name,
+                Description = category.Description,
+            };
+
+
+            return Ok(categorydto);
+        }
+        [HttpPost]
+        public async Task<IActionResult> AddCategory([FromBody] CategoryDto categorydto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var category = new Category()
+            {
+                Name = categorydto.Name,
+                Description = categorydto.Description
+            };
+            if (categorydto.ParentCategoryId.HasValue)
+            {
+                category.ParentCategoryId = categorydto.ParentCategoryId;
+            }
+            await _unitOfWork.Categories.AddAsync(category);
+            await _unitOfWork.Complete();
+            return CreatedAtAction(nameof(GetCategoryById), new { id = category.Id }, category);
+        }
+
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> UpdateCategory(int id, [FromBody] CategoryDto updatedCategory)
+        {
+            var category = await _unitOfWork.Categories.GetByIdAsync(id);
+
+            if (category == null)
+            {
+                return NotFound($"Category with ID {id} not found.");
+            }
+
+            category.Name = updatedCategory.Name;
+            category.Description = updatedCategory.Description;
+            if (updatedCategory.ParentCategoryId.HasValue)
+            {
+                category.ParentCategoryId = updatedCategory.ParentCategoryId;
+            }
+            _unitOfWork.Categories.Update(category);
+            await _unitOfWork.Complete();
+
+            return NoContent();
+        }
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> DeleteCategory(int id)
+        {
+            var category = await _unitOfWork.Categories.GetByIdAsync(id);
+
+            if (category == null)
+            {
+                return NotFound($"Category with ID {id} not found.");
+            }
+
+            _unitOfWork.Categories.Remove(category);
+            await _unitOfWork.Complete();
+
+            return NoContent();
+        }
+        [HttpGet("main-categories")]
+        public async Task<IActionResult> GetMainCategories()
+        {
+            var mainCategories = await _unitOfWork.Categories.FindAsync(c => c.ParentCategoryId == null);
+            List<CategoryDto> categorydto = new List<CategoryDto>();
+
+
+            if (mainCategories == null || !mainCategories.Any())
+            {
+                return NotFound("No main categories found.");
+            }
+            foreach (var category in mainCategories)
+            {
+                var x = new CategoryDto()
+                {
+                    Id = category.Id,
+                    Name = category.Name,
+                    Description = category.Description,
+                };
+                categorydto.Add(x);
+            }
+            return Ok(categorydto);
         }
     }
 }
