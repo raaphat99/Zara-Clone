@@ -4,6 +4,7 @@ using DataAccess.EFCore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.EFCore.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20241003005208_UpdateSizingSystemTables")]
+    partial class UpdateSizingSystemTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -342,9 +345,6 @@ namespace DataAccess.EFCore.Migrations
                     b.Property<int>("ProductMaterial")
                         .HasColumnType("int");
 
-                    b.Property<int>("ProductSizeId")
-                        .HasColumnType("int");
-
                     b.Property<int>("StockQuntity")
                         .HasColumnType("int");
 
@@ -354,8 +354,6 @@ namespace DataAccess.EFCore.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ProductId");
-
-                    b.HasIndex("ProductSizeId");
 
                     b.ToTable("ProductVariants");
                 });
@@ -707,6 +705,21 @@ namespace DataAccess.EFCore.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("ProductSizeProductVariant", b =>
+                {
+                    b.Property<int>("ProductSizesId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductVariantsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProductSizesId", "ProductVariantsId");
+
+                    b.HasIndex("ProductVariantsId");
+
+                    b.ToTable("ProductSizeProductVariant");
+                });
+
             modelBuilder.Entity("ProductWishlist", b =>
                 {
                     b.Property<int>("ProductsId")
@@ -839,15 +852,7 @@ namespace DataAccess.EFCore.Migrations
                         .WithMany("ProductVariants")
                         .HasForeignKey("ProductId");
 
-                    b.HasOne("Domain.Models.ProductSize", "ProductSize")
-                        .WithMany("ProductVariants")
-                        .HasForeignKey("ProductSizeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Product");
-
-                    b.Navigation("ProductSize");
                 });
 
             modelBuilder.Entity("Domain.Models.SizeType", b =>
@@ -939,6 +944,21 @@ namespace DataAccess.EFCore.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ProductSizeProductVariant", b =>
+                {
+                    b.HasOne("Domain.Models.ProductSize", null)
+                        .WithMany()
+                        .HasForeignKey("ProductSizesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.ProductVariant", null)
+                        .WithMany()
+                        .HasForeignKey("ProductVariantsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("ProductWishlist", b =>
                 {
                     b.HasOne("Domain.Models.Product", null)
@@ -975,11 +995,6 @@ namespace DataAccess.EFCore.Migrations
                 });
 
             modelBuilder.Entity("Domain.Models.Product", b =>
-                {
-                    b.Navigation("ProductVariants");
-                });
-
-            modelBuilder.Entity("Domain.Models.ProductSize", b =>
                 {
                     b.Navigation("ProductVariants");
                 });

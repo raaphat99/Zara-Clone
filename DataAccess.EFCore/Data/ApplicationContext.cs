@@ -32,7 +32,7 @@ namespace DataAccess.EFCore.Data
         public DbSet<Category> Categories { get; set; }
         public DbSet<ProductImage> ProductImages { get; set; }
         public DbSet<ProductSize> ProductSizes { get; set; }
-        public DbSet<ProductType> ProductTypes { get; set; }
+        public DbSet<SizeType> ProductTypes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

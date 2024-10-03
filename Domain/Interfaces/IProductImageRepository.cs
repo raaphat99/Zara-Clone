@@ -9,5 +9,6 @@ namespace Domain.Interfaces
 {
     public interface IProductImageRepository : IGenericRepository<ProductImage, int>
     {
+        Task<IEnumerable<ProductImage>> GetImagesByVariantIdAsync(int variantId);
     }
 }

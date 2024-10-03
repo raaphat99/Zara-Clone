@@ -15,6 +15,7 @@ namespace DataAccess.EFCore.Repositories
         private readonly ApplicationContext _context;
         private readonly Lazy<IProductRepository> products;
         private readonly Lazy<ICategoryRepository> categories;
+        private readonly Lazy<IProductImageRepository> productImages;
         #endregion
 
 
@@ -25,6 +26,7 @@ namespace DataAccess.EFCore.Repositories
             // Lazy<T> class is used to defer the creation of the repositories until they are accessed.
             products = new Lazy<IProductRepository>(() => new ProductRepository(_context));
             categories = new Lazy<ICategoryRepository>(() => new CategoryRepository(_context));
+            productImages = new Lazy<IProductImageRepository>(() => new ProductImageRepository(_context));
         }
         #endregion
 
@@ -33,6 +35,7 @@ namespace DataAccess.EFCore.Repositories
         //The Value property of Lazy<T> ensures that the repository is instantiated only once and then reused. (Singleton object)
         public IProductRepository Products => products.Value;
         public ICategoryRepository Categories => categories.Value;
+        public IProductImageRepository ProductImages => productImages.Value;
         #endregion
 
 

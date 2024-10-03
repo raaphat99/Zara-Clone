@@ -16,6 +16,10 @@ namespace Domain.Models
         public string Description { get; set; }
         public int? ParentCategoryId { get; set; }
         public virtual Category ParentCategory { get; set; }
+
+        [ForeignKey("SizeType")]
+        public int? SizeTypeId { get; set; }
+        public virtual SizeType SizeType { get; set; }
         public virtual ICollection<Category> Subcategories { get; set; }
         public virtual ICollection<Product> Products { get; set; }
     }
