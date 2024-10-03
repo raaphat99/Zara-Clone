@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace DataAccess.EFCore.Repositories
 {
-    public class ProductTypeRepository : GenericRepository<ProductType, int>, IProductTypeRepository
+    public class ProductTypeRepository : GenericRepository<SizeType, int>, IProductTypeRepository
     {
         public ProductTypeRepository(ApplicationContext applicationContext) : base(applicationContext)
         {

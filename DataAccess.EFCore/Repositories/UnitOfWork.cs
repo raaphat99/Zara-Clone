@@ -16,6 +16,7 @@ namespace DataAccess.EFCore.Repositories
         private readonly Lazy<IProductRepository> products;
         private readonly Lazy<IProductVariantRepository> productVariant;
         private readonly Lazy<ICategoryRepository> categories;
+        private readonly Lazy<IProductImageRepository> productImages;
         #endregion
 
 
@@ -27,6 +28,7 @@ namespace DataAccess.EFCore.Repositories
             productVariant = new Lazy<IProductVariantRepository>(() => new ProductVariantRepository(_context));
             products = new Lazy<IProductRepository>(() => new ProductRepository(_context));
             categories = new Lazy<ICategoryRepository>(() => new CategoryRepository(_context));
+            productImages = new Lazy<IProductImageRepository>(() => new ProductImageRepository(_context));
         }
         #endregion
 
@@ -36,6 +38,7 @@ namespace DataAccess.EFCore.Repositories
         public IProductRepository Products => products.Value;
         public IProductVariantRepository ProductVariant => productVariant.Value;
         public ICategoryRepository Categories => categories.Value;
+        public IProductImageRepository ProductImages => productImages.Value;
         #endregion
 
 

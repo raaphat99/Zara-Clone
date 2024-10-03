@@ -26,10 +26,14 @@ namespace Domain.Models
         [ForeignKey("Product")]
         public int? ProductId { get; set; }
         public virtual Product Product { get; set; }
+
+        [ForeignKey("ProductSize")]
+        public int ProductSizeId { get; set; }
+        public virtual ProductSize ProductSize { get; set; } = new ProductSize();
         public virtual ICollection<OrderItem> OrderItem { get; set; } = new List<OrderItem>();
         public virtual ICollection<CartItem> CartItem { get; set; } = new List<CartItem>();
         public virtual ICollection<ProductImage> ProductImage { get; set; } = new List<ProductImage>();
-        public virtual ICollection<ProductSize> ProductSizes { get; set; } = new List<ProductSize>();
+
     }
 
 }

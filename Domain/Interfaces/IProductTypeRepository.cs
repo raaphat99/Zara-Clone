@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Domain.Interfaces
 {
-    public interface IProductTypeRepository : IGenericRepository<ProductType, int>
+    public interface IProductTypeRepository : IGenericRepository<SizeType, int>
     {
     }
 }

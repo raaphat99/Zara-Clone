@@ -26,7 +26,7 @@ namespace WebAPI.Controllers
         public async Task<IActionResult> GetDiscountedProducts(int categoryId, int pageNumber = 1, int pageSize = 10)
         {
             var products = await _unitOfWork.Products.GetAll()
-                .Where(p => p.CategoryID == categoryId)
+                .Where(p => p.CategoryId == categoryId)
                 .ToListAsync();
 
             var discountedProducts = products
@@ -36,7 +36,7 @@ namespace WebAPI.Controllers
                 .Take(pageSize)
                 .Select(v => new ProductListDTO
                 {
-                    ID = v.Product.ID,
+                    ID = v.Product.Id,
                     Name = v.Product.Name,
                     Price = v.Price,
                     DiscountPercentage = v.DiscountPercentage,
@@ -67,7 +67,7 @@ namespace WebAPI.Controllers
 
             var productDetail = new ProductDetailDTO
             {
-                ID = product.ID,
+                ID = product.Id,
                 Name = product.Name,
                 Description = product.Description,
                 Price = product.Price,

@@ -17,7 +17,7 @@ namespace DataAccess.EFCore.Repositories
         public async Task<IEnumerable<Category>> GetSubCategoriesByParentIdAsync(int id)
         {
             return await _dbContext.Categories
-                .Where(c => c.ParentCategoryID == id)
+                .Where(c => c.ParentCategoryId == id)
                 .ToListAsync();
         }
 

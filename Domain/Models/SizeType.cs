@@ -8,11 +8,14 @@ using System.Threading.Tasks;
 
 namespace Domain.Models
 {
-    public class ProductType
+    public class SizeType
     {
         [Key]
         public int Id { get; set; }
-        public string Name { get; set; }
+
+        [Required]
+        public virtual SizeType Type { get; set; }
+        public virtual Category Category { get; set; }
         public virtual ICollection<ProductSize> ProductSizes { get; set; } = new List<ProductSize>();
     }
 }

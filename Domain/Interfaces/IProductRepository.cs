@@ -15,6 +15,7 @@ namespace Domain.Interfaces
             string category = null,
             double? minPrice = null,
             double? maxPrice = null,
+            string? size = null,
             Color? color = null,
             Material? material = null);
     }

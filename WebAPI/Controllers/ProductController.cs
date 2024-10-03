@@ -12,7 +12,7 @@ namespace WebAPI.Controllers
 {
     //[Route("api/[controller]")]
     [ApiController]
-    public class ProductController : ControllerBase
+    public partial class ProductController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -63,7 +63,7 @@ namespace WebAPI.Controllers
         [HttpGet("/api/products/category/{categoryId:int}")]
         public IActionResult GetProductsByCategory(int categoryID)
         {
-            var products = _unitOfWork.Products.Find(prd => prd.CategoryID == categoryID);
+            var products = _unitOfWork.Products.Find(prd => prd.CategoryId == categoryID);
             return Ok(products);
         }
 
@@ -73,7 +73,7 @@ namespace WebAPI.Controllers
         public async Task<IActionResult> GetProductVariants(int id)
         {
             var product = await _unitOfWork.Products
-                .Find(prd => prd.ID == id)
+                .Find(prd => prd.Id == id)
                 .Include(prd => prd.ProductVariants)
                 .FirstOrDefaultAsync();
 
@@ -81,33 +81,6 @@ namespace WebAPI.Controllers
                 return NotFound();
 
             return Ok(product.ProductVariants);
-        }
-
-
-
-        [HttpGet("/api/products/search")]
-        public async Task<ActionResult<List<Product>>> SearchProducts(
-            [FromQuery] string searchTerm,
-            [FromQuery] string category = null,
-            [FromQuery] double? minPrice = null,
-            [FromQuery] double? maxPrice = null,
-            [FromQuery] Color? color = null,
-            [FromQuery] Material? material = null)
-        {
-            var products = await _unitOfWork.Products.SearchProductsAsync(
-                searchTerm,
-                category,
-                minPrice,
-                maxPrice,
-                color,
-                material);
-
-            if (products == null || products.Count == 0)
-            {
-                return NotFound("No products found matching the search criteria.");
-            }
-
-            return Ok(products);
         }
 
 
@@ -129,16 +102,16 @@ namespace WebAPI.Controllers
             {
                 var subCategory = await _unitOfWork.Categories.GetByIdAsync(subCategoryId.Value);
 
-                if (subCategory == null || subCategory.ParentCategoryID != mainCategoryId)
+                if (subCategory == null || subCategory.ParentCategoryId != mainCategoryId)
                 {
                     return NotFound($"No subcategory found with ID {subCategoryId} under main category ID {mainCategoryId}.");
                 }
 
-                products = _unitOfWork.Products.Find(p => p.CategoryID == subCategoryId);
+                products = _unitOfWork.Products.Find(p => p.CategoryId == subCategoryId);
             }
             else
             {
-                products = _unitOfWork.Products.Find(p => p.CategoryID == mainCategoryId);
+                products = _unitOfWork.Products.Find(p => p.CategoryId == mainCategoryId);
             }
 
             if (products == null || !products.Any())
