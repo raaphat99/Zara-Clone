@@ -73,7 +73,7 @@ namespace WebAPI.Controllers
                 Price = product.Price,
                 DiscountPercentage = product.ProductVariants.FirstOrDefault()?.DiscountPercentage ?? 0,
                 DiscountedPrice = product.ProductVariants.FirstOrDefault()?.DiscountedPrice ?? product.Price,
-                ProductVariants = product.ProductVariants.Select(v => new ProductVariantDTO
+                ProductVariants = product.ProductVariants.Select(v => new ProductvariantDTO
                 {
                     Id = v.Id,
                     Price = v.Price,
@@ -87,12 +87,12 @@ namespace WebAPI.Controllers
                             AlternativeText = img.AlternativeText
                         }).ToList(),
                     ProductColors = GetColorName((int)v.ProductColor),
-                    AvailableSizes = v.ProductSizes.Select(s => new ProductSizeDTO
-                    {
-                        Id = s.Id,
-                        Type = s.Type,
-                        Value = s.Value
-                    }).ToList()
+                    //AvailableSizes = v.ProductSizes.Select(s => new ProductSizeDTO
+                    //{
+                    //    Id = s.Id,
+                    //    Type = s.Type,
+                    //    Value = s.Value
+                    //}).ToList()
 
 
                 }).ToList()

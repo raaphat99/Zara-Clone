@@ -1,4 +1,5 @@
-﻿namespace WebAPI.DTOs
+﻿
+namespace WebAPI.DTOs
 {
     public class ProductDetailDTO
     { 
@@ -8,7 +9,8 @@
         public double Price { get; set; }
         public double DiscountPercentage { get; set; }
         public double DiscountedPrice { get; set; }
-        public List<ProductVariantDTO> ProductVariants { get; set; }
+        public List<ProductvariantDTO> ProductVariants { get; set; }
+        
     }
 
 }

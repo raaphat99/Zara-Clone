@@ -17,5 +17,7 @@ namespace Domain.Interfaces
         void Update(TEntity entity);
         void Remove(TEntity entity);
         void RemoveRange(IEnumerable<TEntity> entities);
+        Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>> expression);
+
     }
 }
