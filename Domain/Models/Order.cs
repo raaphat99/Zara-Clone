@@ -39,7 +39,7 @@ namespace Domain.Models
             }
             else
             {
-                ShippingMethodId = (int)ShippingType.Standard;
+                ShippingMethodId = (int)ShippingType.StandardHome;
             }
         }
     }

@@ -71,6 +71,8 @@ namespace WebAPI.Controllers
                 SecurityStamp = Guid.NewGuid().ToString(),
                 Name = model.Name,
                 Surname = model.Surname,
+                UserName = (model.Name + model.Surname)
+
             };
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
@@ -95,6 +97,7 @@ namespace WebAPI.Controllers
                 SecurityStamp = Guid.NewGuid().ToString(),
                 Name = model.Name,
                 Surname = model.Surname,
+                UserName= (model.Name+model.Surname)
             };
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)

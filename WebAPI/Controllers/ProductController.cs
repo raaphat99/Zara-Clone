@@ -60,7 +60,7 @@ namespace WebAPI.Controllers
 
 
 
-        [HttpGet("/api/products/category/{categoryId}")]
+        [HttpGet("/api/products/category/{categoryId:int}")]
         public IActionResult GetProductsByCategory(int categoryID)
         {
             var products = _unitOfWork.Products.Find(prd => prd.CategoryId == categoryID);

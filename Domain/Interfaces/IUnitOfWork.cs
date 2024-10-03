@@ -11,6 +11,8 @@ namespace Domain.Interfaces
         IProductRepository Products { get; }
         ICategoryRepository Categories { get; }
         IProductImageRepository ProductImages { get; }
+        IProductVariantRepository ProductVariant { get; }
+
         Task<int> Complete();
     }
 }
