@@ -47,7 +47,7 @@ namespace WebAPI.Controllers
 
 
 
-        [HttpGet("/api/products/{id: int}")]
+        [HttpGet("/api/products/{id:int}")]
         public async Task<IActionResult> GetProductByID(int id)
         {
             var product = await _unitOfWork.Products.GetByIdAsync(id);
@@ -60,7 +60,7 @@ namespace WebAPI.Controllers
 
 
 
-        [HttpGet("/api/products/category/{categoryId}")]
+        [HttpGet("/api/products/category/{categoryId:int}")]
         public IActionResult GetProductsByCategory(int categoryID)
         {
             var products = _unitOfWork.Products.Find(prd => prd.CategoryID == categoryID);
@@ -69,7 +69,7 @@ namespace WebAPI.Controllers
 
 
 
-        [HttpGet("/api/products/{id: int}/variants")]
+        [HttpGet("/api/products/{id:int}/variants")]
         public async Task<IActionResult> GetProductVariants(int id)
         {
             var product = await _unitOfWork.Products

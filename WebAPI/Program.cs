@@ -3,12 +3,15 @@ using DataAccess.EFCore.Data;
 using DataAccess.EFCore.Repositories;
 using Domain.Interfaces;
 using Domain.Models;
+using Domain.Utilities;
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Stripe;
 using System.Text;
 
 namespace WebAPI
@@ -51,7 +54,8 @@ namespace WebAPI
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]))
                 };
             });
-
+            // Stripe Configuration
+            builder.Services.Configure<StripeData>(builder.Configuration.GetSection("stripe"));
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -104,6 +108,7 @@ namespace WebAPI
                 app.UseSwaggerUI();
             }
 
+            StripeConfiguration.ApiKey = builder.Configuration.GetSection("stripe:SecretKey").Get<string>();
             app.UseAuthorization();
 
             app.MapControllers();
