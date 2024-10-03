@@ -12,8 +12,18 @@ namespace DataAccess.EFCore.Repositories
 {
     public class UserAddressRepository : GenericRepository<UserAddress, int>, IUserAddressRepository
     {
-        public UserAddressRepository(ApplicationContext applicationContext) : base(applicationContext)
+        private readonly ApplicationContext _context;
+
+        public UserAddressRepository(ApplicationContext context) : base(context)
         {
+            _context = context;
+        }
+
+        public async Task<IEnumerable<UserAddress>> GetAllByUserIdAsync(string userId)
+        {
+            return await _context.UserAddresses
+                .Where(address => address.UserId == userId)
+                .ToListAsync();
         }
     }
 }
