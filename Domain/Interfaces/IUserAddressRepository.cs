@@ -9,6 +9,6 @@ namespace Domain.Interfaces
 {
     public interface IUserAddressRepository : IGenericRepository<UserAddress, int>
     {
-
+        Task<IEnumerable<UserAddress>> GetAllByUserIdAsync(string userId);
     }
 }

@@ -18,7 +18,7 @@ namespace Domain.Models
         public string? City { get; set; }
         public string? Street { get; set; }
         public string? PostalCode { get; set; }
-        public bool? Active { get; set; }
+        public bool? Active { get; set; } = false;
 
         [ForeignKey("User")]
         public string? UserId { get; set; }
