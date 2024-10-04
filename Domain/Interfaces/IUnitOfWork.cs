@@ -13,6 +13,7 @@ namespace Domain.Interfaces
         IProductImageRepository ProductImages { get; }
         IProductVariantRepository ProductVariant { get; }
         IUserAddressRepository UserAddress { get; }
+        IWishlistRepository Wishlist { get; }
 
         Task<int> Complete();
     }
