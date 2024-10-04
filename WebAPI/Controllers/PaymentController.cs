@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Options;
 using Stripe;
 using Stripe.Checkout;
+using Domain.Models;
 
 namespace WebAPI.Controllers
 {
@@ -19,8 +20,9 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("create-checkout-session")]
-        public ActionResult CreateCheckoutSession()
+        public ActionResult CreateCheckoutSession(Cart cart)
         {
+            var items = cart.CartItems.ToList();
             var options = new SessionCreateOptions
             {
                 LineItems = new List<SessionLineItemOptions>

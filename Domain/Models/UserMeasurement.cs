@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -12,12 +13,15 @@ namespace Domain.Models
     {
         [Key]
         public int Id { get; set; }
+        public string MesurmentProfileName { get; set; }
+        public string FavoriteSection { get; set; }
+        public string SizeValue { get; set; }
         public int Height { get; set; }
         public int Weight { get; set; }
         public int Age { get; set; }
-        public bool Active { get; set; }
-        public DateTime Created { get; set; }
-        public DateTime Updated { get; set; }
+        public bool Active { get; set; } = false;
+        public DateTime? Created { get; set; }
+        public DateTime? Updated { get; set; }
 
         [ForeignKey("User")]
         public string? UserId { get; set; }

@@ -7,6 +7,7 @@ using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Domain.Models;
+using Domain.Interfaces;
 
 namespace WebAPI.Controllers
 {
@@ -17,15 +18,30 @@ namespace WebAPI.Controllers
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
-
+        private readonly IUnitOfWork _unitOfWork;
         public AuthenticateController(
             UserManager<User> userManager,
             RoleManager<IdentityRole> roleManager,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IUnitOfWork unitOfWork)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _configuration = configuration;
+            _unitOfWork = unitOfWork;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var users =  _unitOfWork.Users.GetAll();
+            List<string> Ids = new List<string>();
+            foreach (var item in users)
+            {
+                Ids.Add(item.Id);
+            }
+            return Ok(Ids);
+            
         }
         [HttpPost("login")]
 

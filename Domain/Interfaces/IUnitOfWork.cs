@@ -13,6 +13,8 @@ namespace Domain.Interfaces
         IProductImageRepository ProductImages { get; }
         IProductVariantRepository ProductVariant { get; }
         IUserAddressRepository UserAddress { get; }
+        IUserMeasurementRepository UserMeasurements { get; }
+        IUserRepository Users { get; }
         IWishlistRepository Wishlist { get; }
 
         IProductSizeRepository ProductSize { get; }
