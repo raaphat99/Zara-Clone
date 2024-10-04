@@ -18,6 +18,8 @@ namespace DataAccess.EFCore.Repositories
         private readonly Lazy<ICategoryRepository> categories;
         private readonly Lazy<IProductImageRepository> productImages;
         private readonly Lazy<IUserAddressRepository> userAddress;
+        private readonly Lazy<IUserMeasurementRepository> userMeasurements;
+        private readonly Lazy<IUserRepository> users;
         #endregion
 
 
@@ -31,6 +33,8 @@ namespace DataAccess.EFCore.Repositories
             categories = new Lazy<ICategoryRepository>(() => new CategoryRepository(_context));
             productImages = new Lazy<IProductImageRepository>(() => new ProductImageRepository(_context));
             userAddress = new Lazy<IUserAddressRepository>(() => new UserAddressRepository(_context));
+            userMeasurements = new Lazy<IUserMeasurementRepository>(() => new UserMeasurementRepository(_context));
+            users = new Lazy<IUserRepository>(() => new UserRepository(_context));
         }
         #endregion
 
@@ -42,6 +46,8 @@ namespace DataAccess.EFCore.Repositories
         public ICategoryRepository Categories => categories.Value;
         public IProductImageRepository ProductImages => productImages.Value;
         public IUserAddressRepository UserAddress => userAddress.Value;
+        public IUserMeasurementRepository UserMeasurements => userMeasurements.Value;
+        public IUserRepository Users => users.Value;
         #endregion
 
 

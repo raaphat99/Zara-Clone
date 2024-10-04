@@ -23,6 +23,7 @@ namespace DataAccess.EFCore.Repositories
         {
             return await _dbSet.Where(expression).ToListAsync();
         }
+      
         public IQueryable<TEntity> GetAll()
         {
             return _dbSet.AsQueryable();
