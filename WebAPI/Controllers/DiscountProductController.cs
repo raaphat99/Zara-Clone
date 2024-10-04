@@ -87,12 +87,12 @@ namespace WebAPI.Controllers
                             AlternativeText = img.AlternativeText
                         }).ToList(),
                     ProductColors = GetColorName((int)v.ProductColor),
-                    AvailableSizes = v.ProductSizes.Select(s => new ProductSizeDTO
-                    {
-                        Id = s.Id,
-                        Type = s.Type,
-                        Value = s.Value
-                    }).ToList()
+                    //AvailableSizes = v.ProductSizes.Select(s => new ProductSizeDTO
+                    //{
+                    //    Id = s.Id,
+                    //    Type = s.Type,
+                    //    Value = s.Value
+                    //}).ToList()
 
 
                 }).ToList()
