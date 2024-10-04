@@ -15,6 +15,7 @@ namespace Domain.Interfaces
         IUserAddressRepository UserAddress { get; }
         IWishlistRepository Wishlist { get; }
 
+        IProductSizeRepository ProductSize { get; }
         Task<int> Complete();
     }
 }

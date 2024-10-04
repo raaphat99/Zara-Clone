@@ -13,6 +13,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Stripe;
 using System.Text;
+using WebAPI.Services;
 
 namespace WebAPI
 {
@@ -35,6 +36,7 @@ namespace WebAPI
             //Identity
             builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<ApplicationContext>().AddDefaultTokenProviders();
 
+            // Register Generic Repository & UnitOfWork services
             builder.Services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
@@ -54,9 +56,15 @@ namespace WebAPI
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]))
                 };
             });
+
             // Stripe Configuration
             builder.Services.Configure<StripeData>(builder.Configuration.GetSection("stripe"));
+
             builder.Services.AddControllers();
+
+            // Register the S3 Service
+            builder.Services.AddTransient<S3Service>();
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();

@@ -25,8 +25,19 @@ namespace WebAPI.Controllers
             {
                 return NotFound($"No subcategories found for the parent category with ID {id}.");
             }
-
-            return Ok(subCategories);
+            List<CategoryDto> categoryDtos = new List<CategoryDto>();
+            foreach (var category in subCategories)
+            {
+                categoryDtos.Add(new CategoryDto()
+                {
+                    Id = category.Id,
+                    Name = category.Name,
+                    Description = category.Description,
+                    ParentCategoryId = category.ParentCategoryId,
+                    SizeTypeId = category.SizeTypeId,
+                });
+            }
+            return Ok(categoryDtos);
         }
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetCategoryById(int id)
@@ -42,6 +53,9 @@ namespace WebAPI.Controllers
                 Id = category.Id,
                 Name = category.Name,
                 Description = category.Description,
+                ParentCategoryId = category.ParentCategoryId,
+                SizeTypeId = category.SizeTypeId,
+
             };
 
 
@@ -80,6 +94,9 @@ namespace WebAPI.Controllers
 
             category.Name = updatedCategory.Name;
             category.Description = updatedCategory.Description;
+            category.SizeTypeId = updatedCategory.SizeTypeId;
+            category.ParentCategoryId = updatedCategory.ParentCategoryId;
+
             if (updatedCategory.ParentCategoryId.HasValue)
             {
                 category.ParentCategoryId = updatedCategory.ParentCategoryId;
@@ -122,6 +139,9 @@ namespace WebAPI.Controllers
                     Id = category.Id,
                     Name = category.Name,
                     Description = category.Description,
+                    SizeTypeId = category.SizeTypeId,
+                    ParentCategoryId = category.ParentCategoryId,
+
                 };
                 categorydto.Add(x);
             }
