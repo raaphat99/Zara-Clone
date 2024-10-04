@@ -12,7 +12,7 @@ namespace WebAPI.DTOs
 
         // Foreign key for Size
         public int SizeId { get; set; }
-        public string SizeName { get; set; }
+        public string SizeValue { get; set; }
 
         // Pricing and stock details
         public double Price { get; set; }

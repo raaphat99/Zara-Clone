@@ -83,8 +83,6 @@ namespace WebAPI.Controllers
             return Ok(product.ProductVariants);
         }
 
-
-
         // Get all products with id=7 woman and all dress with id=10
         [HttpGet("/api/products/{mainCategoryId:int}")]
         public async Task<IActionResult> GetProductsByCategory(int mainCategoryId, int? subCategoryId = null)
@@ -159,10 +157,10 @@ namespace WebAPI.Controllers
                 ProductId = productVariantDto.ProductId,
                 //SizeId = productVariantDto.SizeId,
                 Price = productVariantDto.Price,
-                StockQuntity = productVariantDto.StockQuantity,  // Ensure this matches the DTO
+                StockQuntity = productVariantDto.StockQuantity,  
                 ProductColor = productVariantDto.ProductColor,
                 ProductMaterial = productVariantDto.ProductMaterial,
-                Created = DateTime.UtcNow,  // It's a good practice to use UtcNow for date/time
+                Created = DateTime.UtcNow,  
                 Updated = DateTime.UtcNow
             };
 
@@ -172,68 +170,44 @@ namespace WebAPI.Controllers
             return CreatedAtAction(nameof(GetProductVariantById), new { id = productVariant.Id }, productVariant);
         }
         [HttpGet("search")]
-        public async Task<IActionResult> SearchProductVariants([FromQuery] List<string>? colors, [FromQuery] List<string>? materials, [FromQuery] double? priceFrom, [FromQuery] double? priceTo)
+        public async Task<IActionResult> SearchProductVariants(
+            [FromQuery] List<string>? colors,
+            [FromQuery] List<string>? materials,
+            [FromQuery] double? priceFrom,
+            [FromQuery] double? priceTo,
+            [FromQuery] List<string>? sizes)
         {
-            // Convert color strings to enum values
-            List<Color> colorEnums = new List<Color>();
-            if (colors != null && colors.Count > 0)
-            {
-                foreach (var color in colors)
-                {
-                    if (Enum.TryParse(color, true, out Color parsedColor))
-                    {
-                        colorEnums.Add(parsedColor);
-                    }
-                }
-            }
+            List<Color> colorEnums = colors?.Select(c => Enum.TryParse(c, true, out Color parsedColor) ? parsedColor : (Color?)null).Where(c => c.HasValue).Select(c => c.Value).ToList() ?? new List<Color>();
+            List<Material> materialEnums = materials?.Select(m => Enum.TryParse(m, true, out Material parsedMaterial) ? parsedMaterial : (Material?)null).Where(m => m.HasValue).Select(m => m.Value).ToList() ?? new List<Material>();
+            List<SizeValue> sizeEnums = sizes?.Select(s => Enum.TryParse(s, true, out SizeValue parsedSize) ? parsedSize : (SizeValue?)null).Where(s => s.HasValue).Select(s => s.Value).ToList() ?? new List<SizeValue>();
 
-            // Convert material strings to enum values
-            List<Material> materialEnums = new List<Material>();
-            if (materials != null && materials.Count > 0)
-            {
-                foreach (var material in materials)
-                {
-                    if (Enum.TryParse(material, true, out Material parsedMaterial))
-                    {
-                        materialEnums.Add(parsedMaterial);
-                    }
-                }
-            }
-
-            // Get all product variants
             var allVariants = await _unitOfWork.ProductVariant.GetAllAsync();
-
-            // Filter product variants based on color, material, and price
             var productVariants = await _unitOfWork.ProductVariant.FindAsync(pv =>
                 (colorEnums.Count == 0 || colorEnums.Contains(pv.ProductColor)) &&
                 (materialEnums.Count == 0 || materialEnums.Contains(pv.ProductMaterial)) &&
                 (!priceFrom.HasValue || pv.Price >= priceFrom) &&
-                (!priceTo.HasValue || pv.Price <= priceTo)
-            );
+                (!priceTo.HasValue || pv.Price <= priceTo) &&
+                (sizeEnums.Count == 0 || sizeEnums.Contains(pv.ProductSize.Value)));
 
-            // If no variants are found, return NotFound
             if (productVariants == null || !productVariants.Any())
             {
                 return NotFound("No product variants found.");
             }
 
-            // Prepare the result DTO
-            List<ProductVariantforC_M_P> productvariantdto = new List<ProductVariantforC_M_P>();
-            foreach (var variant in productVariants)
+            var productVariantDtos = productVariants.Select(variant => new ProductVariantforC_M_P()
             {
-                productvariantdto.Add(new ProductVariantforC_M_P()
-                {
-                    Id = variant.Id,
-                    ProductName = variant.Product.Name,
-                    ProductColor = variant.ProductColor,
-                    ProductMaterial = variant.ProductMaterial,
-                    Price = variant.Price,
-                    ProductId = variant.ProductId ?? 0,
-                    StockQuantity = variant.StockQuntity
-                });
-            }
+                Id = variant.Id,
+                ProductName = variant.Product.Name,
+                ProductColor = variant.ProductColor,
+                ProductMaterial = variant.ProductMaterial,
+                Price = variant.Price,
+                ProductId = variant.ProductId ?? 0,
+                StockQuantity = variant.StockQuntity,
+                SizeId=variant.ProductSizeId,
+                SizeValue=variant.ProductSize.Value.ToString(),
+            }).ToList();
 
-            return Ok(productvariantdto);
+            return Ok(productVariantDtos);
         }
 
         [HttpGet("variants")]
@@ -300,6 +274,101 @@ namespace WebAPI.Controllers
             return NoContent();
         }
 
+        [HttpGet("sizes/{id:int}")]
+        public async Task<IActionResult> GetProductSizeById(int id)
+        {
+            var productSize = await _unitOfWork.ProductSize.GetByIdAsync(id);
 
+            if (productSize == null)
+            {
+                return NotFound($"Product size with ID {id} not found.");
+            }
+
+            var productSizeDto = new ProductSizeDTO()
+            {
+                Id = productSize.Id,
+                Type = productSize.SizeType, // تأكد من أن SizeTypeId هو نوع البيانات الصحيح في الكود
+                Value = productSize.Value,
+            };
+
+            return Ok(productSizeDto); // استخدام productSizeDto بدلاً من productSize
+        }
+
+        [HttpGet("sizes")]
+        public async Task<IActionResult> GetAllProductSizes()
+        {
+            var productSizes = _unitOfWork.ProductSize.GetAll(); // استخدام GetAll
+            var productSizeList = await productSizes.ToListAsync(); // تحويل إلى قائمة بشكل غير متزامن
+
+            // تحويل النتيجة إلى DTOs
+            var productSizeDtos = productSizeList.Select(ps => new ProductSizeDTO()
+            {
+                Id = ps.Id,
+                Type = ps.SizeType,
+                Value = ps.Value
+            }).ToList();
+
+            return Ok(productSizeDtos);
+        }
+
+
+        // Add a new product size
+        [HttpPost("sizes")]
+        public async Task<IActionResult> AddProductSize([FromBody] ProductSizeDTO productSizeDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var productSize = new ProductSize
+            {
+                SizeTypeId = productSizeDto.Type.Id, // تحويل النوع إلى نوع العدد الصحيح
+                Value = productSizeDto.Value,           // القيمة المحددة للحجم
+
+            };
+
+            await _unitOfWork.ProductSize.AddAsync(productSize);
+            await _unitOfWork.Complete();
+
+            return CreatedAtAction(nameof(GetProductSizeById), new { id = productSize.Id }, productSizeDto);
+        }
+
+        // Update an existing product size
+        [HttpPut("sizes/{id:int}")]
+        public async Task<IActionResult> UpdateProductSize(int id, [FromBody] ProductSizeDTO productSizeDto)
+        {
+            var productSize = await _unitOfWork.ProductSize.GetByIdAsync(id);
+
+            if (productSize == null)
+            {
+                return NotFound($"Product size with ID {id} not found.");
+            }
+
+            productSize.SizeTypeId = productSizeDto.Type.Id; // تحويل النوع إلى نوع العدد الصحيح
+            productSize.Value = productSizeDto.Value;           // القيمة المحددة للحجم
+
+            _unitOfWork.ProductSize.Update(productSize);
+            await _unitOfWork.Complete();
+
+            return NoContent();
+        }
+
+        // Delete a product size
+        [HttpDelete("sizes/{id:int}")]
+        public async Task<IActionResult> DeleteProductSize(int id)
+        {
+            var productSize = await _unitOfWork.ProductSize.GetByIdAsync(id);
+
+            if (productSize == null)
+            {
+                return NotFound($"Product Size with ID {id} not found.");
+            }
+
+            _unitOfWork.ProductSize.Remove(productSize);
+            await _unitOfWork.Complete();
+
+            return NoContent();
+        }
     }
 }
