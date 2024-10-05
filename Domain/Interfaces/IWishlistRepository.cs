@@ -9,11 +9,6 @@ namespace Domain.Interfaces
 {
     public interface IWishlistRepository : IGenericRepository<Wishlist, int>
     {
-        Task<Wishlist> AddToWishList(Wishlist wishList);
 
-        Task RemoveFromWishList(Wishlist wishList);
-
-        bool IsWishList(int itemId, string userId);
-        Task<IEnumerable<Wishlist>> GetUserWishlist(string userId);
     }
 }

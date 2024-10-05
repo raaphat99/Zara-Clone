@@ -17,6 +17,6 @@ namespace Domain.Models
         public virtual ICollection<UserAddress> Adresses { get; set; }
         public virtual ICollection<UserMeasurement> UserMeasurements { get; set; }
         public virtual Cart Cart { get; set; }
-        public virtual Wishlist Wishlist { get; set; }
+        public virtual Wishlist Wishlist { get; set; } = new Wishlist();
     }
 }

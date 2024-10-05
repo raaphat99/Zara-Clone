@@ -22,6 +22,7 @@ namespace DataAccess.EFCore.Repositories
         private readonly Lazy<IUserMeasurementRepository> userMeasurements;
         private readonly Lazy<IUserRepository> users;
         private readonly Lazy<IProductSizeRepository> productSize;
+        private readonly Lazy<ICartItemRepository> cartItems;
         #endregion
 
 
@@ -39,6 +40,7 @@ namespace DataAccess.EFCore.Repositories
             userMeasurements = new Lazy<IUserMeasurementRepository>(() => new UserMeasurementRepository(_context));
             users = new Lazy<IUserRepository>(() => new UserRepository(_context));
             productSize= new Lazy<IProductSizeRepository>(() => new ProductSizeRepository(_context));
+            cartItems = new Lazy<ICartItemRepository>(() => new CartItemRepository(_context));
         }
         #endregion
 
@@ -55,6 +57,7 @@ namespace DataAccess.EFCore.Repositories
         public IUserMeasurementRepository UserMeasurements => userMeasurements.Value;
         public IUserRepository Users => users.Value;
         public IProductSizeRepository ProductSize => productSize.Value;
+        public ICartItemRepository CartItems => cartItems.Value;
         #endregion
 
 

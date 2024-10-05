@@ -117,6 +117,7 @@ namespace WebAPI
             }
 
             StripeConfiguration.ApiKey = builder.Configuration.GetSection("stripe:SecretKey").Get<string>();
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();

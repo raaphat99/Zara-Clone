@@ -4,93 +4,77 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using WebAPI.DTOs;
 
 namespace WebAPI.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class WishListController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly UserManager<User> _userManager;
-
-        public WishListController(IUnitOfWork unitOfWork , UserManager<User> userManager)
+        public WishListController(IUnitOfWork unitOfWork )
         {
             _unitOfWork = unitOfWork;
-            _userManager = userManager;
         }
 
-        [HttpPost("add")]
-        public async Task<ActionResult<Wishlist>> AddToWishlist([FromBody] AddToWishListDTO addToWishlistDto)
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> GetAllItems( string userId) 
         {
-            // Get the currently authenticated user
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+            var wishlist = user.Wishlist.Products.ToList();
+            if(user == null) 
+                return NotFound("User Not Found");
+            if(!wishlist.Any())
+                return NotFound("No Item In WishList");
+            List<WishListItemDTO> wishListItemDTOs = new List<WishListItemDTO>();
+            foreach (var item in wishlist)
             {
-                return Unauthorized("User is not logged in.");
+                WishListItemDTO wishListItemDTO = new WishListItemDTO()
+                {
+                    Id = item.Id,
+                    Name = item.Name,
+                    Price = item.Price,
+                    ImageUrl = GetImgUrl(item)
+                };
+                wishListItemDTOs.Add(wishListItemDTO);
+
             }
+            return Ok(wishListItemDTOs);
 
-            // Create the wishlist item based on DTO input
-            var wishlist = new Wishlist
-            {
-                UserId = user.Id,
-                Products = new List<Product>
-            {
-                new Product { Id = addToWishlistDto.ProductId }
-            }
-            };
-
-            var addedItem = await _unitOfWork.Wishlist.AddToWishList(wishlist);
-            await _unitOfWork.Complete();
-
-            return Ok(addedItem);
         }
 
-        [HttpDelete("remove")]
-        public async Task<IActionResult> RemoveWishlistItem([FromQuery] int productId)
+        [HttpPost]
+        public async Task<IActionResult> AddToWishList(int productId , string userId) 
         {
-            // Get the currently authenticated user
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
+            Wishlist wishlist = (Wishlist) _unitOfWork.Wishlist.Find(w=>w.UserId == userId);
+            var product = await _unitOfWork.Products.GetByIdAsync (productId);
+            var products = wishlist.Products.ToList();
+            if(products.Contains(product))
             {
-                return Unauthorized("User is not logged in.");
+                wishlist.Products.Remove(product);
+                _unitOfWork.Wishlist.Update(wishlist);
+                await _unitOfWork.Complete();
+                return Ok("Product Removed");
             }
+            else
+            {
+                wishlist.Products.Add(product);
+                _unitOfWork.Wishlist.Update(wishlist);
+                await _unitOfWork.Complete();
+                return Ok("Product Added");
 
-            var wishlist = new Wishlist
-            {
-                UserId = user.Id,
-                Products = new List<Product>
-            {
-                new Product { Id = productId }
             }
-            };
-
-            // Remove from wishlist via the Unit of Work
-            await _unitOfWork.Wishlist.RemoveFromWishList(wishlist);
-            await _unitOfWork.Complete();
-
-            return Ok("Item removed from wishlist.");
         }
 
-        [HttpGet("checkwish/{itemId}")]
-        public async Task<IActionResult> CheckWishlist(int itemId)
+
+        private  string GetImgUrl(Product product) 
         {
-            // Get the currently authenticated user
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return Unauthorized("User is not logged in.");
-            }
-
-            // Check if the item is in the user's wishlist
-            bool isInWishlist = _unitOfWork.Wishlist.IsWishList(itemId, user.Id);
-
-            return Ok(isInWishlist);
+            var variants = product.ProductVariants.ToList();
+            var imgs = variants[0].ProductImage.ToList();
+            string imgUrl = imgs[0].ImageUrl;
+            return imgUrl;
         }
-
-
-
     }
 }

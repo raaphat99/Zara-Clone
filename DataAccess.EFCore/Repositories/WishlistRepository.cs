@@ -15,43 +15,7 @@ namespace DataAccess.EFCore.Repositories
         public WishlistRepository(ApplicationContext applicationContext) : base(applicationContext)
         { }
 
-        public async Task<Wishlist> AddToWishList(Wishlist wishListitem)
-        {
 
-            _dbContext.Wishlists.Add(wishListitem);
-            await _dbContext.SaveChangesAsync();
-            return wishListitem;
-        }
-
-       
-
-        public async Task RemoveFromWishList(Wishlist wishlistitem)
-        {
-            var item = await _dbContext.Wishlists.FirstOrDefaultAsync(w => w.UserId == wishlistitem.UserId && w.Products.Any(p => p.Id == wishlistitem.Products.First().Id));
-
-            if (wishlistitem != null)
-            {
-                _dbContext.Wishlists.Remove(wishlistitem);
-                await _dbContext.SaveChangesAsync();
-            }
-
-        }
-
-
-
-        public bool IsWishList(int itemId, string userId)
-        {
-            return _dbContext.Wishlists.Any(w => w.UserId == userId && w.Products.Any(p => p.Id == itemId));
-
-        }
-
-        public async Task<IEnumerable<Wishlist>> GetUserWishlist(string userId)
-        {
-            return await _dbContext.Wishlists
-                .Include(w => w.Products) 
-                .Where(w => w.UserId == userId)
-                .ToListAsync();
-        }
 
 
     }

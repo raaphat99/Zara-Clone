@@ -18,6 +18,7 @@ namespace Domain.Interfaces
         IWishlistRepository Wishlist { get; }
 
         IProductSizeRepository ProductSize { get; }
+        ICartItemRepository CartItems { get; }
         Task<int> Complete();
     }
 }

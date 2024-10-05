@@ -19,7 +19,7 @@ namespace WebAPI.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        [HttpGet("{UserId}")]
+        [HttpGet("{userId}")]
         public async Task<IActionResult> GetAllMesurments(string userId)
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
