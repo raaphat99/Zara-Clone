@@ -14,6 +14,7 @@ namespace Domain.Models
         [Key]
         public int Id { get; set; }
         public double Price { get; set; }
+
         [Range(0, 100, ErrorMessage = "Discount percentage must be between 0 and 100.")]
         public double DiscountPercentage { get; set; }
         public double DiscountedPrice => Price * (1 - (DiscountPercentage / 100));
