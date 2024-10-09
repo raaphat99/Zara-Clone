@@ -3,6 +3,9 @@ using Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Stripe;
+using WebAPI.Services;
+using static Amazon.S3.Util.S3EventNotification;
 
 namespace WebAPI.Controllers
 {
@@ -13,10 +16,14 @@ namespace WebAPI.Controllers
     public class ProductImageController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly S3Service _s3Service;
+        private readonly string bucketName;
 
-        public ProductImageController(IUnitOfWork unitOfWork)
+        public ProductImageController(IUnitOfWork unitOfWork, S3Service s3Service, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
+            _s3Service = s3Service;
+            bucketName = configuration["AWS:BucketName"];
         }
 
 
@@ -33,11 +40,41 @@ namespace WebAPI.Controllers
         }
 
 
-        [HttpPost]
-        public async Task<ActionResult<ProductImage>> UploadImage([FromBody] ProductImage image)
+        [HttpPost("/{variantId:int}")]
+        public async Task<ActionResult<ProductImage>> UploadImage(IFormFile file, int variantId)
         {
-            await _unitOfWork.ProductImages.AddAsync(image);
-            return CreatedAtAction(nameof(GetImagesByVariant), new { variantId = image.ProductVariantId }, image);
+            if (file == null || file.Length == 0)
+                return BadRequest("No file uploaded.");
+
+            //var fileExtension = Path.GetExtension(file.FileName);
+            //var uniqueFileName = Guid.NewGuid().ToString() + fileExtension;
+            var fileName = Path.GetFileName(file.FileName);
+
+            try
+            {
+                using (var stream = new MemoryStream())
+                {
+                    await file.CopyToAsync(stream);
+                    await _s3Service.UploadFileAsync(file);
+                }
+
+                var publicUrl = $"https://{bucketName}.s3.amazonaws.com/{fileName}";
+
+                ProductImage image = new ProductImage()
+                {
+                    ProductVariantId = variantId,
+                    ImageUrl = publicUrl,
+                };
+
+                await _unitOfWork.ProductImages.AddAsync(image);
+                await _unitOfWork.Complete();
+
+                return Ok("Image added successfully.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error uploading file: {ex.Message}");
+            }
         }
 
 
