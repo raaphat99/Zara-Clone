@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -17,10 +18,10 @@ namespace Domain.Models
         public int? OrderId { get; set; }
         public virtual Order Order { get; set; }
         public string PaymentMethod { get; set; }
-        public string PaymentStatus { get; set; }
+        public PaymentStatus? PaymentStatus { get; set; }
         public double Amount { get; set; }
         public double AmountRefunded { get; set; }
-        public DateTime Created { get; set; }
-        public DateTime Updated { get; set; }
+        public DateTime? Created { get; set; }
+        public DateTime? Updated { get; set; }
     }
 }

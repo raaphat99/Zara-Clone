@@ -11,23 +11,24 @@ using System.Threading.Tasks;
 
 namespace DataAccess.EFCore.Repositories
 {
-    public class ProductSizeRepository : GenericRepository<ProductSize, int>, IProductSizeRepository
+    public class SizeRepository : GenericRepository<Size, int>, ISizeRepository
     {
-        public ProductSizeRepository(ApplicationContext applicationContext) : base(applicationContext)
+        public SizeRepository(ApplicationContext applicationContext) : base(applicationContext)
         {
         }
+
         // Existing methods
-        public async Task<IEnumerable<ProductSize>> GetSizesByType(Domain.Models.SizeType sizeType)
+        public async Task<IEnumerable<Size>> GetSizesByType(Domain.Models.SizeType sizeType)
         {
-            return await _dbContext.ProductSizes
+            return await _dbContext.Sizes
                 .Where(size => size.SizeType == sizeType)
                 .ToListAsync();
         }
 
         // Implementing GetSizeByValue method
-        public async Task<ProductSize> GetSizeByValue(SizeValue sizeValue)
+        public async Task<Size> GetSizeByValue(SizeValue sizeValue)
         {
-            return await _dbContext.ProductSizes
+            return await _dbContext.Sizes
                 .FirstOrDefaultAsync(size => size.Value == sizeValue);
         }
 

@@ -17,14 +17,14 @@ namespace Domain.Models
         public string Description { get; set; }
         public double Price { get; set; }
         public int StockQuntity { get; set; }
-        public DateTime Created { get; set; }
-        public DateTime Updated { get; set; }
+        public DateTime? Created { get; set; }
+        public DateTime? Updated { get; set; }
 
         [ForeignKey("Category")]
         public int? CategoryId { get; set; }
         public virtual Category Category { get; set; }
-        public virtual ICollection<ProductVariant> ProductVariants { get; set; }
-        public virtual ICollection<Wishlist> Wishlists { get; set; }
+        public virtual ICollection<ProductVariant> ProductVariants { get; set; } = new List<ProductVariant>();
+        public virtual ICollection<Wishlist> Wishlists { get; set; } = new List<Wishlist>();
 
     }
 }

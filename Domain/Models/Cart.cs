@@ -13,7 +13,7 @@ namespace Domain.Models
     {
         [Key]
         public int Id { get; set; }
-        public DateTime Updated { get; set; }
+        public DateTime? Updated { get; set; }
 
         [ForeignKey("User")]
         public string? UserId { get; set; }

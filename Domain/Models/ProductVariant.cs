@@ -19,8 +19,8 @@ namespace Domain.Models
         public double DiscountPercentage { get; set; }
         public double DiscountedPrice => Price * (1 - (DiscountPercentage / 100));
         public int StockQuntity { get; set; }
-        public DateTime Created { get; set; }
-        public DateTime Updated { get; set; }
+        public DateTime? Created { get; set; }
+        public DateTime? Updated { get; set; }
         public Color ProductColor { get; set; }
         public Material ProductMaterial { get; set; }
 
@@ -28,9 +28,9 @@ namespace Domain.Models
         public int? ProductId { get; set; }
         public virtual Product Product { get; set; }
 
-        [ForeignKey("ProductSize")]
-        public int ProductSizeId { get; set; }
-        public virtual ProductSize ProductSize { get; set; } = new ProductSize();
+        [ForeignKey("Size")]
+        public int SizeId { get; set; }
+        public virtual Size Size { get; set; }
         public virtual ICollection<OrderItem> OrderItem { get; set; } = new List<OrderItem>();
         public virtual ICollection<CartItem> CartItem { get; set; } = new List<CartItem>();
         public virtual ICollection<ProductImage> ProductImage { get; set; } = new List<ProductImage>();

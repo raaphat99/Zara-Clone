@@ -1,4 +1,5 @@
 ﻿using Domain.Enums;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -26,21 +27,12 @@ namespace Domain.Models
         public int? UserAddressId { get; set; }
         public virtual UserAddress UserAddress { get; set; }
         public virtual Payment Payment { get; set; }
+        public string? TrackingNumber { get; set; }
         public OrderStatus Status { get; set; }
         public double TotalPrice { get; set; }
-        public DateTime Created { get; set; }
-        public DateTime Updated { get; set; }
+        public DateTime? Created { get; set; }
+        public DateTime? Updated { get; set; }
         public virtual ICollection<OrderItem> OrderItems { get; set; } = new HashSet<OrderItem>();
-        public void SetShippingMethod()
-        {
-            if (TotalPrice > 4000)
-            {
-                ShippingMethodId = (int)ShippingType.Free;
-            }
-            else
-            {
-                ShippingMethodId = (int)ShippingType.StandardHome;
-            }
-        }
+
     }
 }

@@ -214,7 +214,7 @@ namespace DataAccess.EFCore.Migrations
                 column: "ProductsId",
                 principalTable: "Products",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.NoAction);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_ProductWishlist_Wishlists_WishlistsId",
@@ -222,7 +222,7 @@ namespace DataAccess.EFCore.Migrations
                 column: "WishlistsId",
                 principalTable: "Wishlists",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.NoAction);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_UserMeasurements_AspNetUsers_UserId",
@@ -446,7 +446,7 @@ namespace DataAccess.EFCore.Migrations
                 column: "ProductsID",
                 principalTable: "Products",
                 principalColumn: "ID",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.NoAction);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_ProductWishlist_Wishlists_WishlistsID",
@@ -454,7 +454,7 @@ namespace DataAccess.EFCore.Migrations
                 column: "WishlistsID",
                 principalTable: "Wishlists",
                 principalColumn: "ID",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.NoAction);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_UserMeasurements_AspNetUsers_UserID",

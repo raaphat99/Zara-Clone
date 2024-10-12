@@ -8,16 +8,16 @@ using System.Threading.Tasks;
 
 namespace Domain.Models
 {
-    public class Wishlist
+    public class Notification
     {
         [Key]
         public int Id { get; set; }
-        public DateTime? Created { get; set; }
 
         [ForeignKey("User")]
-        public string? UserId { get; set; }
+        public string UserId { get; set; }
         public virtual User User { get; set; }
-        public virtual ICollection<Product> Products { get; set; } = new List<Product>();
-
+        public string Message { get; set; }
+        public bool IsRead { get; set; }
+        public DateTime Created { get; set; }
     }
 }

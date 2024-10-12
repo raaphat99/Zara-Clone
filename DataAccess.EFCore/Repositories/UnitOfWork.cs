@@ -21,8 +21,9 @@ namespace DataAccess.EFCore.Repositories
         private readonly Lazy<IWishlistRepository> wishlist;
         private readonly Lazy<IUserMeasurementRepository> userMeasurements;
         private readonly Lazy<IUserRepository> users;
-        private readonly Lazy<IProductSizeRepository> productSize;
+        private readonly Lazy<ISizeRepository> sizes;
         private readonly Lazy<ICartItemRepository> cartItems;
+        private readonly Lazy<INotificationRepository> notifications;
         #endregion
 
 
@@ -39,8 +40,9 @@ namespace DataAccess.EFCore.Repositories
             wishlist = new Lazy<IWishlistRepository>(() => new WishlistRepository(_context));
             userMeasurements = new Lazy<IUserMeasurementRepository>(() => new UserMeasurementRepository(_context));
             users = new Lazy<IUserRepository>(() => new UserRepository(_context));
-            productSize= new Lazy<IProductSizeRepository>(() => new ProductSizeRepository(_context));
+            sizes = new Lazy<ISizeRepository>(() => new SizeRepository(_context));
             cartItems = new Lazy<ICartItemRepository>(() => new CartItemRepository(_context));
+            notifications = new Lazy<INotificationRepository>(() => new NotificationRepository(_context));
         }
         #endregion
 
@@ -52,12 +54,13 @@ namespace DataAccess.EFCore.Repositories
         public ICategoryRepository Categories => categories.Value;
         public IProductImageRepository ProductImages => productImages.Value;
         public IUserAddressRepository UserAddress => userAddress.Value;
-
         public IWishlistRepository Wishlist => wishlist.Value;
         public IUserMeasurementRepository UserMeasurements => userMeasurements.Value;
         public IUserRepository Users => users.Value;
-        public IProductSizeRepository ProductSize => productSize.Value;
+        public ISizeRepository Sizes => sizes.Value;
         public ICartItemRepository CartItems => cartItems.Value;
+        public INotificationRepository Notifications => notifications.Value;
+
         #endregion
 
 

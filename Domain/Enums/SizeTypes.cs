@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace Domain.Enums
 {
-    public enum ShippingType
+    public enum SizeTypes
     {
-        StandardHome,
-        DropPoint,
-        Free,
-        ZaraStore
+        Alpha,
+        Numeric,
+        AgeBased
     }
 }

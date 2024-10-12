@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.EFCore.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20241003005208_UpdateSizingSystemTables")]
-    partial class UpdateSizingSystemTables
+    [Migration("20241011145051_RenameDbTable")]
+    partial class RenameDbTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -333,6 +333,9 @@ namespace DataAccess.EFCore.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
+                    b.Property<double>("DiscountPercentage")
+                        .HasColumnType("float");
+
                     b.Property<double>("Price")
                         .HasColumnType("float");
 
@@ -345,6 +348,9 @@ namespace DataAccess.EFCore.Migrations
                     b.Property<int>("ProductMaterial")
                         .HasColumnType("int");
 
+                    b.Property<int>("ProductSizeId")
+                        .HasColumnType("int");
+
                     b.Property<int>("StockQuntity")
                         .HasColumnType("int");
 
@@ -354,6 +360,8 @@ namespace DataAccess.EFCore.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("ProductSizeId");
 
                     b.ToTable("ProductVariants");
                 });
@@ -395,7 +403,7 @@ namespace DataAccess.EFCore.Migrations
 
                     b.HasIndex("TypeId");
 
-                    b.ToTable("ProductTypes");
+                    b.ToTable("SizeTypes");
                 });
 
             modelBuilder.Entity("Domain.Models.User", b =>
@@ -527,13 +535,25 @@ namespace DataAccess.EFCore.Migrations
                     b.Property<int>("Age")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("Created")
+                    b.Property<DateTime?>("Created")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("FavoriteSection")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Height")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("Updated")
+                    b.Property<string>("MesurmentProfileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SizeValue")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("Updated")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("UserId")
@@ -705,21 +725,6 @@ namespace DataAccess.EFCore.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("ProductSizeProductVariant", b =>
-                {
-                    b.Property<int>("ProductSizesId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProductVariantsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ProductSizesId", "ProductVariantsId");
-
-                    b.HasIndex("ProductVariantsId");
-
-                    b.ToTable("ProductSizeProductVariant");
-                });
-
             modelBuilder.Entity("ProductWishlist", b =>
                 {
                     b.Property<int>("ProductsId")
@@ -852,7 +857,15 @@ namespace DataAccess.EFCore.Migrations
                         .WithMany("ProductVariants")
                         .HasForeignKey("ProductId");
 
+                    b.HasOne("Domain.Models.ProductSize", "ProductSize")
+                        .WithMany("ProductVariants")
+                        .HasForeignKey("ProductSizeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.Navigation("Product");
+
+                    b.Navigation("ProductSize");
                 });
 
             modelBuilder.Entity("Domain.Models.SizeType", b =>
@@ -944,21 +957,6 @@ namespace DataAccess.EFCore.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ProductSizeProductVariant", b =>
-                {
-                    b.HasOne("Domain.Models.ProductSize", null)
-                        .WithMany()
-                        .HasForeignKey("ProductSizesId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Models.ProductVariant", null)
-                        .WithMany()
-                        .HasForeignKey("ProductVariantsId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("ProductWishlist", b =>
                 {
                     b.HasOne("Domain.Models.Product", null)
@@ -995,6 +993,11 @@ namespace DataAccess.EFCore.Migrations
                 });
 
             modelBuilder.Entity("Domain.Models.Product", b =>
+                {
+                    b.Navigation("ProductVariants");
+                });
+
+            modelBuilder.Entity("Domain.Models.ProductSize", b =>
                 {
                     b.Navigation("ProductVariants");
                 });

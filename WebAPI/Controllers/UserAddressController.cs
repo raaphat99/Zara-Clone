@@ -28,7 +28,6 @@ namespace WebAPI.Controllers
                 State = a.State,
                 City = a.City,
                 Street = a.Street,
-                PostalCode = a.PostalCode,
                 Active = a.Active.Value,
                 UserId = a.UserId
             }).ToList();
@@ -54,7 +53,6 @@ namespace WebAPI.Controllers
                 State = addressDTO.State,
                 City = addressDTO.City,
                 Street = addressDTO.Street,
-                PostalCode = addressDTO.PostalCode,
                 UserId = addressDTO.UserId,
                 Active = userAddresses.Count() == 0 // Set Active to true if first address, otherwise false
             };
@@ -83,8 +81,7 @@ namespace WebAPI.Controllers
             address.State = addressDTO.State;
             address.City = addressDTO.City;
             address.Street = addressDTO.Street;
-            address.PostalCode = addressDTO.PostalCode;
-            address.UserId = addressDTO.UserId; 
+            address.UserId = addressDTO.UserId;
 
             _unitOfWork.UserAddress.Update(address);
             await _unitOfWork.Complete();

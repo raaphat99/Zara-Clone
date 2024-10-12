@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Drawing;
@@ -14,8 +15,8 @@ namespace Domain.Models
         public int Id { get; set; }
 
         [Required]
-        public virtual SizeType Type { get; set; }
+        public virtual SizeTypes Type { get; set; }
         public virtual Category Category { get; set; }
-        public virtual ICollection<ProductSize> ProductSizes { get; set; } = new List<ProductSize>();
+        public virtual ICollection<Size> ProductSizes { get; set; } = new List<Size>();
     }
 }

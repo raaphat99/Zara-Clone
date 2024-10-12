@@ -107,6 +107,15 @@ namespace WebAPI
                 });
             });
 
+            // Add CORS Policy
+            builder.Services.AddCors(CorsOptions =>
+            {
+                CorsOptions.AddPolicy("mypolicy", CorsPolicyBuilder =>
+                {
+                    CorsPolicyBuilder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+                });
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -118,7 +127,10 @@ namespace WebAPI
 
             StripeConfiguration.ApiKey = builder.Configuration.GetSection("stripe:SecretKey").Get<string>();
             app.UseAuthentication();
+
             app.UseAuthorization();
+
+            app.UseCors("mypolicy");
 
             app.MapControllers();
 

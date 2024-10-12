@@ -80,7 +80,7 @@ namespace DataAccess.EFCore.Repositories
             // Filter by size
             if (!string.IsNullOrEmpty(size))
             {
-                products = products.Where(p => p.ProductVariants.Any(v => v.ProductSize.Value.ToString() == size));
+                products = products.Where(p => p.ProductVariants.Any(v => v.Size.Value.ToString() == size));
             }
 
             return await products.ToListAsync();

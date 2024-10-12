@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace Domain.Enums
 {
-    public enum SizeType
+    public enum PaymentStatus
     {
-        Alpha,
-        Numeric,
-        AgeBased
+        Paid,
+        Pending,
+        Canceled
     }
 }

@@ -20,7 +20,7 @@ namespace Domain.Models
         [ForeignKey("SizeType")]
         public int? SizeTypeId { get; set; }
         public virtual SizeType SizeType { get; set; }
-        public virtual ICollection<Category> Subcategories { get; set; }
-        public virtual ICollection<Product> Products { get; set; }
+        public virtual ICollection<Category> Subcategories { get; set; } = new List<Category>();
+        public virtual ICollection<Product> Products { get; set; } = new List<Product>();
     }
 }

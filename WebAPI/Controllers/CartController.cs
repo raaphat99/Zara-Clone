@@ -20,13 +20,13 @@ namespace WebAPI.Controllers
         public async Task<IActionResult> GetAllItems(string userId)
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
-           var cart = user.Cart.CartItems.ToList();
-           // if(cart == null )
-                //return NotFound("User has No Cart");
+            var cart = user.Cart.CartItems.ToList();
+            // if(cart == null )
+            //return NotFound("User has No Cart");
             if (!cart.Any())
                 return NotFound("No Items In This Cart");
             List<CartItemDTO> cartItems = new List<CartItemDTO>();
-            foreach (var item in cart) 
+            foreach (var item in cart)
             {
                 var images = item.ProductVariant.ProductImage.ToList();
                 var cartItemDTO = new CartItemDTO
@@ -34,13 +34,13 @@ namespace WebAPI.Controllers
                     Id = item.Id,
                     Quantity = item.Quantity,
                     Color = item.ProductVariant.ProductColor,
-                    Size = item.ProductVariant.ProductSize.Value,
+                    Size = item.ProductVariant.Size.Value,
                     Title = item.ProductVariant.Product.Name,
                     ImageUrl = await GetImgUrls(item),
                     Price = item.UnitPrice
 
                 };
-               cartItems.Add(cartItemDTO);
+                cartItems.Add(cartItemDTO);
             }
 
             return Ok(cartItems);
@@ -48,42 +48,42 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult>AddCartItem(int productVariantId , string userId)
+        public async Task<IActionResult> AddCartItem(int productVariantId, string userId)
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
             List<CartItem> cartitems = user.Cart.CartItems.ToList();
             ProductVariant product = await _unitOfWork.ProductVariant.GetByIdAsync(productVariantId);
-            if(product.StockQuntity == 0)
+            if (product.StockQuntity == 0)
                 return NotFound("Out Of Stock");
             bool exist = false;
             foreach (var item in cartitems)
             {
-                if (item.ProductVariant.Id == product.Id) 
-                { 
+                if (item.ProductVariant.Id == product.Id)
+                {
                     exist = true;
-                    break; 
+                    break;
                 }
-                    
+
             }
             CartItem newitem = new CartItem();
             if (!exist && product.StockQuntity > 0)
             {
-                newitem = new CartItem() 
+                newitem = new CartItem()
                 {
                     Quantity = 1,
                     ProductVariantId = product.Id,
                     CartId = user.Cart.Id,
                     UnitPrice = product.Price
                 };
-               await _unitOfWork.CartItems.AddAsync(newitem);
-               await _unitOfWork.Complete();
+                await _unitOfWork.CartItems.AddAsync(newitem);
+                await _unitOfWork.Complete();
                 return Ok("Item added");
             }
-            else if(exist && product.StockQuntity > 0)
+            else if (exist && product.StockQuntity > 0)
             {
-             var item =   await _unitOfWork.CartItems.GetByIdAsync(newitem.Id);
+                var item = await _unitOfWork.CartItems.GetByIdAsync(newitem.Id);
                 item.Quantity++;
-                 _unitOfWork.CartItems.Update(item);
+                _unitOfWork.CartItems.Update(item);
                 await _unitOfWork.Complete();
                 return Ok("Item Quantity Increased");
 
@@ -96,20 +96,20 @@ namespace WebAPI.Controllers
         }
 
         [HttpDelete]
-        public async Task<IActionResult>RemoveItemFromCart(int cartItemId)
+        public async Task<IActionResult> RemoveItemFromCart(int cartItemId)
         {
             var cartitem = await _unitOfWork.CartItems.GetByIdAsync(cartItemId);
             _unitOfWork.CartItems.Remove(cartitem);
             await _unitOfWork.Complete();
-            return Ok("Item Deleted"); 
+            return Ok("Item Deleted");
         }
 
         private async Task<ICollection<string>> GetImgUrls(CartItem cart)
         {
-           var item = await _unitOfWork.CartItems.GetByIdAsync(cart.Id);
+            var item = await _unitOfWork.CartItems.GetByIdAsync(cart.Id);
             var imgs = item.ProductVariant.ProductImage.ToList();
             List<string> urls = new List<string>();
-            foreach (var i in imgs) 
+            foreach (var i in imgs)
             {
                 urls.Add(i.ImageUrl);
             }

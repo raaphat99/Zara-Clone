@@ -16,11 +16,11 @@ namespace Domain.Models
         [Key]
         public int Id { get; set; }
         public string ImageUrl { get; set; }
-        public string AlternativeText { get; set; }
-        public int SortOrder { get; set; }
-        public DateTime Created { get; set; }
-        public DateTime Updated { get; set; }
-        public ImageType ImageType { get; set; }
+        public string? AlternativeText { get; set; }
+        public int? SortOrder { get; set; }
+        public DateTime? Created { get; set; }
+        public DateTime? Updated { get; set; }
+        public ImageType? ImageType { get; set; }
 
         [ForeignKey("ProductVariant")]
         public int? ProductVariantId { get; set; }

@@ -9,16 +9,15 @@ using System.Threading.Tasks;
 
 namespace Domain.Models
 {
-    public class ProductSize
+    public class Size
     {
         [Key]
         public int Id { get; set; }
 
         [ForeignKey("SizeType")]
         public int? SizeTypeId { get; set; }
-        public virtual Domain.Models.SizeType SizeType { get; set; }
+        public virtual SizeType SizeType { get; set; }
+        public virtual ICollection<ProductVariant> ProductVariant { get; set; } = new List<ProductVariant>();
         public SizeValue Value { get; set; }
-        public virtual ICollection<ProductVariant> ProductVariants { get; set; } = new List<ProductVariant>();
-
     }
 }

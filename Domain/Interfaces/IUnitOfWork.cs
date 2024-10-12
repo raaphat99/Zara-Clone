@@ -16,9 +16,9 @@ namespace Domain.Interfaces
         IUserMeasurementRepository UserMeasurements { get; }
         IUserRepository Users { get; }
         IWishlistRepository Wishlist { get; }
-
-        IProductSizeRepository ProductSize { get; }
+        ISizeRepository Sizes { get; }
         ICartItemRepository CartItems { get; }
+        INotificationRepository Notifications { get; }
         Task<int> Complete();
     }
 }

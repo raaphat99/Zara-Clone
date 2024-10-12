@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace Domain.Interfaces
 {
-    public interface IProductSizeRepository : IGenericRepository<ProductSize, int>
+    public interface ISizeRepository : IGenericRepository<Size, int>
     {
-        Task<IEnumerable<ProductSize>> GetSizesByType(Domain.Models.SizeType sizeType);
-        Task<ProductSize> GetSizeByValue(SizeValue sizeValue);
+        Task<IEnumerable<Size>> GetSizesByType(Domain.Models.SizeType sizeType);
+        Task<Size> GetSizeByValue(SizeValue sizeValue);
     }
 }

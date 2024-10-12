@@ -19,6 +19,10 @@ namespace Domain.Enums
         Linen,
         Shiny,
         Sequins,
-        TedSkin
+        TedSkin,
+        Denim,
+        Wool,
+        Viscose,
+        Elastane
     }
 }

@@ -131,12 +131,12 @@ namespace WebAPI.Controllers
             var productvariantdto = new ProductVariantforC_M_P()
             {
                 Id = productVariant.Id,
-                ProductId = productVariant.ProductId??0,
+                ProductId = productVariant.ProductId ?? 0,
                 ProductName = productVariant.Product.Name,
                 Price = productVariant.Price,
                 ProductColor = productVariant.ProductColor,
                 // SizeName = productVariant.Product.,
-               // SizeId = productVariant.SizeId,
+                // SizeId = productVariant.SizeId,
                 StockQuantity = productVariant.StockQuntity,
                 ProductMaterial = productVariant.ProductMaterial,
                 Created = productVariant.Created,
@@ -157,10 +157,10 @@ namespace WebAPI.Controllers
                 ProductId = productVariantDto.ProductId,
                 //SizeId = productVariantDto.SizeId,
                 Price = productVariantDto.Price,
-                StockQuntity = productVariantDto.StockQuantity,  
+                StockQuntity = productVariantDto.StockQuantity,
                 ProductColor = productVariantDto.ProductColor,
                 ProductMaterial = productVariantDto.ProductMaterial,
-                Created = DateTime.UtcNow,  
+                Created = DateTime.UtcNow,
                 Updated = DateTime.UtcNow
             };
 
@@ -187,7 +187,7 @@ namespace WebAPI.Controllers
                 (materialEnums.Count == 0 || materialEnums.Contains(pv.ProductMaterial)) &&
                 (!priceFrom.HasValue || pv.Price >= priceFrom) &&
                 (!priceTo.HasValue || pv.Price <= priceTo) &&
-                (sizeEnums.Count == 0 || sizeEnums.Contains(pv.ProductSize.Value)));
+                (sizeEnums.Count == 0 || sizeEnums.Contains(pv.Size.Value)));
 
             if (productVariants == null || !productVariants.Any())
             {
@@ -203,8 +203,8 @@ namespace WebAPI.Controllers
                 Price = variant.Price,
                 ProductId = variant.ProductId ?? 0,
                 StockQuantity = variant.StockQuntity,
-                SizeId=variant.ProductSizeId,
-                SizeValue=variant.ProductSize.Value.ToString(),
+                SizeId = variant.SizeId,
+                SizeValue = variant.Size.Value.ToString(),
             }).ToList();
 
             return Ok(productVariantDtos);
@@ -277,7 +277,7 @@ namespace WebAPI.Controllers
         [HttpGet("sizes/{id:int}")]
         public async Task<IActionResult> GetProductSizeById(int id)
         {
-            var productSize = await _unitOfWork.ProductSize.GetByIdAsync(id);
+            var productSize = await _unitOfWork.Sizes.GetByIdAsync(id);
 
             if (productSize == null)
             {
@@ -297,7 +297,7 @@ namespace WebAPI.Controllers
         [HttpGet("sizes")]
         public async Task<IActionResult> GetAllProductSizes()
         {
-            var productSizes = _unitOfWork.ProductSize.GetAll(); // استخدام GetAll
+            var productSizes = _unitOfWork.Sizes.GetAll(); // استخدام GetAll
             var productSizeList = await productSizes.ToListAsync(); // تحويل إلى قائمة بشكل غير متزامن
 
             // تحويل النتيجة إلى DTOs
@@ -321,14 +321,14 @@ namespace WebAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var productSize = new ProductSize
+            var productSize = new Size
             {
                 SizeTypeId = productSizeDto.Type.Id, // تحويل النوع إلى نوع العدد الصحيح
                 Value = productSizeDto.Value,           // القيمة المحددة للحجم
 
             };
 
-            await _unitOfWork.ProductSize.AddAsync(productSize);
+            await _unitOfWork.Sizes.AddAsync(productSize);
             await _unitOfWork.Complete();
 
             return CreatedAtAction(nameof(GetProductSizeById), new { id = productSize.Id }, productSizeDto);
@@ -338,7 +338,7 @@ namespace WebAPI.Controllers
         [HttpPut("sizes/{id:int}")]
         public async Task<IActionResult> UpdateProductSize(int id, [FromBody] ProductSizeDTO productSizeDto)
         {
-            var productSize = await _unitOfWork.ProductSize.GetByIdAsync(id);
+            var productSize = await _unitOfWork.Sizes.GetByIdAsync(id);
 
             if (productSize == null)
             {
@@ -348,7 +348,7 @@ namespace WebAPI.Controllers
             productSize.SizeTypeId = productSizeDto.Type.Id; // تحويل النوع إلى نوع العدد الصحيح
             productSize.Value = productSizeDto.Value;           // القيمة المحددة للحجم
 
-            _unitOfWork.ProductSize.Update(productSize);
+            _unitOfWork.Sizes.Update(productSize);
             await _unitOfWork.Complete();
 
             return NoContent();
@@ -358,14 +358,14 @@ namespace WebAPI.Controllers
         [HttpDelete("sizes/{id:int}")]
         public async Task<IActionResult> DeleteProductSize(int id)
         {
-            var productSize = await _unitOfWork.ProductSize.GetByIdAsync(id);
+            var productSize = await _unitOfWork.Sizes.GetByIdAsync(id);
 
             if (productSize == null)
             {
                 return NotFound($"Product Size with ID {id} not found.");
             }
 
-            _unitOfWork.ProductSize.Remove(productSize);
+            _unitOfWork.Sizes.Remove(productSize);
             await _unitOfWork.Complete();
 
             return NoContent();

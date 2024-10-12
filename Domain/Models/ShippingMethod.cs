@@ -17,6 +17,5 @@ namespace Domain.Models
         public int EstimatedDeliveryTime { get; set; }
         public virtual ICollection<Order> Orders { get; set; } = new HashSet<Order>();
 
-
     }
 }

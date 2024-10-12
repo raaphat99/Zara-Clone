@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace DataAccess.EFCore.Repositories
 {
-    public class OrderItemRepository : GenericRepository<OrderItem, int>, IOrderItemRepository
+    class NotificationRepository : GenericRepository<Notification, int>, INotificationRepository
     {
-        public OrderItemRepository(ApplicationContext applicationContext) : base(applicationContext)
+        public NotificationRepository(ApplicationContext applicationContext) : base(applicationContext)
         {
         }
     }

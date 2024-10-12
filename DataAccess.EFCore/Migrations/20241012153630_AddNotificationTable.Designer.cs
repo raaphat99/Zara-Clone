@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.EFCore.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20241003005208_UpdateSizingSystemTables")]
-    partial class UpdateSizingSystemTables
+    [Migration("20241012153630_AddNotificationTable")]
+    partial class AddNotificationTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,7 +36,7 @@ namespace DataAccess.EFCore.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("Updated")
+                    b.Property<DateTime?>("Updated")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("UserId")
@@ -113,7 +113,7 @@ namespace DataAccess.EFCore.Migrations
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("Domain.Models.Order", b =>
+            modelBuilder.Entity("Domain.Models.Notification", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -124,16 +124,50 @@ namespace DataAccess.EFCore.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("Domain.Models.Order", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("Created")
+                        .HasColumnType("datetime2");
+
                     b.Property<int?>("ShippingMethodId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<double>("TotalPrice")
                         .HasColumnType("float");
 
-                    b.Property<DateTime>("Updated")
+                    b.Property<string>("TrackingNumber")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime?>("Updated")
                         .HasColumnType("datetime2");
 
                     b.Property<int?>("UserAddressId")
@@ -145,6 +179,10 @@ namespace DataAccess.EFCore.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ShippingMethodId");
+
+                    b.HasIndex("TrackingNumber")
+                        .IsUnique()
+                        .HasFilter("[TrackingNumber] IS NOT NULL");
 
                     b.HasIndex("UserAddressId");
 
@@ -167,7 +205,7 @@ namespace DataAccess.EFCore.Migrations
                     b.Property<int?>("ProductVariantId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Quality")
+                    b.Property<int>("Quantity")
                         .HasColumnType("int");
 
                     b.Property<double>("Subtotal")
@@ -199,7 +237,7 @@ namespace DataAccess.EFCore.Migrations
                     b.Property<double>("AmountRefunded")
                         .HasColumnType("float");
 
-                    b.Property<DateTime>("Created")
+                    b.Property<DateTime?>("Created")
                         .HasColumnType("datetime2");
 
                     b.Property<int?>("OrderId")
@@ -210,10 +248,9 @@ namespace DataAccess.EFCore.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PaymentStatus")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("Updated")
+                    b.Property<DateTime?>("Updated")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
@@ -236,7 +273,7 @@ namespace DataAccess.EFCore.Migrations
                     b.Property<int?>("CategoryId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("Created")
+                    b.Property<DateTime?>("Created")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
@@ -253,7 +290,7 @@ namespace DataAccess.EFCore.Migrations
                     b.Property<int>("StockQuntity")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("Updated")
+                    b.Property<DateTime?>("Updated")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
@@ -272,14 +309,13 @@ namespace DataAccess.EFCore.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("AlternativeText")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("Created")
+                    b.Property<DateTime?>("Created")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("ImageType")
-                        .HasColumnType("int");
+                    b.Property<string>("ImageType")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ImageUrl")
                         .IsRequired()
@@ -288,10 +324,10 @@ namespace DataAccess.EFCore.Migrations
                     b.Property<int?>("ProductVariantId")
                         .HasColumnType("int");
 
-                    b.Property<int>("SortOrder")
+                    b.Property<int?>("SortOrder")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("Updated")
+                    b.Property<DateTime?>("Updated")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
@@ -299,27 +335,6 @@ namespace DataAccess.EFCore.Migrations
                     b.HasIndex("ProductVariantId");
 
                     b.ToTable("ProductImages");
-                });
-
-            modelBuilder.Entity("Domain.Models.ProductSize", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("SizeTypeId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Value")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SizeTypeId");
-
-                    b.ToTable("ProductSizes");
                 });
 
             modelBuilder.Entity("Domain.Models.ProductVariant", b =>
@@ -330,30 +345,40 @@ namespace DataAccess.EFCore.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("Created")
+                    b.Property<DateTime?>("Created")
                         .HasColumnType("datetime2");
+
+                    b.Property<double>("DiscountPercentage")
+                        .HasColumnType("float");
 
                     b.Property<double>("Price")
                         .HasColumnType("float");
 
-                    b.Property<int>("ProductColor")
-                        .HasColumnType("int");
+                    b.Property<string>("ProductColor")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("ProductId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ProductMaterial")
+                    b.Property<string>("ProductMaterial")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SizeId")
                         .HasColumnType("int");
 
                     b.Property<int>("StockQuntity")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("Updated")
+                    b.Property<DateTime?>("Updated")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("SizeId");
 
                     b.ToTable("ProductVariants");
                 });
@@ -372,12 +397,35 @@ namespace DataAccess.EFCore.Migrations
                     b.Property<double>("ShippingCost")
                         .HasColumnType("float");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.ToTable("ShippingMethods");
+                });
+
+            modelBuilder.Entity("Domain.Models.Size", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("SizeTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SizeTypeId");
+
+                    b.ToTable("Sizes");
                 });
 
             modelBuilder.Entity("Domain.Models.SizeType", b =>
@@ -388,14 +436,13 @@ namespace DataAccess.EFCore.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("TypeId")
-                        .HasColumnType("int");
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TypeId");
-
-                    b.ToTable("ProductTypes");
+                    b.ToTable("SizeTypes");
                 });
 
             modelBuilder.Entity("Domain.Models.User", b =>
@@ -488,13 +535,17 @@ namespace DataAccess.EFCore.Migrations
                     b.Property<bool?>("Active")
                         .HasColumnType("bit");
 
+                    b.Property<string>("AddressMoreInfo")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("City")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Country")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PostalCode")
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("State")
@@ -527,13 +578,25 @@ namespace DataAccess.EFCore.Migrations
                     b.Property<int>("Age")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("Created")
+                    b.Property<DateTime?>("Created")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("FavoriteSection")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Height")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("Updated")
+                    b.Property<string>("MesurmentProfileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SizeValue")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("Updated")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("UserId")
@@ -557,7 +620,7 @@ namespace DataAccess.EFCore.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("Created")
+                    b.Property<DateTime?>("Created")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("UserId")
@@ -705,21 +768,6 @@ namespace DataAccess.EFCore.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("ProductSizeProductVariant", b =>
-                {
-                    b.Property<int>("ProductSizesId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProductVariantsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ProductSizesId", "ProductVariantsId");
-
-                    b.HasIndex("ProductVariantsId");
-
-                    b.ToTable("ProductSizeProductVariant");
-                });
-
             modelBuilder.Entity("ProductWishlist", b =>
                 {
                     b.Property<int>("ProductsId")
@@ -772,6 +820,17 @@ namespace DataAccess.EFCore.Migrations
                     b.Navigation("ParentCategory");
 
                     b.Navigation("SizeType");
+                });
+
+            modelBuilder.Entity("Domain.Models.Notification", b =>
+                {
+                    b.HasOne("Domain.Models.User", "User")
+                        .WithOne("Notification")
+                        .HasForeignKey("Domain.Models.Notification", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Domain.Models.Order", b =>
@@ -837,33 +896,30 @@ namespace DataAccess.EFCore.Migrations
                     b.Navigation("ProductVariant");
                 });
 
-            modelBuilder.Entity("Domain.Models.ProductSize", b =>
-                {
-                    b.HasOne("Domain.Models.SizeType", "SizeType")
-                        .WithMany("ProductSizes")
-                        .HasForeignKey("SizeTypeId");
-
-                    b.Navigation("SizeType");
-                });
-
             modelBuilder.Entity("Domain.Models.ProductVariant", b =>
                 {
                     b.HasOne("Domain.Models.Product", "Product")
                         .WithMany("ProductVariants")
                         .HasForeignKey("ProductId");
 
-                    b.Navigation("Product");
-                });
-
-            modelBuilder.Entity("Domain.Models.SizeType", b =>
-                {
-                    b.HasOne("Domain.Models.SizeType", "Type")
-                        .WithMany()
-                        .HasForeignKey("TypeId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                    b.HasOne("Domain.Models.Size", "Size")
+                        .WithMany("ProductVariant")
+                        .HasForeignKey("SizeId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Type");
+                    b.Navigation("Product");
+
+                    b.Navigation("Size");
+                });
+
+            modelBuilder.Entity("Domain.Models.Size", b =>
+                {
+                    b.HasOne("Domain.Models.SizeType", "SizeType")
+                        .WithMany("ProductSizes")
+                        .HasForeignKey("SizeTypeId");
+
+                    b.Navigation("SizeType");
                 });
 
             modelBuilder.Entity("Domain.Models.UserAddress", b =>
@@ -898,7 +954,7 @@ namespace DataAccess.EFCore.Migrations
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
@@ -907,7 +963,7 @@ namespace DataAccess.EFCore.Migrations
                     b.HasOne("Domain.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
@@ -916,7 +972,7 @@ namespace DataAccess.EFCore.Migrations
                     b.HasOne("Domain.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
@@ -925,13 +981,13 @@ namespace DataAccess.EFCore.Migrations
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Domain.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
@@ -940,22 +996,7 @@ namespace DataAccess.EFCore.Migrations
                     b.HasOne("Domain.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("ProductSizeProductVariant", b =>
-                {
-                    b.HasOne("Domain.Models.ProductSize", null)
-                        .WithMany()
-                        .HasForeignKey("ProductSizesId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Models.ProductVariant", null)
-                        .WithMany()
-                        .HasForeignKey("ProductVariantsId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
@@ -964,13 +1005,13 @@ namespace DataAccess.EFCore.Migrations
                     b.HasOne("Domain.Models.Product", null)
                         .WithMany()
                         .HasForeignKey("ProductsId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Domain.Models.Wishlist", null)
                         .WithMany()
                         .HasForeignKey("WishlistsId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
@@ -1013,6 +1054,11 @@ namespace DataAccess.EFCore.Migrations
                     b.Navigation("Orders");
                 });
 
+            modelBuilder.Entity("Domain.Models.Size", b =>
+                {
+                    b.Navigation("ProductVariant");
+                });
+
             modelBuilder.Entity("Domain.Models.SizeType", b =>
                 {
                     b.Navigation("Category")
@@ -1026,6 +1072,9 @@ namespace DataAccess.EFCore.Migrations
                     b.Navigation("Adresses");
 
                     b.Navigation("Cart")
+                        .IsRequired();
+
+                    b.Navigation("Notification")
                         .IsRequired();
 
                     b.Navigation("UserMeasurements");

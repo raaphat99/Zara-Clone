@@ -25,14 +25,14 @@ namespace WebAPI.DTOs
         public Material ProductMaterial { get; set; }
 
         // Timestamps for record creation and updates
-        public DateTime Created { get; set; }
-        public DateTime Updated { get; set; }
+        public DateTime? Created { get; set; }
+        public DateTime? Updated { get; set; }
 
         // Collection of related product images
         //public List<ProductImageDto> ProductImages { get; set; } = new List<ProductImageDto>();
 
         // Optionally: Collection of related sizes for variants
-       // public List<ProductVariantSizeDto> ProductVariantSizes { get; set; } = new List<ProductVariantSizeDto>();
+        // public List<ProductVariantSizeDto> ProductVariantSizes { get; set; } = new List<ProductVariantSizeDto>();
 
     }
 }

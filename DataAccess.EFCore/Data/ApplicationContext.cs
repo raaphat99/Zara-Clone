@@ -31,8 +31,9 @@ namespace DataAccess.EFCore.Data
         public DbSet<ShippingMethod> ShippingMethods { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<ProductImage> ProductImages { get; set; }
-        public DbSet<ProductSize> ProductSizes { get; set; }
-        public DbSet<SizeType> ProductTypes { get; set; }
+        public DbSet<Size> Sizes { get; set; }
+        public DbSet<SizeType> SizeTypes { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -40,6 +41,42 @@ namespace DataAccess.EFCore.Data
             .HasOne(c => c.ParentCategory)
             .WithMany(c => c.Subcategories)
             .HasForeignKey(c => c.ParentCategoryId);
+
+            builder.Entity<ProductImage>()
+            .Property(p => p.ImageType)
+            .HasConversion<string>();
+
+            builder.Entity<Order>()
+            .Property(order => order.Status)
+            .HasConversion<string>();
+
+            builder.Entity<Size>()
+            .Property(productSize => productSize.Value)
+            .HasConversion<string>();
+
+            builder.Entity<ProductVariant>()
+            .Property(p => p.ProductColor)
+            .HasConversion<string>();
+
+            builder.Entity<ProductVariant>()
+            .Property(p => p.ProductMaterial)
+            .HasConversion<string>();
+
+            builder.Entity<ShippingMethod>()
+            .Property(method => method.Type)
+            .HasConversion<string>();
+
+            builder.Entity<SizeType>()
+            .Property(type => type.Type)
+            .HasConversion<string>();
+
+            builder.Entity<Payment>()
+            .Property(payment => payment.PaymentStatus)
+            .HasConversion<string>();
+
+            builder.Entity<Order>()
+            .HasIndex(o => o.TrackingNumber)
+            .IsUnique();
 
             base.OnModelCreating(builder);
         }
