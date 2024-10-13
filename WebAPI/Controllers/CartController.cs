@@ -52,8 +52,6 @@ namespace WebAPI.Controllers
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
             Cart cart = await _unitOfWork.Carts.FindSingle(c=> c.UserId== userId);
-            if (cart == null)
-                return NotFound("hamada");
             List<CartItem> cartitems = cart.CartItems.ToList();
             ProductVariant product = await _unitOfWork.ProductVariant.GetByIdAsync(productVariantId);
             if (product.StockQuntity == 0)
