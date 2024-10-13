@@ -51,22 +51,27 @@ namespace WebAPI.Controllers
         public async Task<IActionResult> AddCartItem(int productVariantId, string userId)
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
-            List<CartItem> cartitems = user.Cart.CartItems.ToList();
+            Cart cart = await _unitOfWork.Carts.FindSingle(c=> c.UserId== userId);
+            if (cart == null)
+                return NotFound("hamada");
+            List<CartItem> cartitems = cart.CartItems.ToList();
             ProductVariant product = await _unitOfWork.ProductVariant.GetByIdAsync(productVariantId);
             if (product.StockQuntity == 0)
                 return NotFound("Out Of Stock");
             bool exist = false;
+            int itemId=0;
             foreach (var item in cartitems)
             {
-                if (item.ProductVariant.Id == product.Id)
+                if (item.ProductVariant.Id == product.Id&& item.ProductVariant.SizeId==product.SizeId)
                 {
                     exist = true;
+                    itemId = item.Id;
                     break;
                 }
 
             }
             CartItem newitem = new CartItem();
-            if (!exist && product.StockQuntity > 0)
+            if (!   exist && product.StockQuntity > 0)
             {
                 newitem = new CartItem()
                 {
@@ -81,7 +86,7 @@ namespace WebAPI.Controllers
             }
             else if (exist && product.StockQuntity > 0)
             {
-                var item = await _unitOfWork.CartItems.GetByIdAsync(newitem.Id);
+                var item = await _unitOfWork.CartItems.GetByIdAsync(itemId);
                 item.Quantity++;
                 _unitOfWork.CartItems.Update(item);
                 await _unitOfWork.Complete();

@@ -17,7 +17,7 @@ namespace Domain.Models
 
         [ForeignKey("ProductVariant")]
         public int? ProductVariantId { get; set; }
-        public virtual ProductVariant ProductVariant { get; set; }
+        public virtual ProductVariant ProductVariant { get; set; } 
 
         [ForeignKey("Cart")]
         public int? CartId { get; set; }

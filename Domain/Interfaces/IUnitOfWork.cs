@@ -19,6 +19,7 @@ namespace Domain.Interfaces
         ISizeRepository Sizes { get; }
         ICartItemRepository CartItems { get; }
         INotificationRepository Notifications { get; }
+        ICartRepository Carts { get; }
         Task<int> Complete();
     }
 }
