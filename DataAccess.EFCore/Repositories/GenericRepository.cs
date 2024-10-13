@@ -23,15 +23,15 @@ namespace DataAccess.EFCore.Repositories
         {
             return await _dbSet.Where(expression).ToListAsync();
         }
-      
-        public IQueryable<TEntity> GetAll()
-        {
-            return _dbSet.AsQueryable();
-        }
 
         public IQueryable<TEntity> Find(Expression<Func<TEntity, bool>> predicate)
         {
             return _dbSet.Where(predicate).AsQueryable();
+        }
+
+        public IQueryable<TEntity> GetAll()
+        {
+            return _dbSet.AsQueryable();
         }
 
         public async Task<TEntity> GetByIdAsync(TKey id)

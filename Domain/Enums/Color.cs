@@ -27,6 +27,13 @@ namespace Domain.Enums
         Khaki,
         Reddish,
         Pleasant,
-        Mineral
+        Mineral,
+        Snowy,
+        MintGreen,
+        Pink,
+        Cyan,
+        Magenta,
+        Gray,
+
     }
 }

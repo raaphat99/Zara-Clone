@@ -19,6 +19,28 @@ namespace DataAccess.EFCore.Repositories
         public ProductRepository(ApplicationContext applicationContext) : base(applicationContext)
         { }
 
+        public IQueryable<Product> GetAllWithVariantsAndImages()
+        {
+            var products = _dbSet;
+            return products
+                .Include(prd => prd.ProductVariants)
+                .ThenInclude(variant => variant.ProductImage);
+        }
+
+        public IQueryable<ProductVariant> GetAllVariants()
+        {
+            return _dbContext.ProductVariants.AsQueryable();
+        }
+
+        public IQueryable<ProductVariant> GetVariantsByProductId(int productId)
+        {
+            return _dbContext.ProductVariants
+                    .Include(variant => variant.Size)
+                    .Include(variant => variant.ProductImage)
+                    .Where(variant => variant.ProductId == productId);
+        }
+
+
         public async Task<ICollection<Product>> SearchProductsAsync(
             string searchTerm,
             string category = null,

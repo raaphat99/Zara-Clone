@@ -13,6 +13,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Stripe;
 using System.Text;
+using System.Text.Json.Serialization;
 using WebAPI.Services;
 
 namespace WebAPI
@@ -60,7 +61,14 @@ namespace WebAPI
             // Stripe Configuration
             builder.Services.Configure<StripeData>(builder.Configuration.GetSection("stripe"));
 
-            builder.Services.AddControllers();
+            // Configure JSON Serialization Settings
+            builder.Services.AddControllers()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+                // Optionally, ignore null values
+                //options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+            });
 
             // Register the S3 Service
             builder.Services.AddTransient<S3Service>();
