@@ -9,5 +9,7 @@ namespace Domain.Interfaces
 {
     public interface IOrderRepository : IGenericRepository<Order, int>
     {
+        public Task<Order> GetOrderByTrackingNumberAsync(string userId, string trackingNumber);
+
     }
 }

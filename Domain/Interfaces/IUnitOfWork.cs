@@ -19,6 +19,8 @@ namespace Domain.Interfaces
         ISizeRepository Sizes { get; }
         ICartItemRepository CartItems { get; }
         INotificationRepository Notifications { get; }
+        IOrderRepository Orders { get; }
+        IOrderItemRepository OrderItems { get; }
         Task<int> Complete();
     }
 }
