@@ -18,5 +18,11 @@ namespace Domain.Interfaces
             string? size = null,
             Color? color = null,
             Material? material = null);
+
+        IQueryable<Product> GetAllWithVariantsAndImages();
+        IQueryable<ProductVariant> GetAllVariants();
+        IQueryable<ProductVariant> GetVariantsByProductId(int productId);
     }
+
+
 }

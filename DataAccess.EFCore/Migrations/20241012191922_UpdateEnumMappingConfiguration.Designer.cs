@@ -4,6 +4,7 @@ using DataAccess.EFCore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.EFCore.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20241012191922_UpdateEnumMappingConfiguration")]
+    partial class UpdateEnumMappingConfiguration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -134,7 +137,8 @@ namespace DataAccess.EFCore.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Notifications");
                 });
@@ -283,7 +287,7 @@ namespace DataAccess.EFCore.Migrations
                     b.Property<double>("Price")
                         .HasColumnType("float");
 
-                    b.Property<int>("StockQuantity")
+                    b.Property<int>("StockQuntity")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("Updated")
@@ -821,8 +825,8 @@ namespace DataAccess.EFCore.Migrations
             modelBuilder.Entity("Domain.Models.Notification", b =>
                 {
                     b.HasOne("Domain.Models.User", "User")
-                        .WithMany("Notification")
-                        .HasForeignKey("UserId")
+                        .WithOne("Notification")
+                        .HasForeignKey("Domain.Models.Notification", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1070,7 +1074,8 @@ namespace DataAccess.EFCore.Migrations
                     b.Navigation("Cart")
                         .IsRequired();
 
-                    b.Navigation("Notification");
+                    b.Navigation("Notification")
+                        .IsRequired();
 
                     b.Navigation("UserMeasurements");
 

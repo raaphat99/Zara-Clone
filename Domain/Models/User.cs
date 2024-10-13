@@ -16,8 +16,14 @@ namespace Domain.Models
         public DateTime? LastUpdated { get; set; }
         public virtual ICollection<UserAddress> Adresses { get; set; } = new List<UserAddress>();
         public virtual ICollection<UserMeasurement> UserMeasurements { get; set; } = new List<UserMeasurement>();
+<<<<<<< HEAD
         public virtual Cart Cart { get; set; } = new Cart();
         public virtual Wishlist Wishlist { get; set; } = new Wishlist();
         public virtual Notification Notification { get; set; }
+=======
+        public virtual Cart Cart { get; set; }
+        public virtual Wishlist Wishlist { get; set; }
+        public virtual ICollection<Notification> Notification { get; set; } = new List<Notification>();
+>>>>>>> 459f6791d67f7472da7b3889fdc3f03856aefed6
     }
 }

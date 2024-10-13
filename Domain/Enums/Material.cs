@@ -23,6 +23,7 @@ namespace Domain.Enums
         Denim,
         Wool,
         Viscose,
-        Elastane
+        Elastane,
+        Silk
     }
 }

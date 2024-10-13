@@ -21,27 +21,29 @@ namespace WebAPI.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        //    #region Expensive ProductDto
-        //    var expensiveProducts = _unitOfWork.Products.GetMostExpensiveProducts(count);
-        //    List<ProductDto> productdto = new List<ProductDto>();
-        //        foreach (var product in expensiveProducts)
-        //        {
-        //            var x = new ProductDto()
-        //            {
-        //                Id = product.Id,
-        //                Name = product.Name,
-        //                Price = product.Price,
-        //                StockQuntity = product.StockQuntity
-        //            };
-        //    productdto.Add(x);
-        //        }
-        //        return Ok(productdto);
-        //#endregion
-
-        [HttpGet("/api/products")]
-        public IActionResult GetAll()
+        [HttpGet("api/products")]
+        public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts()
         {
-            var products = _unitOfWork.Products.GetAll();
+            var productsQuery = _unitOfWork.Products.GetAllWithVariantsAndImages();
+
+            var products = await productsQuery
+                .Select(p => new ProductDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Price = p.Price,
+                    StockQuantity = p.StockQuantity,
+                    Created = p.Created,
+                    Updated = p.Updated,
+                    CategoryId = p.CategoryId,
+                    MainImageUrl = p.ProductVariants
+                    .SelectMany(v => v.ProductImage)
+                    .Select(i => i.ImageUrl)
+                    .FirstOrDefault()
+                })
+                .ToListAsync();
+
             return Ok(products);
         }
 
