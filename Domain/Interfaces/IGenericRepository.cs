@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -11,6 +12,8 @@ namespace Domain.Interfaces
     {
         IQueryable<TEntity> GetAll();
         IQueryable<TEntity> Find(Expression<Func<TEntity, bool>> predicate);
+        Task<TEntity> FindSingle(Expression<Func<TEntity, bool>> predicate);
+       
         Task<TEntity> GetByIdAsync(TKey id);
         Task AddAsync(TEntity entity);
         Task AddRangeAsync(IEnumerable<TEntity> entities);

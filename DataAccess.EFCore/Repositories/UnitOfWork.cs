@@ -26,6 +26,7 @@ namespace DataAccess.EFCore.Repositories
         private readonly Lazy<INotificationRepository> notifications;
         private readonly Lazy<IOrderRepository> order;
         private readonly Lazy<IOrderItemRepository> orderItem;
+        private readonly Lazy<ICartRepository> carts;
         #endregion
 
 
@@ -47,6 +48,7 @@ namespace DataAccess.EFCore.Repositories
             notifications = new Lazy<INotificationRepository>(() => new NotificationRepository(_context));
             order = new Lazy<IOrderRepository>(() => new OrderRepository(_context));
             orderItem = new Lazy<IOrderItemRepository>(() => new OrderItemRepository(_context));
+            carts = new Lazy<ICartRepository>(() => new CartRepository(_context));
         }
         #endregion
 
@@ -66,6 +68,7 @@ namespace DataAccess.EFCore.Repositories
         public INotificationRepository Notifications => notifications.Value;
         public IOrderRepository Orders => order.Value;
         public IOrderItemRepository OrderItems => orderItem.Value;
+        public ICartRepository Carts => carts.Value;
 
         #endregion
 

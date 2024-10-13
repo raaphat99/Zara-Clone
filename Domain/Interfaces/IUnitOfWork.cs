@@ -21,6 +21,7 @@ namespace Domain.Interfaces
         INotificationRepository Notifications { get; }
         IOrderRepository Orders { get; }
         IOrderItemRepository OrderItems { get; }
+        ICartRepository Carts { get; }
         Task<int> Complete();
     }
 }

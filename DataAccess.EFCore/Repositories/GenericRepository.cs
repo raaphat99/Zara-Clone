@@ -28,6 +28,11 @@ namespace DataAccess.EFCore.Repositories
         {
             return _dbSet.Where(predicate).AsQueryable();
         }
+        public async Task<TEntity> FindSingle(Expression<Func<TEntity, bool>> predicate)
+        {
+            return await _dbSet.SingleOrDefaultAsync(predicate);
+        }
+
 
         public IQueryable<TEntity> GetAll()
         {
