@@ -53,7 +53,7 @@ namespace WebAPI.Controllers
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
             List<CartItem> cartitems = user.Cart.CartItems.ToList();
             ProductVariant product = await _unitOfWork.ProductVariant.GetByIdAsync(productVariantId);
-            if (product.StockQuntity == 0)
+            if (product.StockQuantity == 0)
                 return NotFound("Out Of Stock");
             bool exist = false;
             foreach (var item in cartitems)
@@ -66,7 +66,7 @@ namespace WebAPI.Controllers
 
             }
             CartItem newitem = new CartItem();
-            if (!exist && product.StockQuntity > 0)
+            if (!exist && product.StockQuantity > 0)
             {
                 newitem = new CartItem()
                 {
@@ -79,7 +79,7 @@ namespace WebAPI.Controllers
                 await _unitOfWork.Complete();
                 return Ok("Item added");
             }
-            else if (exist && product.StockQuntity > 0)
+            else if (exist && product.StockQuantity > 0)
             {
                 var item = await _unitOfWork.CartItems.GetByIdAsync(newitem.Id);
                 item.Quantity++;

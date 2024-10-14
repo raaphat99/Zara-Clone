@@ -22,5 +22,6 @@ namespace Domain.Models
         public virtual SizeType SizeType { get; set; }
         public virtual ICollection<Category> Subcategories { get; set; } = new List<Category>();
         public virtual ICollection<Product> Products { get; set; } = new List<Product>();
+        public virtual ICollection<Filter> Filters { get; set; } = new List<Filter>();
     }
 }

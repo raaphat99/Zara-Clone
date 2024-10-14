@@ -1,6 +1,6 @@
 ﻿using Domain.Enums;
 
-namespace WebAPI.DTOs
+namespace WebAPI.DTOs.ProductDTOs
 {
     public class ProductVariantforC_M_P
     {

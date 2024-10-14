@@ -12,7 +12,7 @@ namespace Domain.Interfaces
     {
         Task<ICollection<Product>> SearchProductsAsync(
             string searchTerm,
-            string category = null,
+            string? category = null,
             double? minPrice = null,
             double? maxPrice = null,
             string? size = null,

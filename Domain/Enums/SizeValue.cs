@@ -18,7 +18,9 @@ namespace Domain.Enums
         Size42 = 42,
         Size44 = 44,
         TwoToFour,
-        FourToEight,
-        EightToTwelve,
+        FourToSix,
+        SixToEight,
+        EightToTen,
+        TenToTwelve
     }
 }
