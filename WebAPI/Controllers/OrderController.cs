@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Stripe.Climate;
+using System.IdentityModel.Tokens.Jwt;
 using WebAPI.DTOs;
 
 namespace WebAPI.Controllers
@@ -20,9 +21,14 @@ namespace WebAPI.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        [HttpGet("{userId}")]
-        public async Task<ActionResult<IEnumerable<OrderDTO>>> GetOrders(string userId)
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<OrderDTO>>> GetOrders()
         {
+            string userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+
+            if (user == null)
+                return NotFound("User not found!");
             if (string.IsNullOrEmpty(userId))
             {
                 return BadRequest("User ID cannot be null or empty.");
@@ -55,9 +61,14 @@ namespace WebAPI.Controllers
 
             return Ok(orderDtos);
         }
-        [HttpGet("{userId}/tracking/{trackingNumber}")]
-        public async Task<ActionResult<OrderDetailsDTO>> GetOrderDetails(string userId, string trackingNumber)
+        [HttpGet("/tracking/{trackingNumber}")]
+        public async Task<ActionResult<OrderDetailsDTO>> GetOrderDetails(string trackingNumber)
         {
+            string userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+
+            if (user == null)
+                return NotFound("User not found!");
             var order = await _unitOfWork.Orders.GetOrderByTrackingNumberAsync(userId, trackingNumber);
 
             if (order == null)
@@ -95,19 +106,19 @@ namespace WebAPI.Controllers
 
             return Ok(orderDTO);
         }
-        [HttpPut("{userId}/{orderId}/status")]
-        public async Task<IActionResult> UpdateOrderStatus(string userId, int orderId, OrderStatus newStatus)
+        [HttpPut("/{orderId}/status")]
+        public async Task<IActionResult> UpdateOrderStatus(int orderId, OrderStatus newStatus)
         {
+            string userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+
+            if (user == null)
+                return NotFound("User not found!");
             var order = await _unitOfWork.Orders.GetByIdAsync(orderId);
 
             if (order == null)
             {
                 return NotFound("Order not found.");
-            }
-
-            if (order.UserId != userId)
-            {
-                return Unauthorized("You do not have permission to update this order.");
             }
 
             if (order.Status == newStatus)
