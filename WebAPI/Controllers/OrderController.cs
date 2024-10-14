@@ -1,6 +1,7 @@
 ﻿using Domain.Enums;
 using Domain.Interfaces;
 using Domain.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ using WebAPI.DTOs;
 
 namespace WebAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class OrderController : ControllerBase
@@ -20,10 +22,13 @@ namespace WebAPI.Controllers
         {
             _unitOfWork = unitOfWork;
         }
-
         [HttpGet]
         public async Task<ActionResult<IEnumerable<OrderDTO>>> GetOrders()
         {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Unauthorized();
+            }
             string userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
 
@@ -61,7 +66,7 @@ namespace WebAPI.Controllers
 
             return Ok(orderDtos);
         }
-        [HttpGet("/tracking/{trackingNumber}")]
+        [HttpGet("tracking/{trackingNumber}")]
         public async Task<ActionResult<OrderDetailsDTO>> GetOrderDetails(string trackingNumber)
         {
             string userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;

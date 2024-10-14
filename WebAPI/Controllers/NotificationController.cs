@@ -9,6 +9,7 @@ using WebAPI.DTOs;
 
 namespace WebAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class NotificationController : ControllerBase
@@ -19,7 +20,6 @@ namespace WebAPI.Controllers
         {
             _unitOfWork = unitOfWork;
         }
-        [Authorize]
       [HttpGet]
         public async Task<ActionResult<IEnumerable<NotificationDTO>>> GetNotifications()
         {
