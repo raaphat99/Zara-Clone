@@ -63,11 +63,34 @@ namespace WebAPI.Controllers
 
 
         [HttpGet("/api/products/category/{categoryId:int}")]
-        public IActionResult GetProductsByCategory(int categoryID)
+        public IActionResult GetProductsByCategory(int categoryId) // لاحظ التغيير هنا
         {
-            var products = _unitOfWork.Products.Find(prd => prd.CategoryId == categoryID);
-            return Ok(products);
+            var products = _unitOfWork.Products.Find(prd => prd.CategoryId == categoryId);
+
+            if (products == null || !products.Any())
+            {
+                return NotFound(); // في حالة عدم وجود منتجات
+            }
+
+            var Products = new List<ProductDto>();
+
+            foreach (var product in products)
+            {
+                Products.Add(new ProductDto()
+                {
+                    Id = product.Id,
+                    Name = product.Name,
+                    Price = product.Price,
+                    Description = product.Description,
+                    StockQuantity = product.StockQuantity,
+                    Created = product.Created,
+                    CategoryId= product.CategoryId,
+                    Updated = product.Updated,
+                });
+            }
+            return Ok(Products);
         }
+
 
 
 
@@ -173,29 +196,45 @@ namespace WebAPI.Controllers
         }
         [HttpGet("search")]
         public async Task<IActionResult> SearchProductVariants(
-            [FromQuery] List<string>? colors,
-            [FromQuery] List<string>? materials,
-            [FromQuery] double? priceFrom,
-            [FromQuery] double? priceTo,
-            [FromQuery] List<string>? sizes)
+    [FromQuery] int? productId, // معلمة productId
+    [FromQuery] int? categoryId, // إضافة معلمة categoryId
+    [FromQuery] List<string>? colors,
+    [FromQuery] List<string>? materials,
+    [FromQuery] double? priceFrom,
+    [FromQuery] double? priceTo,
+    [FromQuery] List<string>? sizes)
         {
-            List<Color> colorEnums = colors?.Select(c => Enum.TryParse(c, true, out Color parsedColor) ? parsedColor : (Color?)null).Where(c => c.HasValue).Select(c => c.Value).ToList() ?? new List<Color>();
-            List<Material> materialEnums = materials?.Select(m => Enum.TryParse(m, true, out Material parsedMaterial) ? parsedMaterial : (Material?)null).Where(m => m.HasValue).Select(m => m.Value).ToList() ?? new List<Material>();
-            List<SizeValue> sizeEnums = sizes?.Select(s => Enum.TryParse(s, true, out SizeValue parsedSize) ? parsedSize : (SizeValue?)null).Where(s => s.HasValue).Select(s => s.Value).ToList() ?? new List<SizeValue>();
+            List<Color> colorEnums = colors?.Select(c => Enum.TryParse(c, true, out Color parsedColor) ? parsedColor : (Color?)null)
+                                            .Where(c => c.HasValue)
+                                            .Select(c => c.Value).ToList() ?? new List<Color>();
+            List<Material> materialEnums = materials?.Select(m => Enum.TryParse(m, true, out Material parsedMaterial) ? parsedMaterial : (Material?)null)
+                                                    .Where(m => m.HasValue)
+                                                    .Select(m => m.Value).ToList() ?? new List<Material>();
+            List<SizeValue> sizeEnums = sizes?.Select(s => Enum.TryParse(s, true, out SizeValue parsedSize) ? parsedSize : (SizeValue?)null)
+                                            .Where(s => s.HasValue)
+                                            .Select(s => s.Value).ToList() ?? new List<SizeValue>();
 
+            // الحصول على جميع الـ ProductVariants
             var allVariants = await _unitOfWork.ProductVariant.GetAllAsync();
+
+            // تصفية البيانات باستخدام productId، categoryId والمعلمات الأخرى
             var productVariants = await _unitOfWork.ProductVariant.FindAsync(pv =>
+                (!productId.HasValue || pv.ProductId == productId) && // تحقق من productId
+                (!categoryId.HasValue || pv.Product.CategoryId == categoryId) && // تحقق من categoryId
                 (colorEnums.Count == 0 || colorEnums.Contains(pv.ProductColor)) &&
                 (materialEnums.Count == 0 || materialEnums.Contains(pv.ProductMaterial)) &&
                 (!priceFrom.HasValue || pv.Price >= priceFrom) &&
                 (!priceTo.HasValue || pv.Price <= priceTo) &&
-                (sizeEnums.Count == 0 || sizeEnums.Contains(pv.Size.Value)));
+                (sizeEnums.Count == 0 || sizeEnums.Contains(pv.Size.Value))
+            );
 
+            // التحقق من وجود أي نتائج
             if (productVariants == null || !productVariants.Any())
             {
                 return NotFound("No product variants found.");
             }
 
+            // تحويل النتائج إلى Dtos
             var productVariantDtos = productVariants.Select(variant => new ProductVariantforC_M_P()
             {
                 Id = variant.Id,
@@ -209,8 +248,10 @@ namespace WebAPI.Controllers
                 SizeValue = variant.Size.Value.ToString(),
             }).ToList();
 
+            // إعادة النتائج
             return Ok(productVariantDtos);
         }
+
 
         [HttpGet("variants")]
         public async Task<IActionResult> GetAllProductVariants()
