@@ -8,9 +8,12 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Domain.Models;
 using Domain.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace WebAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AuthenticateController : ControllerBase
@@ -43,6 +46,7 @@ namespace WebAPI.Controllers
             return Ok(Ids);
             
         }
+        [AllowAnonymous]
         [HttpPost("login")]
 
         public async Task<IActionResult> Login(LoginModel model)
@@ -54,7 +58,9 @@ namespace WebAPI.Controllers
 
                 var authClaims = new List<Claim>
                 {
-                    new Claim(ClaimTypes.Email, user.Email),
+                    new Claim(JwtRegisteredClaimNames.Sid,user.Id),
+                    new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                    new Claim(JwtRegisteredClaimNames.Name,($"{user.Name} {user.Surname}")),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 };
 
@@ -76,7 +82,8 @@ namespace WebAPI.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterModel model)
         {
-
+            if(!ModelState.IsValid) 
+                return BadRequest();
             var userExists = await _userManager.FindByEmailAsync(model.Email);
             if (userExists != null)
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });

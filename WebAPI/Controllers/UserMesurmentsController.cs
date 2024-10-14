@@ -1,13 +1,18 @@
 ﻿using Domain.Interfaces;
 using Domain.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics.Metrics;
 using System.Drawing;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using WebAPI.DTOs;
 
 namespace WebAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class UserMesurmentsController : ControllerBase
@@ -18,10 +23,11 @@ namespace WebAPI.Controllers
         {
             _unitOfWork = unitOfWork;
         }
-
-        [HttpGet("{userId}")]
-        public async Task<IActionResult> GetAllMesurments(string userId)
+        
+        [HttpGet]
+        public async Task<IActionResult> GetAllMesurments()
         {
+            string userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
 
             if (user == null)
