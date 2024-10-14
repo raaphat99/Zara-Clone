@@ -18,6 +18,6 @@ namespace Domain.Models
         public virtual ICollection<UserMeasurement> UserMeasurements { get; set; } = new List<UserMeasurement>();
         public virtual Cart Cart { get; set; } = new Cart();
         public virtual Wishlist Wishlist { get; set; } = new Wishlist();
-        public virtual Notification Notification { get; set; }
+        public virtual ICollection<Notification> Notification { get; set; } = new List<Notification>();
     }
 }
