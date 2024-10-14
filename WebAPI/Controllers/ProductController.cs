@@ -84,7 +84,7 @@ namespace WebAPI.Controllers
                     Description = product.Description,
                     StockQuantity = product.StockQuantity,
                     Created = product.Created,
-                    CategoryId= product.CategoryId,
+                    CategoryId = product.CategoryId,
                     Updated = product.Updated,
                 });
             }
@@ -194,8 +194,8 @@ namespace WebAPI.Controllers
 
             return CreatedAtAction(nameof(GetProductVariantById), new { id = productVariant.Id }, productVariant);
         }
-        [HttpGet("search")]
-        public async Task<IActionResult> SearchProductVariants(
+        [HttpGet("filter")]
+        public async Task<IActionResult> FilterProductVariants(
     [FromQuery] int? productId, // معلمة productId
     [FromQuery] int? categoryId, // إضافة معلمة categoryId
     [FromQuery] List<string>? colors,
