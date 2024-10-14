@@ -51,16 +51,16 @@ namespace WebAPI.Controllers
         public async Task<IActionResult> AddCartItem(int productVariantId, string userId)
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
-            Cart cart = await _unitOfWork.Carts.FindSingle(c=> c.UserId== userId);
+            Cart cart = await _unitOfWork.Carts.FindSingle(c => c.UserId == userId);
             List<CartItem> cartitems = cart.CartItems.ToList();
             ProductVariant product = await _unitOfWork.ProductVariant.GetByIdAsync(productVariantId);
-            if (product.StockQuntity == 0)
+            if (product.StockQuantity == 0)
                 return NotFound("Out Of Stock");
             bool exist = false;
-            int itemId=0;
+            int itemId = 0;
             foreach (var item in cartitems)
             {
-                if (item.ProductVariant.Id == product.Id&& item.ProductVariant.SizeId==product.SizeId)
+                if (item.ProductVariant.Id == product.Id && item.ProductVariant.SizeId == product.SizeId)
                 {
                     exist = true;
                     itemId = item.Id;
@@ -69,7 +69,8 @@ namespace WebAPI.Controllers
 
             }
             CartItem newitem = new CartItem();
-            if (!   exist && product.StockQuntity > 0)
+
+            if (!exist && product.StockQuantity > 0)
             {
                 newitem = new CartItem()
                 {
@@ -82,7 +83,7 @@ namespace WebAPI.Controllers
                 await _unitOfWork.Complete();
                 return Ok("Item added");
             }
-            else if (exist && product.StockQuntity > 0)
+            else if (exist && product.StockQuantity > 0)
             {
                 var item = await _unitOfWork.CartItems.GetByIdAsync(itemId);
                 item.Quantity++;

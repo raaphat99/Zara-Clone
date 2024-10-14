@@ -1,6 +1,6 @@
-﻿namespace WebAPI.DTOs
+﻿namespace WebAPI.DTOs.ProductDTOs
 {
-    public class ProductvariantDTO
+    public class ProductVariantDTO
     {
         public int Id { get; set; }
         public double Price { get; set; }
@@ -8,7 +8,7 @@
         public double DiscountedPrice { get; set; }
         public List<ProductImageDTO> ProductImages { get; set; } // All images for this variant
         public string ProductColors { get; set; }
-        public List<ProductSizeDTO> AvailableSizes { get; set; }
+        public List<SizeDTO> AvailableSizes { get; set; }
 
     }
 }

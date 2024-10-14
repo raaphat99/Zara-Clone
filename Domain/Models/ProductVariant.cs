@@ -18,7 +18,7 @@ namespace Domain.Models
         [Range(0, 100, ErrorMessage = "Discount percentage must be between 0 and 100.")]
         public double DiscountPercentage { get; set; }
         public double DiscountedPrice => Price * (1 - (DiscountPercentage / 100));
-        public int StockQuntity { get; set; }
+        public int StockQuantity { get; set; }
         public DateTime? Created { get; set; }
         public DateTime? Updated { get; set; }
         public Color ProductColor { get; set; }
