@@ -12,7 +12,7 @@ using WebAPI.DTOs;
 
 namespace WebAPI.Controllers
 {
-    [Authorize]
+    
     [Route("api/[controller]")]
     [ApiController]
     public class UserMesurmentsController : ControllerBase
