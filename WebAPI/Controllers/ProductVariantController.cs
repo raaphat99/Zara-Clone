@@ -28,7 +28,7 @@ namespace WebAPI.Controllers
                     Price = v.Price,
                     DiscountPercentage = v.DiscountPercentage,
                     DiscountedPrice = v.Price * (1 - (v.DiscountPercentage / 100)),
-                    StockQuantity = v.StockQuntity,
+                    StockQuantity = v.StockQuantity,
                     Created = v.Created,
                     Updated = v.Updated,
                     ProductColor = v.ProductColor.ToString(),  // Assuming it's an enum or string

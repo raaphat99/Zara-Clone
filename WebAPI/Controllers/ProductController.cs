@@ -139,7 +139,7 @@ namespace WebAPI.Controllers
                 ProductColor = productVariant.ProductColor,
                 // SizeName = productVariant.Product.,
                 // SizeId = productVariant.SizeId,
-                StockQuantity = productVariant.StockQuntity,
+                StockQuantity = productVariant.StockQuantity,
                 ProductMaterial = productVariant.ProductMaterial,
                 Created = productVariant.Created,
                 Updated = productVariant.Updated
@@ -159,7 +159,7 @@ namespace WebAPI.Controllers
                 ProductId = productVariantDto.ProductId,
                 //SizeId = productVariantDto.SizeId,
                 Price = productVariantDto.Price,
-                StockQuntity = productVariantDto.StockQuantity,
+                StockQuantity = productVariantDto.StockQuantity,
                 ProductColor = productVariantDto.ProductColor,
                 ProductMaterial = productVariantDto.ProductMaterial,
                 Created = DateTime.UtcNow,
@@ -204,7 +204,7 @@ namespace WebAPI.Controllers
                 ProductMaterial = variant.ProductMaterial,
                 Price = variant.Price,
                 ProductId = variant.ProductId ?? 0,
-                StockQuantity = variant.StockQuntity,
+                StockQuantity = variant.StockQuantity,
                 SizeId = variant.SizeId,
                 SizeValue = variant.Size.Value.ToString(),
             }).ToList();
@@ -245,7 +245,7 @@ namespace WebAPI.Controllers
                 return NotFound($"Product Variant with ID {id} not found.");
             }
 
-            productVariant.StockQuntity = newStockQuantity;
+            productVariant.StockQuantity = newStockQuantity;
             productVariant.Updated = DateTime.UtcNow;
 
             _unitOfWork.ProductVariant.Update(productVariant);
@@ -265,7 +265,7 @@ namespace WebAPI.Controllers
             }
 
             productVariant.Price = productVariantDto.Price;
-            productVariant.StockQuntity = productVariantDto.StockQuantity;
+            productVariant.StockQuantity = productVariantDto.StockQuantity;
             productVariant.ProductColor = productVariantDto.ProductColor;
             productVariant.ProductMaterial = productVariantDto.ProductMaterial;
             productVariant.Updated = DateTime.UtcNow;

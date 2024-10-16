@@ -41,7 +41,7 @@ namespace WebAPI.Controllers
                     Price = v.Price,
                     DiscountPercentage = v.DiscountPercentage,
                     DiscountedPrice = v.DiscountedPrice,
-                    StockQuantity = v.StockQuntity,
+                    StockQuantity = v.StockQuantity,
                     ProductImage = v.ProductImage
                         .OrderBy(img => img.SortOrder)
                         .Select(img => new ProductImageDTO

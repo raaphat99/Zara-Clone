@@ -1,11 +1,15 @@
-﻿using Domain.Interfaces;
+﻿using Domain.Auth;
+using Domain.Interfaces;
 using Domain.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
 using WebAPI.DTOs;
 
 namespace WebAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class CartController : ControllerBase
@@ -16,9 +20,10 @@ namespace WebAPI.Controllers
         {
             _unitOfWork = unitOfWork;
         }
-        [HttpGet("{userId}")]
-        public async Task<IActionResult> GetAllItems(string userId)
-        {
+        [HttpGet]
+        public async Task<IActionResult> GetAllItems()
+        {;
+            string userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
             var cart = user.Cart.CartItems.ToList();
             // if(cart == null )
@@ -32,11 +37,12 @@ namespace WebAPI.Controllers
                 var cartItemDTO = new CartItemDTO
                 {
                     Id = item.Id,
+                    ProductVariantId = item.ProductVariantId,
                     Quantity = item.Quantity,
-                    Color = item.ProductVariant.ProductColor,
-                    Size = item.ProductVariant.Size.Value,
+                    Color = item.ProductVariant.ProductColor.ToString(),
+                    Size = item.ProductVariant.Size.Value.ToString(),
                     Title = item.ProductVariant.Product.Name,
-                    ImageUrl = await GetImgUrls(item),
+                    ImageUrl = GetImgUrl(item),
                     Price = item.UnitPrice
 
                 };
@@ -47,14 +53,15 @@ namespace WebAPI.Controllers
 
         }
 
-        [HttpPost]
-        public async Task<IActionResult> AddCartItem(int productVariantId, string userId)
+        [HttpPost("{productVariantId:int}")]
+        public async Task<IActionResult> AddCartItem(int productVariantId)
         {
+            string userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
             Cart cart = await _unitOfWork.Carts.FindSingle(c=> c.UserId== userId);
             List<CartItem> cartitems = cart.CartItems.ToList();
             ProductVariant product = await _unitOfWork.ProductVariant.GetByIdAsync(productVariantId);
-            if (product.StockQuntity == 0)
+            if (product.StockQuantity == 0)
                 return NotFound("Out Of Stock");
             bool exist = false;
             int itemId=0;
@@ -69,7 +76,7 @@ namespace WebAPI.Controllers
 
             }
             CartItem newitem = new CartItem();
-            if (!   exist && product.StockQuntity > 0)
+            if (!   exist && product.StockQuantity > 0)
             {
                 newitem = new CartItem()
                 {
@@ -80,15 +87,15 @@ namespace WebAPI.Controllers
                 };
                 await _unitOfWork.CartItems.AddAsync(newitem);
                 await _unitOfWork.Complete();
-                return Ok("Item added");
+                return Ok(new Response { Status = "success", Message = "Item Added"});
             }
-            else if (exist && product.StockQuntity > 0)
+            else if (exist && product.StockQuantity > 0)
             {
                 var item = await _unitOfWork.CartItems.GetByIdAsync(itemId);
                 item.Quantity++;
                 _unitOfWork.CartItems.Update(item);
                 await _unitOfWork.Complete();
-                return Ok("Item Quantity Increased");
+                return Ok(new Response { Status = "success" , Message = "Quantity Increased"});
 
             }
             else
@@ -98,25 +105,72 @@ namespace WebAPI.Controllers
 
         }
 
-        [HttpDelete]
-        public async Task<IActionResult> RemoveItemFromCart(int cartItemId)
+        [HttpDelete("{cartItemId}")]
+        public async Task<IActionResult> DecreaseOrRemoveItemFromCart(int cartItemId)
         {
-            var cartitem = await _unitOfWork.CartItems.GetByIdAsync(cartItemId);
-            _unitOfWork.CartItems.Remove(cartitem);
-            await _unitOfWork.Complete();
-            return Ok("Item Deleted");
+            var cartItem = await _unitOfWork.CartItems.GetByIdAsync(cartItemId);
+
+            if (cartItem == null)
+                return NotFound("Cart item not found");
+
+            if (cartItem.Quantity > 1)
+            {
+                cartItem.Quantity--;
+                _unitOfWork.CartItems.Update(cartItem);
+                await _unitOfWork.Complete();
+                return Ok(new { message = "Quantity decreased"});
+            }
+            else
+            {
+                _unitOfWork.CartItems.Remove(cartItem);
+                await _unitOfWork.Complete();
+                return Ok(new { message = "Item removed from cart"});
+            }
         }
 
-        private async Task<ICollection<string>> GetImgUrls(CartItem cart)
+        [HttpPost("move-to-wishlist/{cartItemId}")]
+        public async Task<IActionResult> MoveToWishlist(int cartItemId)
         {
-            var item = await _unitOfWork.CartItems.GetByIdAsync(cart.Id);
-            var imgs = item.ProductVariant.ProductImage.ToList();
-            List<string> urls = new List<string>();
-            foreach (var i in imgs)
+            string userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;
+            var cartItem = await _unitOfWork.CartItems.GetByIdAsync(cartItemId);
+            if (cartItem == null)
+                return NotFound("Cart item not found");
+
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+            if (user == null)
+                return NotFound("User not found");
+
+            var wishlist = await _unitOfWork.Wishlist.FindSingle(w => w.UserId == userId);
+            if (wishlist == null)
             {
-                urls.Add(i.ImageUrl);
+                wishlist = new Wishlist { UserId = userId };
+                await _unitOfWork.Wishlist.AddAsync(wishlist);
             }
-            return urls;
+
+            if (cartItem.ProductVariant?.ProductId == null)
+                return BadRequest("Invalid product data in cart item");
+
+            var product = await _unitOfWork.Products.GetByIdAsync(cartItem.ProductVariant.ProductId.Value);
+            if (product == null)
+                return NotFound("Product not found");
+
+            if (!wishlist.Products.Contains(product))
+            {
+                wishlist.Products.Add(product);
+            }
+
+            _unitOfWork.CartItems.Remove(cartItem);
+            await _unitOfWork.Complete();
+
+            return Ok(new Response { Status = "success", Message = "Item moved to wishlist" });
+        }
+
+    private string GetImgUrl(CartItem product)
+        {
+           
+            var imgs = product.ProductVariant.ProductImage.ToList();
+            string imgUrl = imgs[0].ImageUrl;
+            return imgUrl;
         }
     }
 }
