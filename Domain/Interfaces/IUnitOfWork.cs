@@ -22,6 +22,7 @@ namespace Domain.Interfaces
         IOrderRepository Orders { get; }
         IOrderItemRepository OrderItems { get; }
         ICartRepository Carts { get; }
+        IFilterRepository Filters { get; }
         Task<int> Complete();
     }
 }
