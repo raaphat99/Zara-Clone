@@ -43,8 +43,12 @@ namespace WebAPI
 
 
             // JWT configuration
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
@@ -57,6 +61,7 @@ namespace WebAPI
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]))
                 };
             });
+       
 
             // Stripe Configuration
             builder.Services.Configure<StripeData>(builder.Configuration.GetSection("stripe"));
@@ -126,6 +131,8 @@ namespace WebAPI
 
             var app = builder.Build();
 
+            app.UseDeveloperExceptionPage();
+
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
@@ -135,6 +142,10 @@ namespace WebAPI
 
             StripeConfiguration.ApiKey = builder.Configuration.GetSection("stripe:SecretKey").Get<string>();
             app.UseCors("mypolicy");
+<<<<<<< HEAD
+=======
+
+>>>>>>> fa53224ec5a2205e7df8088e3af4e0d83b507de4
             app.UseAuthentication();
 
             app.UseAuthorization();

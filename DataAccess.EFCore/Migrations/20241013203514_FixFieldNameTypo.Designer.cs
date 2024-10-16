@@ -4,6 +4,7 @@ using DataAccess.EFCore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.EFCore.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20241013203514_FixFieldNameTypo")]
+    partial class FixFieldNameTypo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -24,21 +27,6 @@ namespace DataAccess.EFCore.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("CategoryFilter", b =>
-                {
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("FiltersId")
-                        .HasColumnType("int");
-
-                    b.HasKey("CategoryId", "FiltersId");
-
-                    b.HasIndex("FiltersId");
-
-                    b.ToTable("CategoryFilter");
-                });
 
             modelBuilder.Entity("Domain.Models.Cart", b =>
                 {
@@ -123,26 +111,6 @@ namespace DataAccess.EFCore.Migrations
                         .HasFilter("[SizeTypeId] IS NOT NULL");
 
                     b.ToTable("Categories");
-                });
-
-            modelBuilder.Entity("Domain.Models.Filter", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Filters");
                 });
 
             modelBuilder.Entity("Domain.Models.Notification", b =>
@@ -814,21 +782,6 @@ namespace DataAccess.EFCore.Migrations
                     b.ToTable("ProductWishlist");
                 });
 
-            modelBuilder.Entity("CategoryFilter", b =>
-                {
-                    b.HasOne("Domain.Models.Category", null)
-                        .WithMany()
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Models.Filter", null)
-                        .WithMany()
-                        .HasForeignKey("FiltersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Domain.Models.Cart", b =>
                 {
                     b.HasOne("Domain.Models.User", "User")
@@ -962,7 +915,7 @@ namespace DataAccess.EFCore.Migrations
             modelBuilder.Entity("Domain.Models.Size", b =>
                 {
                     b.HasOne("Domain.Models.SizeType", "SizeType")
-                        .WithMany("Sizes")
+                        .WithMany("ProductSizes")
                         .HasForeignKey("SizeTypeId");
 
                     b.Navigation("SizeType");
@@ -1110,7 +1063,7 @@ namespace DataAccess.EFCore.Migrations
                     b.Navigation("Category")
                         .IsRequired();
 
-                    b.Navigation("Sizes");
+                    b.Navigation("ProductSizes");
                 });
 
             modelBuilder.Entity("Domain.Models.User", b =>

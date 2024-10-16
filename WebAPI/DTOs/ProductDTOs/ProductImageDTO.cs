@@ -1,4 +1,4 @@
-﻿namespace WebAPI.DTOs
+﻿namespace WebAPI.DTOs.ProductDTOs
 {
     public class ProductImageDTO
     {

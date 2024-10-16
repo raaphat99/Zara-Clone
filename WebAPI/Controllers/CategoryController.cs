@@ -16,6 +16,9 @@ namespace WebAPI.Controllers
         {
             _unitOfWork = unitOfWork;
         }
+
+
+
         [HttpGet("{id:int}/subcategories")]
         public async Task<IActionResult> GetSubCategoriesByParentId(int id)
         {
@@ -39,6 +42,9 @@ namespace WebAPI.Controllers
             }
             return Ok(categoryDtos);
         }
+
+
+
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetCategoryById(int id)
         {
@@ -48,6 +54,7 @@ namespace WebAPI.Controllers
             {
                 return NotFound($"Category with ID {id} not found.");
             }
+
             var categorydto = new CategoryDto()
             {
                 Id = category.Id,
@@ -55,12 +62,13 @@ namespace WebAPI.Controllers
                 Description = category.Description,
                 ParentCategoryId = category.ParentCategoryId,
                 SizeTypeId = category.SizeTypeId,
-
             };
-
 
             return Ok(categorydto);
         }
+
+
+
         [HttpPost]
         public async Task<IActionResult> AddCategory([FromBody] CategoryDto categorydto)
         {
@@ -81,6 +89,8 @@ namespace WebAPI.Controllers
             await _unitOfWork.Complete();
             return CreatedAtAction(nameof(GetCategoryById), new { id = category.Id }, category);
         }
+
+
 
         [HttpPut("{id:int}")]
         public async Task<IActionResult> UpdateCategory(int id, [FromBody] CategoryDto updatedCategory)
@@ -106,6 +116,9 @@ namespace WebAPI.Controllers
 
             return NoContent();
         }
+
+
+
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteCategory(int id)
         {
@@ -121,6 +134,9 @@ namespace WebAPI.Controllers
 
             return NoContent();
         }
+
+
+
         [HttpGet("main-categories")]
         public async Task<IActionResult> GetMainCategories()
         {

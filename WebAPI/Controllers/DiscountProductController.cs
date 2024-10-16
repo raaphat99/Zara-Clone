@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using WebAPI.DTOs;
+using WebAPI.DTOs.ProductDTOs;
 
 namespace WebAPI.Controllers
 {
@@ -73,7 +74,7 @@ namespace WebAPI.Controllers
                 Price = product.Price,
                 DiscountPercentage = product.ProductVariants.FirstOrDefault()?.DiscountPercentage ?? 0,
                 DiscountedPrice = product.ProductVariants.FirstOrDefault()?.DiscountedPrice ?? product.Price,
-                ProductVariants = product.ProductVariants.Select(v => new ProductvariantDTO
+                ProductVariants = product.ProductVariants.Select(v => new ProductVariantDTO
                 {
                     Id = v.Id,
                     Price = v.Price,
