@@ -52,6 +52,7 @@ namespace DataAccess.EFCore.Repositories
             orderItem = new Lazy<IOrderItemRepository>(() => new OrderItemRepository(_context));
             carts = new Lazy<ICartRepository>(() => new CartRepository(_context));
             filters= new Lazy<IFilterRepository>(() => new FilterRepository(_context));
+
         }
         #endregion
 

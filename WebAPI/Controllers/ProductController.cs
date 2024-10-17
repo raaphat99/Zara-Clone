@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection.Metadata.Ecma335;
 using WebAPI.DTOs;
+using WebAPI.DTOs.ProductDTOs;
 
 namespace WebAPI.Controllers
 {
@@ -286,10 +287,10 @@ namespace WebAPI.Controllers
                 return NotFound($"Product size with ID {id} not found.");
             }
 
-            var productSizeDto = new ProductSizeDTO()
+            var productSizeDto = new SizeDTO()
             {
                 Id = productSize.Id,
-                Type = productSize.SizeType, // تأكد من أن SizeTypeId هو نوع البيانات الصحيح في الكود
+                SizeType = productSize.SizeType.ToString(), // تأكد من أن SizeTypeId هو نوع البيانات الصحيح في الكود
                 Value = productSize.Value,
             };
 
@@ -303,10 +304,10 @@ namespace WebAPI.Controllers
             var productSizeList = await productSizes.ToListAsync(); // تحويل إلى قائمة بشكل غير متزامن
 
             // تحويل النتيجة إلى DTOs
-            var productSizeDtos = productSizeList.Select(ps => new ProductSizeDTO()
+            var productSizeDtos = productSizeList.Select(ps => new SizeDTO()
             {
                 Id = ps.Id,
-                Type = ps.SizeType,
+                SizeType = ps.SizeType.ToString(),
                 Value = ps.Value
             }).ToList();
 
@@ -316,7 +317,7 @@ namespace WebAPI.Controllers
 
         // Add a new product size
         [HttpPost("sizes")]
-        public async Task<IActionResult> AddProductSize([FromBody] ProductSizeDTO productSizeDto)
+        public async Task<IActionResult> AddProductSize([FromBody] SizeDTO productSizeDto)
         {
             if (!ModelState.IsValid)
             {
@@ -325,7 +326,7 @@ namespace WebAPI.Controllers
 
             var productSize = new Size
             {
-                SizeTypeId = productSizeDto.Type.Id, // تحويل النوع إلى نوع العدد الصحيح
+                SizeTypeId = productSizeDto.Id, // تحويل النوع إلى نوع العدد الصحيح
                 Value = productSizeDto.Value,           // القيمة المحددة للحجم
 
             };
@@ -338,7 +339,7 @@ namespace WebAPI.Controllers
 
         // Update an existing product size
         [HttpPut("sizes/{id:int}")]
-        public async Task<IActionResult> UpdateProductSize(int id, [FromBody] ProductSizeDTO productSizeDto)
+        public async Task<IActionResult> UpdateProductSize(int id, [FromBody] SizeDTO productSizeDto)
         {
             var productSize = await _unitOfWork.Sizes.GetByIdAsync(id);
 
@@ -347,7 +348,7 @@ namespace WebAPI.Controllers
                 return NotFound($"Product size with ID {id} not found.");
             }
 
-            productSize.SizeTypeId = productSizeDto.Type.Id; // تحويل النوع إلى نوع العدد الصحيح
+            productSize.SizeTypeId = productSizeDto.Id; // تحويل النوع إلى نوع العدد الصحيح
             productSize.Value = productSizeDto.Value;           // القيمة المحددة للحجم
 
             _unitOfWork.Sizes.Update(productSize);

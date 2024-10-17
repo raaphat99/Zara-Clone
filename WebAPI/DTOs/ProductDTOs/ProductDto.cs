@@ -11,7 +11,10 @@
         public DateTime? Updated { get; set; }
         public int? CategoryId { get; set; }
 
-        public List<string>? FilterName { get; set; } = new List<string>(); // List of filter names
+        public string? CategoryName { get; set; }
         public string MainImageUrl { get; set; }
+        public List<string>? FilterName { get; set; } = new List<string>();
+
+      
     }
 }
