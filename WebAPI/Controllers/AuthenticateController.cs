@@ -46,8 +46,8 @@ namespace WebAPI.Controllers
             return Ok(Ids);
             
         }
-        [HttpPost("login")]
         [AllowAnonymous]
+        [HttpPost("login")]
 
         public async Task<IActionResult> Login(LoginModel model)
         {
@@ -80,7 +80,6 @@ namespace WebAPI.Controllers
             return Unauthorized();
         }
         [HttpPost("register")]
-        [AllowAnonymous]
         public async Task<IActionResult> Register(RegisterModel model)
         {
             if(!ModelState.IsValid) 
@@ -108,7 +107,6 @@ namespace WebAPI.Controllers
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
         }
         [HttpPost("register-admin")]
-        [AllowAnonymous]
 
         public async Task<IActionResult> RegisterAdmin( RegisterModel model)
         {

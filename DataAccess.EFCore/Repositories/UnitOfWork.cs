@@ -74,7 +74,6 @@ namespace DataAccess.EFCore.Repositories
         public IOrderItemRepository OrderItems => orderItem.Value;
         public ICartRepository Carts => carts.Value;
         public IFilterRepository Filters => filters.Value;
-
         #endregion
 
 

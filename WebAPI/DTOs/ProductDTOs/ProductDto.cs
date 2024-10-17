@@ -15,6 +15,6 @@
         public string MainImageUrl { get; set; }
         public List<string>? FilterName { get; set; } = new List<string>();
 
-
+      
     }
 }
