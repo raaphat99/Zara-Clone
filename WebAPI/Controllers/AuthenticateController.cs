@@ -37,15 +37,16 @@ namespace WebAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
-            var users = _unitOfWork.Users.GetAll();
+            var users =  _unitOfWork.Users.GetAll();
             List<string> Ids = new List<string>();
             foreach (var item in users)
             {
                 Ids.Add(item.Id);
             }
             return Ok(Ids);
-
+            
         }
+
 
         [HttpPost("login")]
         [AllowAnonymous]
@@ -85,7 +86,7 @@ namespace WebAPI.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Register(RegisterModel model)
         {
-            if (!ModelState.IsValid)
+            if(!ModelState.IsValid) 
                 return BadRequest();
             var userExists = await _userManager.FindByEmailAsync(model.Email);
             if (userExists != null)
@@ -103,16 +104,15 @@ namespace WebAPI.Controllers
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
             {
-                await _userManager.AddToRoleAsync(user, UserRoles.User);
+                await _userManager.AddToRoleAsync(user,UserRoles.User);
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
-
+                
             }
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
         }
         [HttpPost("register-admin")]
-        [AllowAnonymous]
 
-        public async Task<IActionResult> RegisterAdmin(RegisterModel model)
+        public async Task<IActionResult> RegisterAdmin( RegisterModel model)
         {
             var userExists = await _userManager.FindByEmailAsync(model.Email);
             if (userExists != null)
@@ -124,7 +124,7 @@ namespace WebAPI.Controllers
                 SecurityStamp = Guid.NewGuid().ToString(),
                 Name = model.Name,
                 Surname = model.Surname,
-                UserName = (model.Name + model.Surname)
+                UserName= (model.Name+model.Surname)
             };
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
@@ -145,19 +145,19 @@ namespace WebAPI.Controllers
             }
             return Ok(new Response { Status = "Success", Message = "Admin created successfully!" });
         }
-        private JwtSecurityToken GetToken(List<Claim> authClaims)
-        {
-            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
+            private JwtSecurityToken GetToken(List<Claim> authClaims)
+            {
+                var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
 
-            var token = new JwtSecurityToken(
-                issuer: _configuration["JWT:ValidIssuer"],
-                audience: _configuration["JWT:ValidAudience"],
-                expires: DateTime.Now.AddDays(3),
-                claims: authClaims,
-                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
-                );
+                var token = new JwtSecurityToken(
+                    issuer: _configuration["JWT:ValidIssuer"],
+                    audience: _configuration["JWT:ValidAudience"],
+                    expires: DateTime.Now.AddDays(3),
+                    claims: authClaims,
+                    signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
+                    );
 
-            return token;
+                return token;
+            }
         }
-    }
-}
+    } 
