@@ -62,6 +62,7 @@ namespace WebAPI
                 };
             });
 
+
             // Stripe Configuration
             builder.Services.Configure<StripeData>(builder.Configuration.GetSection("stripe"));
 
@@ -140,7 +141,7 @@ namespace WebAPI
             }
 
             StripeConfiguration.ApiKey = builder.Configuration.GetSection("stripe:SecretKey").Get<string>();
-            
+
             app.UseCors("mypolicy");
 
             app.UseAuthentication();
