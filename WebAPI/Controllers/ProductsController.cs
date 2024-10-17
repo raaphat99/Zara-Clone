@@ -44,7 +44,14 @@ namespace WebAPI.Controllers
                     .FirstOrDefault()
                 })
                 .ToListAsync();
-
+            foreach (var product in products)
+            {
+                if (product.CategoryId.HasValue)
+                {
+                    var category = await _unitOfWork.Categories.GetByIdAsync(product.CategoryId.Value); // استخدم .Value للوصول لقيمة int
+                    product.CategoryName = category?.Name; // احصل على اسم الفئة
+                }
+            }
             return Ok(products);
         }
 
@@ -116,15 +123,24 @@ namespace WebAPI.Controllers
         [HttpGet("category/{categoryId:int}")]
         public async Task<IActionResult> GetProductsByCategory(int categoryId)
         {
+            // Fetch products by categoryId
             var products = await _unitOfWork.Products
                 .Find(prd => prd.CategoryId == categoryId)
                 .ToListAsync();
 
+            var filters = await _unitOfWork.Filters.GetFiltersByCategoryIdAsync(categoryId);
+            // Fetch filters by categoryId
+
+            // Check if there are no products
             if (products == null || products.Count == 0)
             {
                 return NotFound($"No products found for category ID {categoryId}");
             }
+            var filterNames = filters.Select(f => f.Name).ToList();
 
+
+            // Convert filter data into a list of filter names
+            // Create product DTOs including the filter names
             var productDtos = products.Select(prd => new ProductDto
             {
                 Id = prd.Id,
@@ -135,6 +151,7 @@ namespace WebAPI.Controllers
                 Created = prd.Created,
                 Updated = prd.Updated,
                 CategoryId = prd.CategoryId,
+                FilterName = filterNames,
                 MainImageUrl = prd.ProductVariants
                     .SelectMany(pv => pv.ProductImage)
                     .FirstOrDefault()?.ImageUrl
@@ -142,6 +159,7 @@ namespace WebAPI.Controllers
 
             return Ok(productDtos);
         }
+
 
 
 
