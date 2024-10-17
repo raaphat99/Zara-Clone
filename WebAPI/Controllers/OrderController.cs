@@ -1,13 +1,18 @@
-﻿using Domain.Enums;
+﻿using Domain.Auth;
+using Domain.Enums;
 using Domain.Interfaces;
 using Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Stripe.Climate;
+
 using System.IdentityModel.Tokens.Jwt;
 using WebAPI.DTOs;
+
+using WebAPI.Services;
+
+using WebAPI.Services;
 
 namespace WebAPI.Controllers
 {
@@ -17,10 +22,12 @@ namespace WebAPI.Controllers
     public class OrderController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
-
-        public OrderController(IUnitOfWork unitOfWork)
+        private const string TrackingPrefix = "#ZA";
+        private readonly ProductService _productService;
+        public OrderController(IUnitOfWork unitOfWork, Services.ProductService productService)
         {
             _unitOfWork = unitOfWork;
+            _productService = productService;
         }
         [HttpGet]
         public async Task<ActionResult<IEnumerable<OrderDTO>>> GetOrders()
@@ -41,12 +48,12 @@ namespace WebAPI.Controllers
 
             var orders
                 = await _unitOfWork.Orders.GetAll()
-                .Where(o => o.UserId == userId) 
+                .Where(o => o.UserId == userId)
                 .ToListAsync();
 
             if (orders == null || !orders.Any())
             {
-                return NotFound(); 
+                return NotFound();
             }
 
             var orderDtos = orders.Select(order => new OrderDTO
@@ -78,13 +85,13 @@ namespace WebAPI.Controllers
 
             if (order == null)
             {
-                return null; 
+                return null;
             }
 
             var orderDTO = new OrderDetailsDTO
             {
                 trackingNumber = order.TrackingNumber,
-                status=order.Status.ToString(),
+                status = order.Status.ToString(),
                 orderDate = order.Created.Value,
                 totalPrice = order.TotalPrice,
                 shippingCost = order.ShippingMethod.ShippingCost,
@@ -152,11 +159,117 @@ namespace WebAPI.Controllers
             };
 
             await _unitOfWork.Notifications.AddAsync(notification);
-            await _unitOfWork.Complete(); 
+            await _unitOfWork.Complete();
 
             return Ok($"Order status updated to {newStatus} for tracking number {order.TrackingNumber} and notification sent.");
         }
+        [HttpPost]
+        public async Task<IActionResult> CreateOrder(List<CheckoutDTO> items)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new Response { Status = "Error", Message = "Send Valid Data" });
 
+            var userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;
+            var user = _unitOfWork.Users.FindSingle(u => u.Id == userId);
+            if (user == null)
+                return Unauthorized(new Response { Status = "Error", Message = "Invalid token or email not found in token" });
+
+            //get tracking number numeric section from data base
+            var trackingNumberRecord = await _unitOfWork.TrackingNumbers.GetByIdAsync(1);
+            int trackingNumber = trackingNumberRecord.UniversalTrackingNumber;
+
+            double totalAmmount = 0;
+
+            // summate total ammount paid for whole order
+
+            foreach (var item in items)
+            {
+                totalAmmount += item.Subtotal;
+            }
+
+            // create the order in the initial state 
+
+            Order order = new Order
+            {
+                UserId = userId,
+                UserAddressId = items[0].UserAddressId,
+                ShippingMethodId = items[0].ShippingMethodId,
+                TrackingNumber = $"{TrackingPrefix}{trackingNumber}",  // concatonating numeric section of tracing number to it's contant trademark prefix
+                TotalPrice = totalAmmount,
+                Created = DateTime.UtcNow,
+                Status = OrderStatus.Pending
+
+            };
+
+            // update the numeric section the data base record
+            trackingNumberRecord.UniversalTrackingNumber += 1;
+            _unitOfWork.TrackingNumbers.Update(trackingNumberRecord);
+            await _unitOfWork.Orders.AddAsync(order);
+            await _unitOfWork.Complete();
+
+
+            //create order items after obtaining order Id
+
+            var orderItems = new List<OrderItem>();
+
+            foreach (var item in items)
+            {
+                OrderItem orderItem = new OrderItem
+                {
+                    ProductVariantId = item.ProductVariantId,
+                    OrderId = order.Id,
+                    UnitPrice = item.UnitPrice,
+                    Quantity = item.Quantity,
+                    Subtotal = item.Subtotal,
+
+                };
+                orderItems.Add(orderItem);
+            }
+            // creating payment record after obtaining order Id 
+            Payment payment = new Payment
+            {
+                OrderId = order.Id,
+                Amount = order.TotalPrice,
+                Created = DateTime.UtcNow,
+                AmountRefunded = 0,
+                PaymentMethod = items[0].PaymentMethod,
+                PaymentStatus = PaymentStatus.Pending,
+
+            };
+            if (items[0].PaymentMethod == "POD")
+            {
+
+                order.Status = OrderStatus.Shipped; //update order status
+                var cart = await _unitOfWork.Carts.FindSingle(c => c.UserId == order.UserId);
+                cart.CartItems.Clear();            //clear cart for this user
+
+                foreach (var item in order.OrderItems)
+                {
+                    await _productService.UpdateStockQuantity(item.ProductVariantId ?? 0, item.Quantity); //update stock quantity
+                }
+
+                Notification notification = new Notification   // notify user
+                {
+                    UserId = order.UserId,
+                    Message = $"Good news! Order {order.TrackingNumber} has been shipped.",
+                    Created = DateTime.Now,
+                    IsRead = false
+                };
+                await _unitOfWork.OrderItems.AddRangeAsync(orderItems);
+                await _unitOfWork.Payments.AddAsync(payment);
+                await _unitOfWork.Complete();
+                return Redirect("http://localhost:4200/home");
+            }
+
+            await _unitOfWork.OrderItems.AddRangeAsync(orderItems);
+            await _unitOfWork.Payments.AddAsync(payment);
+            await _unitOfWork.Complete();
+
+            // hash code for kashier server call 
+            string hash = Kashier.create_hash(order.TotalPrice.ToString(), order.Id.ToString());
+            return Ok(hash);
+
+        }
         private string GenerateNotificationMessage(OrderStatus newStatus, string trackingNumber)
         {
             return newStatus switch
