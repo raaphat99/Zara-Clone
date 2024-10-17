@@ -131,6 +131,8 @@ namespace WebAPI
 
             var app = builder.Build();
 
+            app.UseCors("mypolicy");
+
             app.UseDeveloperExceptionPage();
 
             // Configure the HTTP request pipeline.
@@ -141,8 +143,6 @@ namespace WebAPI
             }
 
             StripeConfiguration.ApiKey = builder.Configuration.GetSection("stripe:SecretKey").Get<string>();
-
-            app.UseCors("mypolicy");
 
             app.UseAuthentication();
 

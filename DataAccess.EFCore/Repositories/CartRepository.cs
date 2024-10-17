@@ -32,9 +32,14 @@ namespace DataAccess.EFCore.Repositories
             }
         }
 
-        public async Task<User> GetUserWithCart(string userId)
+        public async Task<User> GetUserWithCartItems(string userId)
         {
-            return await _dbContext.Users.Include(user => user.Cart).FirstOrDefaultAsync(user => user.Id == userId);
+            return await _dbContext.Users
+                .Include(u => u.Cart)                       // Include the cart
+                .ThenInclude(c => c.CartItems)              // Include cart items
+                .ThenInclude(ci => ci.ProductVariant)       // Include product variant
+                .ThenInclude(pv => pv.ProductImage)         // Include product images
+                .FirstOrDefaultAsync(u => u.Id == userId);      // Filter by user ID
         }
     }
 }

@@ -137,12 +137,11 @@ namespace WebAPI.Controllers
                 .Find(prd => prd.CategoryId == categoryId)
                 .ToListAsync();
 
-            var filters = await _unitOfWork.Filters.GetFiltersByCategoryIdAsync(categoryId);
             if (products == null || products.Count == 0)
             {
                 return NotFound($"No products found for category ID {categoryId}");
             }
-            var filterNames = filters.Select(f => f.Name).ToList();
+
             var productDtos = products.Select(prd => new ProductDto
             {
                 Id = prd.Id,
@@ -153,7 +152,6 @@ namespace WebAPI.Controllers
                 Created = prd.Created,
                 Updated = prd.Updated,
                 CategoryId = prd.CategoryId,
-                FilterName = filterNames, 
                 MainImageUrl = prd.ProductVariants
                     .SelectMany(pv => pv.ProductImage)
                     .FirstOrDefault()?.ImageUrl
@@ -161,7 +159,6 @@ namespace WebAPI.Controllers
 
             return Ok(productDtos);
         }
-
 
 
 
