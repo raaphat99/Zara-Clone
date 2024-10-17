@@ -20,20 +20,38 @@ namespace WebAPI.Controllers
         {
             _unitOfWork = unitOfWork;
         }
+
+
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetAllItems()
         {
-            string userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;
-            var user = await _unitOfWork.Users.GetByIdAsync(userId);
-            var cart = user.Cart.CartItems.ToList();
-            // if(cart == null )
-            //return NotFound("User has No Cart");
-            if (!cart.Any())
+            // Extract the user ID from the JWT token
+            string userId = User.FindFirst(JwtRegisteredClaimNames.Sid)?.Value;
+
+            if (userId == null)
+                return BadRequest("User ID not found.");
+
+            // Load user and include CartItems and related ProductVariant and ProductImage data
+            var user = await _unitOfWork.Carts.GetUserWithCartItems(userId);
+
+            if (user == null || user.Cart == null)
+                return NotFound("User or Cart not found.");
+
+            // Get the cart items
+            var cartItems = user.Cart.CartItems.ToList();
+
+            if (!cartItems.Any())
                 return NotFound("No Items In This Cart");
-            List<CartItemDTO> cartItems = new List<CartItemDTO>();
-            foreach (var item in cart)
+
+            // Prepare the DTO list
+            List<CartItemDTO> cartItemDTOs = new List<CartItemDTO>();
+
+            foreach (var item in cartItems)
             {
-                var images = item.ProductVariant.ProductImage.ToList();
+                // Convert images to URL (you may need to implement the method)
+                var imageUrl = GetImgUrl(item);
+
                 var cartItemDTO = new CartItemDTO
                 {
                     Id = item.Id,
@@ -42,16 +60,65 @@ namespace WebAPI.Controllers
                     Color = item.ProductVariant.ProductColor.ToString(),
                     Size = item.ProductVariant.Size.Value.ToString(),
                     Title = item.ProductVariant.Product.Name,
-                    ImageUrl = GetImgUrl(item),
+                    ImageUrl = imageUrl,
                     Price = item.UnitPrice
-
                 };
-                cartItems.Add(cartItemDTO);
+
+                cartItemDTOs.Add(cartItemDTO);
             }
 
-            return Ok(cartItems);
-
+            return Ok(cartItemDTOs);
         }
+
+        // Helper method to get the first image URL or a default placeholder
+        private string GetImgUrl(CartItem item)
+        {
+            var productImages = item.ProductVariant?.ProductImage?.ToList();
+
+            if (productImages != null && productImages.Any())
+            {
+                // Assuming you have a property for the image URL
+                return productImages.FirstOrDefault()?.ImageUrl ?? "https://picsum.photos/seed/picsum/200/300";
+            }
+
+            return "https://picsum.photos/seed/picsum/200/300"; // Return a default image URL if no images are available
+        }
+
+
+
+        //[HttpGet]
+        //[Authorize]
+        //public async Task<IActionResult> GetAllItems()
+        //{
+        //    string userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;
+        //    var user = await _unitOfWork.Users.GetByIdAsync(userId);
+        //    var cart = user.Cart.CartItems.ToList();
+        //    // if(cart == null )
+        //    //return NotFound("User has No Cart");
+        //    if (!cart.Any())
+        //        return NotFound("No Items In This Cart");
+        //    List<CartItemDTO> cartItems = new List<CartItemDTO>();
+        //    foreach (var item in cart)
+        //    {
+        //        var images = item.ProductVariant.ProductImage.ToList();
+        //        var cartItemDTO = new CartItemDTO
+        //        {
+        //            Id = item.Id,
+        //            ProductVariantId = item.ProductVariantId,
+        //            Quantity = item.Quantity,
+        //            Color = item.ProductVariant.ProductColor.ToString(),
+        //            Size = item.ProductVariant.Size.Value.ToString(),
+        //            Title = item.ProductVariant.Product.Name,
+        //            ImageUrl = GetImgUrl(item),
+        //            Price = item.UnitPrice
+
+        //        };
+        //        cartItems.Add(cartItemDTO);
+        //    }
+
+        //    return Ok(cartItems);
+
+        //}
 
         [HttpPost("{productVariantId:int}")]
         public async Task<IActionResult> AddCartItem(int productVariantId)
@@ -181,12 +248,12 @@ namespace WebAPI.Controllers
             return Ok(new Response { Status = "success", Message = "Item moved to wishlist" });
         }
 
-        private string GetImgUrl(CartItem product)
-        {
+        //private string GetImgUrl(CartItem product)
+        //{
 
-            var imgs = product.ProductVariant.ProductImage.ToList();
-            string imgUrl = imgs[0].ImageUrl;
-            return imgUrl;
-        }
+        //    var imgs = product.ProductVariant.ProductImage.ToList();
+        //    string imgUrl = imgs[0].ImageUrl;
+        //    return imgUrl;
+        //}
     }
 }

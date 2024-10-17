@@ -62,7 +62,6 @@ namespace WebAPI
                 };
             });
 
-
             // Stripe Configuration
             builder.Services.Configure<StripeData>(builder.Configuration.GetSection("stripe"));
 
@@ -130,6 +129,8 @@ namespace WebAPI
             });
 
             var app = builder.Build();
+
+            app.UseCors("mypolicy");
 
             app.UseDeveloperExceptionPage();
 

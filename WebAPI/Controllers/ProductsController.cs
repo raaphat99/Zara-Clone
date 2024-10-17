@@ -179,7 +179,6 @@ namespace WebAPI.Controllers
 
 
 
-
         [HttpGet("any-category/{mainCategoryId:int}")]
         public async Task<IActionResult> GetProductsByCategory(int mainCategoryId, int? subCategoryId = null)
         {

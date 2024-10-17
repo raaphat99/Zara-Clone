@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace DataAccess.EFCore.Repositories
 {
-    public class FilterRepository: GenericRepository<Filter, int>,IFilterRepository 
+    public class FilterRepository : GenericRepository<Filter, int>, IFilterRepository
     {
         public FilterRepository(ApplicationContext applicationContext) : base(applicationContext)
         {
