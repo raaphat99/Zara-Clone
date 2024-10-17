@@ -140,11 +140,13 @@ namespace WebAPI
             }
 
             StripeConfiguration.ApiKey = builder.Configuration.GetSection("stripe:SecretKey").Get<string>();
+            
+            app.UseCors("mypolicy");
+
             app.UseAuthentication();
 
             app.UseAuthorization();
 
-            app.UseCors("mypolicy");
 
             app.MapControllers();
 

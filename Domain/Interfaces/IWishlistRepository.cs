@@ -9,6 +9,8 @@ namespace Domain.Interfaces
 {
     public interface IWishlistRepository : IGenericRepository<Wishlist, int>
     {
-
+        Task AddProductToWishlist(string userId, int productId);
+        Task RemoveProductFromWishlist(string userId, int productId);
+        Task<User> GetUserWithWishlist(string userId);
     }
 }

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.EFCore.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20241014122713_AddFiltersTable")]
-    partial class AddFiltersTable
+    [Migration("20241015165209_MakeUserMeasurementFieldsNullable")]
+    partial class MakeUserMeasurementFieldsNullable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,21 +27,6 @@ namespace DataAccess.EFCore.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("CategoryFilter", b =>
-                {
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("FiltersId")
-                        .HasColumnType("int");
-
-                    b.HasKey("CategoryId", "FiltersId");
-
-                    b.HasIndex("FiltersId");
-
-                    b.ToTable("CategoryFilter");
-                });
 
             modelBuilder.Entity("Domain.Models.Cart", b =>
                 {
@@ -144,6 +129,8 @@ namespace DataAccess.EFCore.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
 
                     b.ToTable("Filters");
                 });
@@ -606,7 +593,7 @@ namespace DataAccess.EFCore.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Active")
+                    b.Property<bool?>("Active")
                         .HasColumnType("bit");
 
                     b.Property<int>("Age")
@@ -616,7 +603,6 @@ namespace DataAccess.EFCore.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("FavoriteSection")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Height")
@@ -627,7 +613,6 @@ namespace DataAccess.EFCore.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SizeValue")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("Updated")
@@ -817,21 +802,6 @@ namespace DataAccess.EFCore.Migrations
                     b.ToTable("ProductWishlist");
                 });
 
-            modelBuilder.Entity("CategoryFilter", b =>
-                {
-                    b.HasOne("Domain.Models.Category", null)
-                        .WithMany()
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Models.Filter", null)
-                        .WithMany()
-                        .HasForeignKey("FiltersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Domain.Models.Cart", b =>
                 {
                     b.HasOne("Domain.Models.User", "User")
@@ -869,6 +839,17 @@ namespace DataAccess.EFCore.Migrations
                     b.Navigation("ParentCategory");
 
                     b.Navigation("SizeType");
+                });
+
+            modelBuilder.Entity("Domain.Models.Filter", b =>
+                {
+                    b.HasOne("Domain.Models.Category", "Category")
+                        .WithMany("Filters")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
                 });
 
             modelBuilder.Entity("Domain.Models.Notification", b =>
@@ -1071,6 +1052,8 @@ namespace DataAccess.EFCore.Migrations
 
             modelBuilder.Entity("Domain.Models.Category", b =>
                 {
+                    b.Navigation("Filters");
+
                     b.Navigation("Products");
 
                     b.Navigation("Subcategories");

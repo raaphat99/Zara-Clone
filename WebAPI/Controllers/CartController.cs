@@ -1,7 +1,9 @@
 ﻿using Domain.Interfaces;
 using Domain.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
 using WebAPI.DTOs;
 
 namespace WebAPI.Controllers
@@ -16,7 +18,9 @@ namespace WebAPI.Controllers
         {
             _unitOfWork = unitOfWork;
         }
+
         [HttpGet("{userId}")]
+        [Authorize]
         public async Task<IActionResult> GetAllItems(string userId)
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
@@ -48,19 +52,22 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddCartItem(int productVariantId, string userId)
+        [Authorize]
+        public async Task<IActionResult> AddCartItem(int productVariantId)
         {
+            string userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;
+
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
             Cart cart = await _unitOfWork.Carts.FindSingle(c => c.UserId == userId);
             List<CartItem> cartitems = cart.CartItems.ToList();
-            ProductVariant product = await _unitOfWork.ProductVariant.GetByIdAsync(productVariantId);
-            if (product.StockQuantity == 0)
+            ProductVariant variant = await _unitOfWork.ProductVariant.GetByIdAsync(productVariantId);
+            if (variant.StockQuantity == 0)
                 return NotFound("Out Of Stock");
             bool exist = false;
             int itemId = 0;
             foreach (var item in cartitems)
             {
-                if (item.ProductVariant.Id == product.Id && item.ProductVariant.SizeId == product.SizeId)
+                if (item.ProductVariant.Id == variant.Id && item.ProductVariant.SizeId == variant.SizeId)
                 {
                     exist = true;
                     itemId = item.Id;
@@ -70,20 +77,20 @@ namespace WebAPI.Controllers
             }
             CartItem newitem = new CartItem();
 
-            if (!exist && product.StockQuantity > 0)
+            if (!exist && variant.StockQuantity > 0)
             {
                 newitem = new CartItem()
                 {
                     Quantity = 1,
-                    ProductVariantId = product.Id,
+                    ProductVariantId = variant.Id,
                     CartId = user.Cart.Id,
-                    UnitPrice = product.Price
+                    UnitPrice = variant.Price
                 };
                 await _unitOfWork.CartItems.AddAsync(newitem);
                 await _unitOfWork.Complete();
                 return Ok("Item added");
             }
-            else if (exist && product.StockQuantity > 0)
+            else if (exist && variant.StockQuantity > 0)
             {
                 var item = await _unitOfWork.CartItems.GetByIdAsync(itemId);
                 item.Quantity++;
@@ -100,12 +107,18 @@ namespace WebAPI.Controllers
         }
 
         [HttpDelete]
+        [Authorize]
         public async Task<IActionResult> RemoveItemFromCart(int cartItemId)
         {
-            var cartitem = await _unitOfWork.CartItems.GetByIdAsync(cartItemId);
-            _unitOfWork.CartItems.Remove(cartitem);
-            await _unitOfWork.Complete();
-            return Ok("Item Deleted");
+            string userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;
+
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+
+            await _unitOfWork.Carts.RemoveProductVariantFromCart(userId, cartItemId);
+            return Ok(new { message = "Item removed from cart." });
         }
 
         private async Task<ICollection<string>> GetImgUrls(CartItem cart)

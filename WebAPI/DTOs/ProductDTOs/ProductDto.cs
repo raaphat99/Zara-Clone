@@ -11,6 +11,8 @@
         public DateTime? Updated { get; set; }
         public int? CategoryId { get; set; }
         public string MainImageUrl { get; set; }
+        public List<string> DistinctColors { get; set; }
+        public string SizeType { get; set; }
 
     }
 }

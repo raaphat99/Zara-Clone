@@ -9,5 +9,7 @@ namespace Domain.Interfaces
 {
     public interface ICartRepository : IGenericRepository<Cart, int>
     {
+        Task RemoveProductVariantFromCart(string userId, int variantId);
+        Task<User> GetUserWithCart(string userId);
     }
 }
