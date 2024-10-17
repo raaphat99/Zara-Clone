@@ -152,7 +152,6 @@ namespace WebAPI.Controllers
                 Updated = prd.Updated,
                 CategoryId = prd.CategoryId,
                 FilterName = filterNames, 
-
                 MainImageUrl = prd.ProductVariants
                     .SelectMany(pv => pv.ProductImage)
                     .FirstOrDefault()?.ImageUrl
