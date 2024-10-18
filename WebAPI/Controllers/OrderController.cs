@@ -12,7 +12,6 @@ using WebAPI.DTOs;
 
 using WebAPI.Services;
 
-using WebAPI.Services;
 
 namespace WebAPI.Controllers
 {
@@ -24,7 +23,7 @@ namespace WebAPI.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private const string TrackingPrefix = "#ZA";
         private readonly ProductService _productService;
-        public OrderController(IUnitOfWork unitOfWork, Services.ProductService productService)
+        public OrderController(IUnitOfWork unitOfWork, ProductService productService)
         {
             _unitOfWork = unitOfWork;
             _productService = productService;
@@ -238,6 +237,7 @@ namespace WebAPI.Controllers
             };
             if (items[0].PaymentMethod == "POD")
             {
+                
 
                 order.Status = OrderStatus.Shipped; //update order status
                 var cart = await _unitOfWork.Carts.FindSingle(c => c.UserId == order.UserId);
