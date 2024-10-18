@@ -41,7 +41,7 @@ namespace DataAccess.EFCore.Repositories
 
         public async Task<TEntity> GetByIdAsync(TKey id)
         {
-            return await _dbSet.FindAsync(id);
+              return await _dbSet.FindAsync(id).ConfigureAwait(false);
         }
 
         public async Task AddAsync(TEntity entity)

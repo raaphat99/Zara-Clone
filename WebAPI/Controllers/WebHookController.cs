@@ -1,4 +1,5 @@
 ﻿using DataAccess.EFCore.Migrations;
+using Domain.Auth;
 using Domain.Enums;
 using Domain.Interfaces;
 using Domain.Models;
@@ -61,9 +62,24 @@ namespace WebAPI.Controllers
                 await _unitOfWork.Complete();
                 return Redirect("http://localhost:4200/home");
             }
+            else
+            {
+                int OrderId = int.Parse(merchantOrderId);
+                var order = await _unitOfWork.Orders.FindSingle(o => o.Id == OrderId);
+                var payment = await _unitOfWork.Payments.FindSingle(o => o.Id == order.Payment.Id);
+                payment.PaymentStatus = PaymentStatus.Canceled; //update payment status
+                Notification notification = new Notification   // notify user
+                {
+                    UserId = order.UserId,
+                    Message = $"Payment was not Accepted, please enter your card details correctly or contact the Bank",
+                    Created = DateTime.Now,
+                    IsRead = false
+                };
+                return Ok(new OrderResponse { Status="Failed"});
+            }
 
 
-            return StatusCode(StatusCodes.Status200OK);
+            
         }
     }
 }

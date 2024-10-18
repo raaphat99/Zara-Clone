@@ -2,13 +2,11 @@
 {
     public class CheckoutDTO
     {
-        public int? ProductVariantId { get; set; }
-        public int Quantity { get; set; }
-        public double UnitPrice { get; set; }
-        public double Subtotal { get; set; }
-        public int? ShippingMethodId { get; set; }
-        public int? UserAddressId { get; set; }
-        public string PaymentMethod { get; set; }
+       public IEnumerable<CheckoutItemDTO> cartItems { get; set; }
+        public double totalPrice { get; set; }
+        public string? shippingMethod { get; set; }
+        public int? userAddressId { get; set; }
+        public string? paymentMethod { get; set; }
 
     }
 }

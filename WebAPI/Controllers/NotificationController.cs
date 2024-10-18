@@ -1,5 +1,7 @@
 ﻿using DataAccess.EFCore.Repositories;
+using Domain.Auth;
 using Domain.Interfaces;
+using Domain.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -75,6 +77,45 @@ namespace WebAPI.Controllers
             await _unitOfWork.Complete(); 
 
             return Ok("Notification deleted.");
+        }
+        [HttpPost]
+        public async Task<IActionResult> NotifyUser([FromBody]NotifyDTO notification)
+        {
+            var user = _unitOfWork.Users.FindSingle(u => u.Id == notification.userId);
+            if (user == null)
+                return NotFound();
+            Notification note = new Notification
+            {
+                UserId = notification.userId,
+                IsRead = false,
+                Message = notification.message,
+                Created = DateTime.Now,
+
+            };
+            await _unitOfWork.Notifications.AddAsync(note);
+            await _unitOfWork.Complete();
+            return Ok(new Response {Status="success", Message = "user notified successfully" });
+        }
+        [HttpPost("notify-all")]
+        public async Task<IActionResult> NotifyAll([FromBody] string message)
+        {
+            var users = _unitOfWork.Users.GetAll();
+            List<Notification> notes = new List<Notification>();
+            foreach (var user in users)
+            {
+                Notification note = new Notification
+                {
+                    UserId = user.Id,
+                    IsRead = false,
+                    Message = message,
+                    Created = DateTime.Now,
+
+                };
+                notes.Add(note);
+            }
+         await   _unitOfWork.Notifications.AddRangeAsync(notes);
+            await _unitOfWork.Complete();
+            return Ok(new Response {Status = "success",Message="All users notified successfully"});
         }
     }
 }

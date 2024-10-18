@@ -1,6 +1,7 @@
 ﻿using DataAccess.EFCore.Data;
 using Domain.Interfaces;
 using Domain.Models;
+using Microsoft.EntityFrameworkCore.Storage;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -88,8 +89,14 @@ namespace DataAccess.EFCore.Repositories
         {
             return await _context.SaveChangesAsync();
         }
+        public async Task<IDbContextTransaction> BeginTransactionAsync()
+        {
+            return await _context.Database.BeginTransactionAsync();
+        }
 
-        public void Dispose()
+      
+   
+    public void Dispose()
         {
             _context.Dispose();
         }

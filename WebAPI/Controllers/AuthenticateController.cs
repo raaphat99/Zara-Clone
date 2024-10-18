@@ -11,6 +11,7 @@ using Domain.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using WebAPI.DTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebAPI.Controllers
 {
@@ -36,17 +37,94 @@ namespace WebAPI.Controllers
             _unitOfWork = unitOfWork;
         }
 
+        [Authorize(Roles=UserRoles.Admin)]  
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
-            var users = _unitOfWork.Users.GetAll();
-            List<string> Ids = new List<string>();
-            foreach (var item in users)
-            {
-                Ids.Add(item.Id);
-            }
-            return Ok(Ids);
+            var users = _unitOfWork.Users.GetAll().ToList();
+            var orders = _unitOfWork.Orders.GetAll().ToList();
+            var addresses = _unitOfWork.UserAddress.GetAll().ToList();
+            var userDTOs = new List<UserDTO>();
 
+            foreach (var user in users)
+            {
+                var userAddress = addresses.FirstOrDefault(a => (a.UserId == user.Id) && (a.Active == true));
+                // Check if userAddress exists
+                if (userAddress == null) continue;  // Skip this user if no active address found
+
+                var userOrders = orders.Where(o => o.UserId == user.Id);
+                var orderDTOs = new List<OrderDTO>();
+
+                foreach (var order in userOrders)
+                {
+                    var orderitemDtOs = new List<OrderItemDTO>();
+
+                    // Null check for OrderItems collection
+                    if (order.OrderItems != null)
+                    {
+                        foreach (var orderitem in order.OrderItems)
+                        {
+                            // Null checks for nested properties
+                            if (orderitem?.ProductVariant?.Product == null) continue;
+
+                            var orderitemDTO = new OrderItemDTO
+                            {
+                                name = orderitem.ProductVariant.Product.Name,
+                                // Null check for ProductImage collection
+                                productImage = orderitem.ProductVariant.ProductImage?.FirstOrDefault()?.ImageUrl,
+                                color = orderitem.ProductVariant.ProductColor.ToString(),
+                                quantity = orderitem.Quantity,
+                                size = orderitem.ProductVariant.Size?.Value.ToString(),
+                                subtotal = orderitem.Subtotal,
+                                unitPrice = orderitem.UnitPrice,
+                            };
+                            orderitemDtOs.Add(orderitemDTO);
+                        }
+                    }
+
+                    var orderDTO = new OrderDTO
+                    {
+                        id = order.Id,
+                        customerName = $"{user.Name} {user.Surname}".Trim(),
+                        created = order.Created.ToString(),
+                        items = orderitemDtOs,
+                        status = order.Status.ToString(),
+                        totalPrice = order.TotalPrice,
+                        trackingNumber = order.TrackingNumber
+                    };
+                    orderDTOs.Add(orderDTO);
+                }
+
+                var userAddressDTO = new UserAddressDTO
+                {
+                    Active = true,
+                    City = userAddress.City,
+                    Country = "Egypt",
+                    Id = userAddress.Id,
+                    State = userAddress.State,
+                    Street = userAddress.Street,
+                    UserId = userAddress.UserId
+                };
+
+                // Null check for UserMeasurements
+                var activeMeasurement = user.UserMeasurements?.FirstOrDefault(m => m.Active == true);
+
+                var userDTO = new UserDTO
+                {
+                    ActiveAddress = userAddressDTO,
+                    Id = user.Id,
+                    ActiveMesurment = activeMeasurement?.SizeValue,
+                    Email = user.Email,
+                    Name = $"{user.Name} {user.Surname}".Trim(),
+                    Orders = orderDTOs,
+                    PhoneNumber = userAddress.PhoneNumber,
+                };
+                userDTOs.Add(userDTO);
+            }
+
+            if (userDTOs.Count > 0)
+                return Ok(userDTOs);
+            return BadRequest("fe haga ghalat");
         }
 
 
@@ -99,13 +177,19 @@ namespace WebAPI.Controllers
                 SecurityStamp = Guid.NewGuid().ToString(),
                 Name = model.Name,
                 Surname = model.Surname,
-                UserName = (model.Name + model.Surname)
+                UserName = model.Email
 
             };
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response
+                {
+                    Status = "Error",
+                    Message = $"User creation failed! Errors: {errors}"
+                });
+                //return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
 
             }
             await _userManager.AddToRoleAsync(user, UserRoles.User);
@@ -221,12 +305,44 @@ namespace WebAPI.Controllers
         [HttpDelete]
         public async Task<IActionResult> DeleteAccount()
         {
-            var user = await _unitOfWork.Users.FindSingle(u => u.Id == User.FindFirst(JwtRegisteredClaimNames.Sid).Value);
+            var userId =  User.FindFirst(JwtRegisteredClaimNames.Sid)?.Value;
+            var user = await _userManager.FindByIdAsync(userId);  // Await the task to get the user object
+
             if (user == null)
-                return NotFound();
-            _unitOfWork.Users.Remove(user);
-            _unitOfWork.Complete();
-            return Ok(new Response { Status = "Success", Message = "Account deleted successfully" });
+            {
+                return NotFound();  // Handle case where the user is not found
+            }
+            var cart = await _unitOfWork.Carts.FindSingle(c => c.UserId == userId);
+            if (cart != null)
+            {
+                _unitOfWork.Carts.Remove(cart);
+                await _unitOfWork.Complete();
+
+            }
+
+            var wishlist = await _unitOfWork.Wishlist.FindSingle(w => w.UserId == userId);
+            if (wishlist != null)
+            {
+                _unitOfWork.Wishlist.Remove(wishlist);
+                await _unitOfWork.Complete();
+
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            // Remove user from roles
+            if (roles.Any())
+            {
+                await _userManager.RemoveFromRolesAsync(user, roles);
+            }
+
+            // Save changes to the database
+            //await _unitOfWork.Complete();
+            //_unitOfWork.Users.Remove(user);
+            var result = await _userManager.DeleteAsync(user);  // Now user is of type User
+
+            //await _unitOfWork.Complete();
+            return Ok(new Response { Status = $"Success {result}", Message = "Account deleted successfully" });
         }
 
 
