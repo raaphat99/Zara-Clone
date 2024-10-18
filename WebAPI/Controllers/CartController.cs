@@ -258,5 +258,27 @@ namespace WebAPI.Controllers
         //    string imgUrl = imgs[0].ImageUrl;
         //    return imgUrl;
         //}
+
+        [HttpGet("count")]
+        public async Task<IActionResult> GetItemCount()
+        {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Unauthorized();
+            }
+
+            string userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+
+            if (user == null)
+            {
+                return NotFound("User not found!");
+            }
+
+            var totalItemsQuantity = user.Cart?.CartItems?.Sum(item => item.Quantity) ?? 0;
+
+            return Ok(totalItemsQuantity);
+        }
+
     }
 }

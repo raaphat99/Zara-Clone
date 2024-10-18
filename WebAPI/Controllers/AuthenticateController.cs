@@ -10,6 +10,7 @@ using Domain.Models;
 using Domain.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using WebAPI.DTOs;
 
 namespace WebAPI.Controllers
 {
@@ -18,6 +19,7 @@ namespace WebAPI.Controllers
     [ApiController]
     public class AuthenticateController : ControllerBase
     {
+        private readonly static int Tnumber;
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
@@ -37,14 +39,14 @@ namespace WebAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
-            var users =  _unitOfWork.Users.GetAll();
+            var users = _unitOfWork.Users.GetAll();
             List<string> Ids = new List<string>();
             foreach (var item in users)
             {
                 Ids.Add(item.Id);
             }
             return Ok(Ids);
-            
+
         }
 
 
@@ -81,12 +83,11 @@ namespace WebAPI.Controllers
             return Unauthorized();
         }
 
-
-        [HttpPost("register")]
         [AllowAnonymous]
+        [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterModel model)
         {
-            if(!ModelState.IsValid) 
+            if (!ModelState.IsValid)
                 return BadRequest();
             var userExists = await _userManager.FindByEmailAsync(model.Email);
             if (userExists != null)
@@ -104,16 +105,19 @@ namespace WebAPI.Controllers
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
             {
-                await _userManager.AddToRoleAsync(user,UserRoles.User);
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
-                
+
             }
+            await _userManager.AddToRoleAsync(user, UserRoles.User);
+
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
         }
+
         [HttpPost("register-admin")]
 
-        public async Task<IActionResult> RegisterAdmin( RegisterModel model)
+        public async Task<IActionResult> RegisterAdmin(RegisterModel model)
         {
+
             var userExists = await _userManager.FindByEmailAsync(model.Email);
             if (userExists != null)
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
@@ -124,7 +128,7 @@ namespace WebAPI.Controllers
                 SecurityStamp = Guid.NewGuid().ToString(),
                 Name = model.Name,
                 Surname = model.Surname,
-                UserName= (model.Name+model.Surname)
+                UserName = (model.Name + model.Surname)
             };
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
@@ -145,19 +149,102 @@ namespace WebAPI.Controllers
             }
             return Ok(new Response { Status = "Success", Message = "Admin created successfully!" });
         }
-            private JwtSecurityToken GetToken(List<Claim> authClaims)
+
+
+        [HttpPut]
+        public async Task<IActionResult> UpdateEmail(UpdateEmailDTO request)
+        {
+
+            // Check if the request is valid
+            if (request == null || string.IsNullOrWhiteSpace(request.Password) || string.IsNullOrWhiteSpace(request.NewEmail))
             {
-                var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
-
-                var token = new JwtSecurityToken(
-                    issuer: _configuration["JWT:ValidIssuer"],
-                    audience: _configuration["JWT:ValidAudience"],
-                    expires: DateTime.Now.AddDays(3),
-                    claims: authClaims,
-                    signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
-                    );
-
-                return token;
+                return BadRequest(new Response { Status = "Error", Message = "Invalid request data" });
             }
+
+            // Extract the email from the JWT token
+            string userEmail = User.FindFirst(JwtRegisteredClaimNames.Sid)?.Value;
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return Unauthorized(new Response { Status = "Error", Message = "Invalid token or email not found in token" });
+            }
+
+            // Retrieve the user by email
+            var user = await _userManager.FindByIdAsync(userEmail);
+            if (user == null)
+            {
+                return NotFound(new Response { Status = "Error", Message = "User not found" });
+            }
+
+            // Check if the provided password is valid
+            var isPasswordValid = await _userManager.CheckPasswordAsync(user, request.Password);
+            if (!isPasswordValid)
+            {
+                return BadRequest(new Response { Status = "Error", Message = "Invalid password" });
+            }
+
+            // Ensure the new email isn't already taken by another user
+            var existingUser = await _userManager.FindByEmailAsync(request.NewEmail);
+            if (existingUser != null)
+            {
+                return BadRequest(new Response { Status = "Error", Message = "Email already in use" });
+            }
+
+            // Update the email
+            user.Email = request.NewEmail;
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                return StatusCode(500, new Response { Status = "Error", Message = "Failed to update email" });
+            }
+
+            return Ok(new Response { Status = "Success", Message = "Email updated successfully" });
+
         }
-    } 
+        [HttpPut("change-password")]
+        public async Task<IActionResult> ChangePassword(ChangePasswordDTO request)
+        {
+            var userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;
+            if (userId == null)
+                return Unauthorized(new Response { Status = "Error", Message = "Invalid token or email not found in token" });
+
+            var user = await _unitOfWork.Users.FindSingle(u => u.Id == userId);
+            var result = await _userManager.ChangePasswordAsync(user, request.OldPassword, request.NewPassword);
+
+            if (!result.Succeeded)
+                return BadRequest(new Response { Status = "Error", Message = "Invalid password" });
+
+            return Ok(new Response { Status = "Success", Message = "Password changed successfully" });
+
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteAccount()
+        {
+            var user = await _unitOfWork.Users.FindSingle(u => u.Id == User.FindFirst(JwtRegisteredClaimNames.Sid).Value);
+            if (user == null)
+                return NotFound();
+            _unitOfWork.Users.Remove(user);
+            _unitOfWork.Complete();
+            return Ok(new Response { Status = "Success", Message = "Account deleted successfully" });
+        }
+
+
+
+        private JwtSecurityToken GetToken(List<Claim> authClaims)
+        {
+            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["JWT:ValidIssuer"],
+                audience: _configuration["JWT:ValidAudience"],
+                expires: DateTime.Now.AddDays(3),
+                claims: authClaims,
+                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
+                );
+
+            return token;
+        }
+    }
+
+}

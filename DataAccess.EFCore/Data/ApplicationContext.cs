@@ -36,6 +36,7 @@ namespace DataAccess.EFCore.Data
         public DbSet<SizeType> SizeTypes { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Filter> Filters { get; set; }
+        public DbSet<TrackingNumber> TrackingNumbers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
