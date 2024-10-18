@@ -11,6 +11,7 @@ using WebAPI.DTOs;
 namespace WebAPI.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
     public class WishListController : ControllerBase
     {
@@ -20,10 +21,10 @@ namespace WebAPI.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        [HttpGet("{userId}")]
-        [Authorize]
-        public async Task<IActionResult> GetAllItems(string userId)
+        [HttpGet]
+        public async Task<IActionResult> GetAllItems()
         {
+            string userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
             var wishlist = user.Wishlist.Products.ToList();
             if (user == null)
@@ -47,32 +48,34 @@ namespace WebAPI.Controllers
 
         }
 
-        //[HttpPost]
-        //public async Task<IActionResult> AddToWishList(int productId, string userId)
-        //{
-        //    Wishlist wishlist = (Wishlist)_unitOfWork.Wishlist.Find(w => w.UserId == userId);
-        //    var product = await _unitOfWork.Products.GetByIdAsync(productId);
-        //    var products = wishlist.Products.ToList();
-        //    if (products.Contains(product))
-        //    {
-        //        wishlist.Products.Remove(product);
-        //        _unitOfWork.Wishlist.Update(wishlist);
-        //        await _unitOfWork.Complete();
-        //        return Ok("Product Removed");
-        //    }
-        //    else
-        //    {
-        //        wishlist.Products.Add(product);
-        //        _unitOfWork.Wishlist.Update(wishlist);
-        //        await _unitOfWork.Complete();
-        //        return Ok("Product Added");
 
-        //    }
-        //}
+
+        [HttpPost]
+        public async Task<IActionResult> AddToWishList(int productId, string userId)
+        {
+            Wishlist wishlist = (Wishlist)_unitOfWork.Wishlist.Find(w => w.UserId == userId);
+            var product = await _unitOfWork.Products.GetByIdAsync(productId);
+            var products = wishlist.Products.ToList();
+            if (products.Contains(product))
+            {
+                wishlist.Products.Remove(product);
+                _unitOfWork.Wishlist.Update(wishlist);
+                await _unitOfWork.Complete();
+                return Ok("Product Removed");
+            }
+            else
+            {
+                wishlist.Products.Add(product);
+                _unitOfWork.Wishlist.Update(wishlist);
+                await _unitOfWork.Complete();
+                return Ok("Product Added");
+
+            }
+        }
+
 
 
         [HttpPost("addProduct/{productId:int}")]
-        [Authorize]
         public async Task<IActionResult> AddProductToWishlist(int productId)
         {
             string userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;
@@ -87,8 +90,8 @@ namespace WebAPI.Controllers
         }
 
 
+
         [HttpPost("removeProduct/{productId:int}")]
-        [Authorize]
         public async Task<IActionResult> RemoveProductFromWishlist(int productId)
         {
             string userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;
@@ -102,8 +105,9 @@ namespace WebAPI.Controllers
             return Ok(new { message = "Product removed from wishlist" });
         }
 
+
+
         [HttpGet("isInWishlist/{productId:int}")]
-        [Authorize]
         public async Task<IActionResult> IsProductInWishlist(int productId)
         {
             string userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;
@@ -115,6 +119,8 @@ namespace WebAPI.Controllers
 
             return Ok(isInWishlist);
         }
+
+
 
         private string GetImgUrl(Product product)
         {

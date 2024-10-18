@@ -2,6 +2,7 @@
 using Domain.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
 using WebAPI.DTOs;
 
 namespace WebAPI.Controllers
@@ -17,9 +18,10 @@ namespace WebAPI.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        [HttpGet("{userId}")]
-        public async Task<IActionResult> GetUserAddresses(string userId)
+        [HttpGet]
+        public async Task<IActionResult> GetUserAddresses()
         {
+            string userId = User.FindFirst(JwtRegisteredClaimNames.Sid)?.Value;
             var addresses = await _unitOfWork.UserAddress.GetAllByUserIdAsync(userId);
             var addressDTOs = addresses.Select(a => new UserAddressDTO
             {

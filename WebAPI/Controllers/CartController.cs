@@ -70,6 +70,7 @@ namespace WebAPI.Controllers
             return Ok(cartItemDTOs);
         }
 
+
         // Helper method to get the first image URL or a default placeholder
         private string GetImgUrl(CartItem item)
         {
@@ -83,7 +84,6 @@ namespace WebAPI.Controllers
 
             return "https://picsum.photos/seed/picsum/200/300"; // Return a default image URL if no images are available
         }
-
 
 
         //[HttpGet]
@@ -172,6 +172,7 @@ namespace WebAPI.Controllers
 
         }
 
+
         [HttpDelete]
         [Authorize]
         public async Task<IActionResult> RemoveItemFromCart(int cartItemId)
@@ -211,6 +212,7 @@ namespace WebAPI.Controllers
             }
         }
 
+
         [HttpPost("move-to-wishlist/{cartItemId}")]
         public async Task<IActionResult> MoveToWishlist(int cartItemId)
         {
@@ -247,6 +249,7 @@ namespace WebAPI.Controllers
 
             return Ok(new Response { Status = "success", Message = "Item moved to wishlist" });
         }
+
 
         //private string GetImgUrl(CartItem product)
         //{
