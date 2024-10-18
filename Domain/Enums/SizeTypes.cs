@@ -10,6 +10,8 @@ namespace Domain.Enums
     {
         Alpha,
         Numeric,
-        AgeBased
+        AgeBased,
+        OneToSix,
+        SevenToFourteen
     }
 }

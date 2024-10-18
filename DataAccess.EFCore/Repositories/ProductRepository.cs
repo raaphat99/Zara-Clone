@@ -124,6 +124,16 @@ namespace DataAccess.EFCore.Repositories
             return filteredProducts.ToList(); // Return the filtered list of products
         }
 
+        public string GetSizeTypeByProductId(int productId)
+        {
+            var product = _dbContext.Products
+                .Include(p => p.Category)
+                .ThenInclude(c => c.SizeType)
+                .FirstOrDefault(p => p.Id == productId);
+
+            return product?.Category?.SizeType?.Type.ToString();
+        }
+
         //#region Old implemetation for search functionality
         //public async Task<ICollection<Product>> SearchProductsAsync(
         //    string searchTerm,

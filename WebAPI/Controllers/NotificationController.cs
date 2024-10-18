@@ -1,15 +1,12 @@
 ﻿using DataAccess.EFCore.Repositories;
 using Domain.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.IdentityModel.Tokens.Jwt;
 using WebAPI.DTOs;
 
 namespace WebAPI.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class NotificationController : ControllerBase
@@ -20,14 +17,10 @@ namespace WebAPI.Controllers
         {
             _unitOfWork = unitOfWork;
         }
-      [HttpGet]
-        public async Task<ActionResult<IEnumerable<NotificationDTO>>> GetNotifications()
-        {
-            string userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;
-            var user = await _unitOfWork.Users.GetByIdAsync(userId);
 
-            if (user == null)
-                return NotFound("User not found!");
+      [HttpGet("{userId}")]
+        public async Task<ActionResult<IEnumerable<NotificationDTO>>> GetNotifications(string userId)
+        {
             var notifications = await _unitOfWork.Notifications.GetAll()
                 .Where(n => n.UserId == userId)
                 .ToListAsync();
@@ -64,7 +57,7 @@ namespace WebAPI.Controllers
 
             await _unitOfWork.Complete(); 
 
-            return NoContent();
+            return Ok("Notification marked as read.");
         }
 
         // DELETE: api/notification/{notificationId}

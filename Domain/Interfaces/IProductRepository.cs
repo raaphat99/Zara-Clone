@@ -22,6 +22,7 @@ namespace Domain.Interfaces
         IQueryable<Product> GetAllWithVariantsAndImages();
         IQueryable<ProductVariant> GetAllVariants();
         IQueryable<ProductVariant> GetVariantsByProductId(int productId);
+        string GetSizeTypeByProductId(int productId);
     }
 
 

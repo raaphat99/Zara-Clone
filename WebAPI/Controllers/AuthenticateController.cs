@@ -48,9 +48,10 @@ namespace WebAPI.Controllers
             return Ok(Ids);
 
         }
+
+
         [HttpPost("login")]
         [AllowAnonymous]
-
         public async Task<IActionResult> Login(LoginModel model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
@@ -81,6 +82,7 @@ namespace WebAPI.Controllers
             }
             return Unauthorized();
         }
+
         [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterModel model)

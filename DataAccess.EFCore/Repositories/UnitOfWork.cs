@@ -54,7 +54,7 @@ namespace DataAccess.EFCore.Repositories
             carts = new Lazy<ICartRepository>(() => new CartRepository(_context));
             trackingNumbers = new Lazy<ITrackingNumberRepository>(() => new TrackingNumberRepository(_context));
             payments = new Lazy<IPaymentRepository>(() => new PaymentRepository(_context));
-            filters = new Lazy<IFilterRepository>(()=> new FilterRepository(_context));
+            filters = new Lazy<IFilterRepository>(() => new FilterRepository(_context));
         }
         #endregion
 
@@ -78,6 +78,7 @@ namespace DataAccess.EFCore.Repositories
         public ITrackingNumberRepository TrackingNumbers => trackingNumbers.Value;
         public IPaymentRepository Payments => payments.Value;
         public IFilterRepository Filters => filters.Value;
+
 
         #endregion
 

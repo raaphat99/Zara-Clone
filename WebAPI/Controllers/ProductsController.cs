@@ -61,6 +61,7 @@ namespace WebAPI.Controllers
         public async Task<IActionResult> GetProductByID(int id)
         {
             var product = await _unitOfWork.Products.GetByIdAsync(id);
+            string productSizeType = _unitOfWork.Products.GetSizeTypeByProductId(id);
 
             if (product == null)
             {
@@ -79,10 +80,26 @@ namespace WebAPI.Controllers
                 CategoryId = product.CategoryId,
                 MainImageUrl = product.ProductVariants
                     .SelectMany(pv => pv.ProductImage)
-                    .FirstOrDefault()?.ImageUrl
+                    .FirstOrDefault()?.ImageUrl,
+                SizeType = productSizeType
             };
 
             return Ok(productDto);
+        }
+
+
+
+        [HttpGet("{id:int}/colors")]
+        public async Task<IActionResult> GetProductDistinctColors(int id)
+        {
+            var distinctColors = await _unitOfWork.ProductVariant
+                .GetAll()
+                .Where(pv => pv.ProductId == id)
+                .Select(pv => pv.ProductColor.ToString())
+                .Distinct()
+                .ToListAsync();
+
+            return Ok(distinctColors);
         }
 
 
@@ -159,7 +176,6 @@ namespace WebAPI.Controllers
 
             return Ok(productDtos);
         }
-
 
 
 

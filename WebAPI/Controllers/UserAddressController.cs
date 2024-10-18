@@ -21,11 +21,7 @@ namespace WebAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUserAddresses()
         {
-            string userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;
-            var user = await _unitOfWork.Users.GetByIdAsync(userId);
-
-            if (user == null)
-                return NotFound("User not found!");
+            string userId = User.FindFirst(JwtRegisteredClaimNames.Sid)?.Value;
             var addresses = await _unitOfWork.UserAddress.GetAllByUserIdAsync(userId);
             var addressDTOs = addresses.Select(a => new UserAddressDTO
             {
