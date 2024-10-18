@@ -20,6 +20,99 @@ namespace WebAPI.Controllers
         {
             _unitOfWork = unitOfWork;
         }
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<OrderDTO>>> GetOrders()
+        {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Unauthorized();
+            }
+            string userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+
+            if (user == null)
+                return NotFound("User not found!");
+            if (string.IsNullOrEmpty(userId))
+            {
+                return BadRequest("User ID cannot be null or empty.");
+            }
+
+            var orders
+                = await _unitOfWork.Orders.GetAll()
+                .Where(o => o.UserId == userId)
+                .ToListAsync();
+
+            if (orders == null || !orders.Any())
+            {
+                return NotFound();
+            }
+
+            var orderDtos = orders.Select(order => new OrderDTO
+            {
+                trackingNumber = order.TrackingNumber,
+                created = order.Created.ToString(),
+                status = order.Status.ToString(),
+                totalPrice = order.TotalPrice,
+                items = order.OrderItems.Select(item => new OrderItemDTO
+                {
+                    name = item.ProductVariant.Product.Name,
+                    productImage = item.ProductVariant.ProductImage.FirstOrDefault()?.ImageUrl,
+                    quantity = item.Quantity,
+                    unitPrice = item.UnitPrice
+                }).ToList()
+            }).ToList();
+
+            return Ok(orderDtos);
+        }
+        [HttpGet("tracking/{trackingNumber}")]
+        public async Task<ActionResult<OrderDetailsDTO>> GetOrderDetails(string trackingNumber)
+        {
+            string userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+
+            if (user == null)
+                return NotFound("User not found!");
+            var order = await _unitOfWork.Orders.GetOrderByTrackingNumberAsync(userId, trackingNumber);
+
+            if (order == null)
+            {
+                return null;
+            }
+
+            var orderDTO = new OrderDetailsDTO
+            {
+                trackingNumber = order.TrackingNumber,
+                status = order.Status.ToString(),
+                orderDate = order.Created.Value,
+                totalPrice = order.TotalPrice,
+                shippingCost = order.ShippingMethod?.ShippingCost ?? 0,
+                paymentMethod = order.Payment?.PaymentMethod ?? "Payment method not available",
+                customer = new CustomerDTO
+                {
+                    name = $"{order.User?.Name} {order.User?.Surname}",
+                    email = order.User?.Email,
+                    shippingAddress = order.User?.Adresses?.FirstOrDefault() != null
+                  ? $"{order.User.Adresses.FirstOrDefault()?.Street}, {order.User.Adresses.FirstOrDefault()?.City}, {order.User.Adresses.FirstOrDefault()?.Country}"
+                      : "Address not available"
+                },
+
+
+
+                items = order.OrderItems?.Select(item => new OrderItemDTO
+                {
+                    name = item.ProductVariant?.Product?.Name ?? "Unknown",
+                    unitPrice = item.UnitPrice,
+                    quantity = item.Quantity,
+                    subtotal = item.Quantity * item.UnitPrice,
+                    productImage = item.ProductVariant?.ProductImage?.FirstOrDefault()?.ImageUrl ?? "Image not available",
+                    color = item.ProductVariant != null ? item.ProductVariant.ProductColor.ToString() : "N/A",
+                    size = item.ProductVariant?.Size?.ToString() ?? "N/A"
+                }).ToList()
+
+            };
+
+            return Ok(orderDTO);
+        }
         [HttpGet("all")]
         [Authorize]
         public async Task<ActionResult<IEnumerable<OrderDTO>>> GetAllOrders()
