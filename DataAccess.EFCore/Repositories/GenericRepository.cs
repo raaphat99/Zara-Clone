@@ -69,7 +69,10 @@ namespace DataAccess.EFCore.Repositories
         {
             _dbSet.RemoveRange(entities);
         }
-
+        public async Task<int> CountAsync()
+        {
+            return await _dbSet.CountAsync();
+        }
 
     }
 }

@@ -2,6 +2,7 @@
 using Domain.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
 using WebAPI.DTOs;
 
 namespace WebAPI.Controllers
@@ -119,5 +120,26 @@ namespace WebAPI.Controllers
             }
             return urls;
         }
+        [HttpGet("count")]
+        public async Task<IActionResult> GetItemCount()
+        {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Unauthorized();
+            }
+
+            string userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+
+            if (user == null)
+            {
+                return NotFound("User not found!");
+            }
+
+            var totalItemsQuantity = user.Cart?.CartItems?.Sum(item => item.Quantity) ?? 0;
+
+            return Ok(totalItemsQuantity);
+        }
+
     }
 }
