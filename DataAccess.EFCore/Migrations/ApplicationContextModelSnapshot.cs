@@ -45,7 +45,7 @@ namespace DataAccess.EFCore.Migrations
                         .IsUnique()
                         .HasFilter("[UserId] IS NOT NULL");
 
-                    b.ToTable("Carts");
+                    b.ToTable("Carts", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.CartItem", b =>
@@ -74,7 +74,7 @@ namespace DataAccess.EFCore.Migrations
 
                     b.HasIndex("ProductVariantId");
 
-                    b.ToTable("CartItems");
+                    b.ToTable("CartItems", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Category", b =>
@@ -107,7 +107,7 @@ namespace DataAccess.EFCore.Migrations
                         .IsUnique()
                         .HasFilter("[SizeTypeId] IS NOT NULL");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Filter", b =>
@@ -129,7 +129,7 @@ namespace DataAccess.EFCore.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Filters");
+                    b.ToTable("Filters", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Notification", b =>
@@ -158,7 +158,7 @@ namespace DataAccess.EFCore.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Order", b =>
@@ -206,7 +206,7 @@ namespace DataAccess.EFCore.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.OrderItem", b =>
@@ -238,7 +238,7 @@ namespace DataAccess.EFCore.Migrations
 
                     b.HasIndex("ProductVariantId");
 
-                    b.ToTable("OrderItems");
+                    b.ToTable("OrderItems", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Payment", b =>
@@ -277,7 +277,7 @@ namespace DataAccess.EFCore.Migrations
                         .IsUnique()
                         .HasFilter("[OrderId] IS NOT NULL");
 
-                    b.ToTable("Payments");
+                    b.ToTable("Payments", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Product", b =>
@@ -315,7 +315,7 @@ namespace DataAccess.EFCore.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.ProductImage", b =>
@@ -352,7 +352,7 @@ namespace DataAccess.EFCore.Migrations
 
                     b.HasIndex("ProductVariantId");
 
-                    b.ToTable("ProductImages");
+                    b.ToTable("ProductImages", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.ProductVariant", b =>
@@ -398,7 +398,7 @@ namespace DataAccess.EFCore.Migrations
 
                     b.HasIndex("SizeId");
 
-                    b.ToTable("ProductVariants");
+                    b.ToTable("ProductVariants", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.ShippingMethod", b =>
@@ -421,7 +421,7 @@ namespace DataAccess.EFCore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ShippingMethods");
+                    b.ToTable("ShippingMethods", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Size", b =>
@@ -443,7 +443,7 @@ namespace DataAccess.EFCore.Migrations
 
                     b.HasIndex("SizeTypeId");
 
-                    b.ToTable("Sizes");
+                    b.ToTable("Sizes", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.SizeType", b =>
@@ -460,7 +460,7 @@ namespace DataAccess.EFCore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SizeTypes");
+                    b.ToTable("SizeTypes", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.User", b =>
@@ -579,7 +579,7 @@ namespace DataAccess.EFCore.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserAddresses");
+                    b.ToTable("UserAddresses", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.UserMeasurement", b =>
@@ -625,7 +625,7 @@ namespace DataAccess.EFCore.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserMeasurements");
+                    b.ToTable("UserMeasurements", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Wishlist", b =>
@@ -648,7 +648,7 @@ namespace DataAccess.EFCore.Migrations
                         .IsUnique()
                         .HasFilter("[UserId] IS NOT NULL");
 
-                    b.ToTable("Wishlists");
+                    b.ToTable("Wishlists", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -796,7 +796,7 @@ namespace DataAccess.EFCore.Migrations
 
                     b.HasIndex("WishlistsId");
 
-                    b.ToTable("ProductWishlist");
+                    b.ToTable("ProductWishlist", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Cart", b =>
