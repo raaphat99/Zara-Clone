@@ -81,6 +81,11 @@ namespace DataAccess.EFCore.Data
             .HasIndex(o => o.TrackingNumber)
             .IsUnique();
 
+            builder.Entity<Category>()
+            .HasOne(c => c.SizeType)
+            .WithMany(st => st.Category)
+            .HasForeignKey(c => c.SizeTypeId);
+
             base.OnModelCreating(builder);
         }
     }
