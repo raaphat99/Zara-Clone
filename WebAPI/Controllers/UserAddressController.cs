@@ -1,5 +1,6 @@
 ﻿using Domain.Interfaces;
 using Domain.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
@@ -7,6 +8,7 @@ using WebAPI.DTOs;
 
 namespace WebAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class UserAddressController : ControllerBase
@@ -22,6 +24,9 @@ namespace WebAPI.Controllers
         public async Task<IActionResult> GetUserAddresses()
         {
             string userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;
+            if (userId == null)
+                return Unauthorized("User ID not found in token");
+
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
 
             if (user == null)
@@ -30,13 +35,14 @@ namespace WebAPI.Controllers
             var addressDTOs = addresses.Select(a => new UserAddressDTO
             {
                 Id = a.Id,
+                PhoneNumber = a.PhoneNumber,
                 Country = a.Country,
                 State = a.State,
                 City = a.City,
                 Street = a.Street,
                 Active = a.Active.Value,
-                UserId = a.UserId
-            }).ToList();
+                Area = a.AddressMoreInfo
+            });
 
             return Ok(addressDTOs);
         }
@@ -49,46 +55,47 @@ namespace WebAPI.Controllers
                 return BadRequest();
             }
 
+            string userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;
+
             // Check if this is the user's first address
-            var userAddresses = await _unitOfWork.UserAddress.GetAllByUserIdAsync(addressDTO.UserId);
+            var userAddresses = await _unitOfWork.UserAddress.GetAllByUserIdAsync(userId);
 
             // Create new UserAddress with Active set based on whether it's the first address
             var address = new UserAddress
             {
+                UserId = userId,
+                AddressMoreInfo = addressDTO.Area,
+                PhoneNumber = addressDTO.PhoneNumber,
                 Country = addressDTO.Country,
                 State = addressDTO.State,
                 City = addressDTO.City,
                 Street = addressDTO.Street,
-                UserId = addressDTO.UserId,
                 Active = userAddresses.Count() == 0 // Set Active to true if first address, otherwise false
             };
 
             await _unitOfWork.UserAddress.AddAsync(address);
             await _unitOfWork.Complete();
 
-            return CreatedAtAction(nameof(GetUserAddresses), new { userId = address.UserId }, address);
+            //return CreatedAtAction(nameof(GetUserAddresses), new { userId = address.UserId }, address);
+            return Ok(userAddresses.Count());
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUserAddress(int id, [FromBody] UserAddressDTO addressDTO)
+        [HttpPut]
+        public async Task<IActionResult> UpdateUserAddress([FromBody] UserAddressDTO addressDTO)
         {
-            if (addressDTO == null || addressDTO.Id != id)
-            {
-                return BadRequest();
-            }
 
-            var address = await _unitOfWork.UserAddress.GetByIdAsync(id);
+            var address = await _unitOfWork.UserAddress.GetByIdAsync(addressDTO.Id);
             if (address == null)
             {
                 return NotFound();
             }
 
+            address.PhoneNumber = addressDTO.PhoneNumber;
             address.Country = addressDTO.Country;
             address.State = addressDTO.State;
             address.City = addressDTO.City;
             address.Street = addressDTO.Street;
-            address.UserId = addressDTO.UserId;
-
+            address.AddressMoreInfo = addressDTO.Area;
             _unitOfWork.UserAddress.Update(address);
             await _unitOfWork.Complete();
 
