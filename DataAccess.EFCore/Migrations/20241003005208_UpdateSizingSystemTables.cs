@@ -58,7 +58,6 @@ namespace DataAccess.EFCore.Migrations
                 name: "IX_Categories_SizeTypeId",
                 table: "Categories",
                 column: "SizeTypeId",
-                unique: true,
                 filter: "[SizeTypeId] IS NOT NULL");
 
             migrationBuilder.AddForeignKey(
