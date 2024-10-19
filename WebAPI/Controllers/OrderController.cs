@@ -212,7 +212,7 @@ namespace WebAPI.Controllers
 
                     if (checkout.paymentMethod == "POD")
                     {
-                        order.Status = OrderStatus.Shipped;
+                       
                         var cart = await _unitOfWork.Carts.FindSingle(c => c.UserId == order.UserId);
                         if (cart != null)
                         {

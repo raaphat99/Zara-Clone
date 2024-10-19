@@ -81,7 +81,7 @@ namespace WebAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> NotifyUser([FromBody]NotifyDTO notification)
         {
-            var user = _unitOfWork.Users.FindSingle(u => u.Id == notification.userId);
+            var user = await _unitOfWork.Users.FindSingle(u => u.Id == notification.userId);
             if (user == null)
                 return NotFound();
             Notification note = new Notification
@@ -97,8 +97,10 @@ namespace WebAPI.Controllers
             return Ok(new Response {Status="success", Message = "user notified successfully" });
         }
         [HttpPost("notify-all")]
-        public async Task<IActionResult> NotifyAll([FromBody] string message)
+        public async Task<IActionResult> NotifyAll([FromBody] NotifyDTO notification)
         {
+            if(notification.message==null)
+                return NotFound("empty message");
             var users = _unitOfWork.Users.GetAll();
             List<Notification> notes = new List<Notification>();
             foreach (var user in users)
@@ -107,7 +109,7 @@ namespace WebAPI.Controllers
                 {
                     UserId = user.Id,
                     IsRead = false,
-                    Message = message,
+                    Message = notification.message,
                     Created = DateTime.Now,
 
                 };

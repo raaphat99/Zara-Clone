@@ -33,7 +33,7 @@ namespace WebAPI.Controllers
             {
                 int OrderId = int.Parse(merchantOrderId);
                 var order = await _unitOfWork.Orders.FindSingle(o => o.Id == OrderId);
-                order.Status = OrderStatus.Shipped; //update order status
+                order.Status = OrderStatus.Pending; //update order status
 
                 var payment = await _unitOfWork.Payments.FindSingle(o => o.Id == order.Payment.Id);
                 payment.PaymentStatus = PaymentStatus.Paid; //update payment status
