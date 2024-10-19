@@ -16,7 +16,7 @@ namespace Domain.Models
 
         [Required]
         public virtual SizeTypes Type { get; set; }
-        public virtual Category Category { get; set; }
+        public virtual ICollection<Category> Category { get; set; } = new List<Category>();
         public virtual ICollection<Size> Sizes { get; set; } = new List<Size>();
     }
 }

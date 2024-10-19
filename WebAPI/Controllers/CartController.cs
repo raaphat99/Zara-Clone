@@ -167,7 +167,7 @@ namespace WebAPI.Controllers
             }
             else
             {
-                return NotFound("Out Of Stock");
+                return Ok(new Response { Status = "success", Message = "Out Of Stock" });
             }
 
         }

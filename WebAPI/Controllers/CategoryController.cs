@@ -1,5 +1,7 @@
+using Domain.Auth;
 using Domain.Interfaces;
 using Domain.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.DTOs;
@@ -16,7 +18,6 @@ namespace WebAPI.Controllers
         {
             _unitOfWork = unitOfWork;
         }
-
 
 
         [HttpGet("{id:int}/subcategories")]
@@ -44,7 +45,6 @@ namespace WebAPI.Controllers
         }
 
 
-
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetCategoryById(int id)
         {
@@ -68,7 +68,7 @@ namespace WebAPI.Controllers
         }
 
 
-
+        [Authorize(Roles = UserRoles.Admin)]
         [HttpPost]
         public async Task<IActionResult> AddCategory([FromBody] CategoryDto categorydto)
         {
@@ -91,7 +91,7 @@ namespace WebAPI.Controllers
         }
 
 
-
+        [Authorize(Roles = UserRoles.Admin)]
         [HttpPut("{id:int}")]
         public async Task<IActionResult> UpdateCategory(int id, [FromBody] CategoryDto updatedCategory)
         {
@@ -118,7 +118,7 @@ namespace WebAPI.Controllers
         }
 
 
-
+        [Authorize(Roles = UserRoles.Admin)]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteCategory(int id)
         {
