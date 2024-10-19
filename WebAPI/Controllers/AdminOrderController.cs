@@ -55,8 +55,8 @@ namespace WebAPI.Controllers
                 totalPrice = order.TotalPrice,
                 items = order.OrderItems.Select(item => new OrderItemDTO
                 {
-                    name = item.ProductVariant.Product.Name,
-                    productImage = item.ProductVariant.ProductImage.FirstOrDefault()?.ImageUrl,
+                    name = item.ProductVariant?.Product?.Name ?? "Unknown Product",
+                    productImage = item.ProductVariant?.ProductImage?.FirstOrDefault()?.ImageUrl ?? "default-image-url.jpg",
                     quantity = item.Quantity,
                     unitPrice = item.UnitPrice
                 }).ToList()
@@ -123,7 +123,6 @@ namespace WebAPI.Controllers
             {
                 return NotFound("No orders found.");
             }
-
             var orderDtos = orders.Select(order => new OrderDTO
             {
                 id = order.Id,
@@ -133,13 +132,12 @@ namespace WebAPI.Controllers
                 totalPrice = order.TotalPrice,
                 items = order.OrderItems.Select(item => new OrderItemDTO
                 {
-                    name = item.ProductVariant.Product.Name,
-                    productImage = item.ProductVariant.ProductImage.FirstOrDefault()?.ImageUrl,
+                    name = item.ProductVariant?.Product?.Name ?? "Unknown Product",
+                    productImage = item.ProductVariant?.ProductImage?.FirstOrDefault()?.ImageUrl ?? "default-image-url.jpg",
                     quantity = item.Quantity,
                     unitPrice = item.UnitPrice
                 }).ToList(),
-                customerName = $"{order.User.Name} {order.User.Surname}",
-
+                customerName = $"{order.User?.Name ?? "Unknown"} {order.User?.Surname ?? "Customer"}",
             }).ToList();
 
             return Ok(orderDtos);
