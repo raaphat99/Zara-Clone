@@ -1,6 +1,7 @@
 ﻿using DataAccess.EFCore.Repositories;
+using Domain.Auth;
 using Domain.Interfaces;
-using Microsoft.AspNetCore.Authorization;
+using Domain.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +10,6 @@ using WebAPI.DTOs;
 
 namespace WebAPI.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class NotificationController : ControllerBase
@@ -20,7 +20,8 @@ namespace WebAPI.Controllers
         {
             _unitOfWork = unitOfWork;
         }
-      [HttpGet]
+
+        [HttpGet]
         public async Task<ActionResult<IEnumerable<NotificationDTO>>> GetNotifications()
         {
             string userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;
@@ -39,7 +40,7 @@ namespace WebAPI.Controllers
 
             var notificationDtos = notifications.Select(n => new NotificationDTO
             {
-                id=n.Id,
+                id = n.Id,
                 userId = n.UserId,
                 message = n.Message,
                 isRead = n.IsRead,
@@ -60,9 +61,9 @@ namespace WebAPI.Controllers
                 return NotFound("Notification not found.");
             }
 
-            notification.IsRead = true; 
+            notification.IsRead = true;
 
-            await _unitOfWork.Complete(); 
+            await _unitOfWork.Complete();
 
             return NoContent();
         }
@@ -78,10 +79,49 @@ namespace WebAPI.Controllers
                 return NotFound("Notification not found.");
             }
 
-            _unitOfWork.Notifications.Remove(notification); 
-            await _unitOfWork.Complete(); 
+            _unitOfWork.Notifications.Remove(notification);
+            await _unitOfWork.Complete();
 
             return Ok("Notification deleted.");
+        }
+        [HttpPost]
+        public async Task<IActionResult> NotifyUser([FromBody]NotifyDTO notification)
+        {
+            var user = _unitOfWork.Users.FindSingle(u => u.Id == notification.userId);
+            if (user == null)
+                return NotFound();
+            Notification note = new Notification
+            {
+                UserId = notification.userId,
+                IsRead = false,
+                Message = notification.message,
+                Created = DateTime.Now,
+
+            };
+            await _unitOfWork.Notifications.AddAsync(note);
+            await _unitOfWork.Complete();
+            return Ok(new Response {Status="success", Message = "user notified successfully" });
+        }
+        [HttpPost("notify-all")]
+        public async Task<IActionResult> NotifyAll([FromBody] string message)
+        {
+            var users = _unitOfWork.Users.GetAll();
+            List<Notification> notes = new List<Notification>();
+            foreach (var user in users)
+            {
+                Notification note = new Notification
+                {
+                    UserId = user.Id,
+                    IsRead = false,
+                    Message = message,
+                    Created = DateTime.Now,
+
+                };
+                notes.Add(note);
+            }
+         await   _unitOfWork.Notifications.AddRangeAsync(notes);
+            await _unitOfWork.Complete();
+            return Ok(new Response {Status = "success",Message="All users notified successfully"});
         }
     }
 }

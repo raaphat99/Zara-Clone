@@ -3,7 +3,7 @@ using DataAccess.EFCore.Data;
 using DataAccess.EFCore.Repositories;
 using Domain.Interfaces;
 using Domain.Models;
-using Domain.Utilities;
+
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Stripe;
+
 using System.Text;
 using System.Text.Json.Serialization;
 using WebAPI.Services;
@@ -40,7 +40,7 @@ namespace WebAPI
             // Register Generic Repository & UnitOfWork services
             builder.Services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
+            builder.Services.AddScoped<ProductService>();
 
             // JWT configuration
             builder.Services.AddAuthentication(options =>
@@ -61,10 +61,8 @@ namespace WebAPI
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]))
                 };
             });
-       
 
-            // Stripe Configuration
-            builder.Services.Configure<StripeData>(builder.Configuration.GetSection("stripe"));
+         
 
             // Configure JSON Serialization Settings
             builder.Services.AddControllers()
@@ -131,6 +129,8 @@ namespace WebAPI
 
             var app = builder.Build();
 
+            app.UseCors("mypolicy");
+
             app.UseDeveloperExceptionPage();
 
             // Configure the HTTP request pipeline.
@@ -140,7 +140,7 @@ namespace WebAPI
                 app.UseSwaggerUI();
             }
 
-            StripeConfiguration.ApiKey = builder.Configuration.GetSection("stripe:SecretKey").Get<string>();
+            
             app.UseCors("mypolicy");
 
             app.UseAuthentication();

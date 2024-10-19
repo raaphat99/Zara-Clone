@@ -17,6 +17,6 @@ namespace Domain.Models
 
         [ForeignKey("Category")]
         public int CategoryId { get; set; }
-        public virtual DbSet<Category> Category { get; set; }
+        public virtual Category Category { get; set; }
     }
 }

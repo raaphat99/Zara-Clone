@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Stripe;
+using WebAPI.DTOs.ProductDTOs;
 using WebAPI.Services;
 using static Amazon.S3.Util.S3EventNotification;
 
@@ -12,7 +13,7 @@ namespace WebAPI.Controllers
 
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class ProductImageController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -28,16 +29,30 @@ namespace WebAPI.Controllers
 
 
         [AllowAnonymous]
-        [HttpGet("{variantId}")]
-        public async Task<ActionResult<IEnumerable<ProductImage>>> GetImagesByVariant(int variantId)
+        [HttpGet("variants/{variantId:int}")]
+        public async Task<ActionResult<IEnumerable<ProductImageDTO>>> GetImagesByVariant(int variantId)
         {
             var images = await _unitOfWork.ProductImages.GetImagesByVariantIdAsync(variantId);
             if (images == null || !images.Any())
             {
                 return NotFound();
             }
-            return Ok(images);
+
+            // Map ProductImage to ProductImageDTO
+            var imageDtos = images.Select(image => new ProductImageDTO
+            {
+                Id = image.Id,
+                ImageUrl = image.ImageUrl,
+                AlternativeText = image.AlternativeText,
+                SortOrder = image.SortOrder,
+                Created = image.Created,
+                Updated = image.Updated,
+                ImageType = image.ImageType.ToString(),
+            }).ToList();
+
+            return Ok(imageDtos);
         }
+
 
 
         [HttpPost("/{variantId:int}")]

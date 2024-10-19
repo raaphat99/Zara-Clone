@@ -1,6 +1,7 @@
 ﻿using DataAccess.EFCore.Data;
 using Domain.Interfaces;
 using Domain.Models;
+using Microsoft.EntityFrameworkCore.Storage;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,8 +28,9 @@ namespace DataAccess.EFCore.Repositories
         private readonly Lazy<IOrderRepository> order;
         private readonly Lazy<IOrderItemRepository> orderItem;
         private readonly Lazy<ICartRepository> carts;
+        private readonly Lazy<ITrackingNumberRepository> trackingNumbers;
+        private readonly Lazy<IPaymentRepository> payments;
         private readonly Lazy<IFilterRepository> filters;
-
         #endregion
 
 
@@ -51,7 +53,9 @@ namespace DataAccess.EFCore.Repositories
             order = new Lazy<IOrderRepository>(() => new OrderRepository(_context));
             orderItem = new Lazy<IOrderItemRepository>(() => new OrderItemRepository(_context));
             carts = new Lazy<ICartRepository>(() => new CartRepository(_context));
-            filters= new Lazy<IFilterRepository>(() => new FilterRepository(_context));
+            trackingNumbers = new Lazy<ITrackingNumberRepository>(() => new TrackingNumberRepository(_context));
+            payments = new Lazy<IPaymentRepository>(() => new PaymentRepository(_context));
+            filters = new Lazy<IFilterRepository>(() => new FilterRepository(_context));
         }
         #endregion
 
@@ -72,6 +76,8 @@ namespace DataAccess.EFCore.Repositories
         public IOrderRepository Orders => order.Value;
         public IOrderItemRepository OrderItems => orderItem.Value;
         public ICartRepository Carts => carts.Value;
+        public ITrackingNumberRepository TrackingNumbers => trackingNumbers.Value;
+        public IPaymentRepository Payments => payments.Value;
         public IFilterRepository Filters => filters.Value;
 
 
@@ -83,8 +89,14 @@ namespace DataAccess.EFCore.Repositories
         {
             return await _context.SaveChangesAsync();
         }
+        public async Task<IDbContextTransaction> BeginTransactionAsync()
+        {
+            return await _context.Database.BeginTransactionAsync();
+        }
 
-        public void Dispose()
+      
+   
+    public void Dispose()
         {
             _context.Dispose();
         }

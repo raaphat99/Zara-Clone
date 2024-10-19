@@ -1,115 +1,30 @@
-﻿using Domain.Enums;
+﻿using Amazon.S3.Model;
+using Domain.Auth;
+using Domain.Enums;
 using Domain.Interfaces;
 using Domain.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Stripe.Climate;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Policy;
 using WebAPI.DTOs;
+using WebAPI.Services;
+
 
 namespace WebAPI.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class OrderController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
-
-        public OrderController(IUnitOfWork unitOfWork)
+        private const string TrackingPrefix = "#ZA";
+        private readonly ProductService _productService;
+        public OrderController(IUnitOfWork unitOfWork, ProductService productService)
         {
             _unitOfWork = unitOfWork;
-        }
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<OrderDTO>>> GetOrders()
-        {
-            if (!User.Identity.IsAuthenticated)
-            {
-                return Unauthorized();
-            }
-            string userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;
-            var user = await _unitOfWork.Users.GetByIdAsync(userId);
-
-            if (user == null)
-                return NotFound("User not found!");
-            if (string.IsNullOrEmpty(userId))
-            {
-                return BadRequest("User ID cannot be null or empty.");
-            }
-
-            var orders
-                = await _unitOfWork.Orders.GetAll()
-                .Where(o => o.UserId == userId) 
-                .ToListAsync();
-
-            if (orders == null || !orders.Any())
-            {
-                return NotFound(); 
-            }
-
-            var orderDtos = orders.Select(order => new OrderDTO
-            {
-                trackingNumber = order.TrackingNumber,
-                created = order.Created.ToString(),
-                status = order.Status.ToString(),
-                totalPrice = order.TotalPrice,
-                items = order.OrderItems.Select(item => new OrderItemDTO
-                {
-                    name = item.ProductVariant.Product.Name,
-                    productImage = item.ProductVariant.ProductImage.FirstOrDefault()?.ImageUrl,
-                    quantity = item.Quantity,
-                    unitPrice = item.UnitPrice
-                }).ToList()
-            }).ToList();
-
-            return Ok(orderDtos);
-        }
-        [HttpGet("tracking/{trackingNumber}")]
-        public async Task<ActionResult<OrderDetailsDTO>> GetOrderDetails(string trackingNumber)
-        {
-            string userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;
-            var user = await _unitOfWork.Users.GetByIdAsync(userId);
-
-            if (user == null)
-                return NotFound("User not found!");
-            var order = await _unitOfWork.Orders.GetOrderByTrackingNumberAsync(userId, trackingNumber);
-
-            if (order == null)
-            {
-                return null; 
-            }
-
-            var orderDTO = new OrderDetailsDTO
-            {
-                trackingNumber = order.TrackingNumber,
-                status=order.Status.ToString(),
-                orderDate = order.Created.Value,
-                totalPrice = order.TotalPrice,
-                shippingCost = order.ShippingMethod.ShippingCost,
-                paymentMethod = order.Payment?.PaymentMethod,
-
-                customer = new CustomerDTO
-                {
-                    name = $"{order.User.Name} {order.User.Surname}",
-                    email = order.User.Email,
-                    shippingAddress = $"{order.User.Adresses.FirstOrDefault()?.Street}, {order.User.Adresses.FirstOrDefault()?.City}, {order.User.Adresses.FirstOrDefault()?.Country}"
-                },
-
-                items = order.OrderItems.Select(item => new OrderItemDTO
-                {
-                    name = item.ProductVariant.Product.Name,
-                    unitPrice = item.UnitPrice,
-                    quantity = item.Quantity,
-                    subtotal = item.Quantity * item.UnitPrice,
-                    productImage = item.ProductVariant.ProductImage.FirstOrDefault()?.ImageUrl,
-                    color = item.ProductVariant.ProductColor.ToString(),
-                    size = item.ProductVariant.Size.ToString()
-                }).ToList()
-            };
-
-            return Ok(orderDTO);
+            _productService = productService;
         }
         [HttpPut("/{orderId}/status")]
         public async Task<IActionResult> UpdateOrderStatus(int orderId, OrderStatus newStatus)
@@ -152,11 +67,134 @@ namespace WebAPI.Controllers
             };
 
             await _unitOfWork.Notifications.AddAsync(notification);
-            await _unitOfWork.Complete(); 
+            await _unitOfWork.Complete();
 
             return Ok($"Order status updated to {newStatus} for tracking number {order.TrackingNumber} and notification sent.");
         }
+        [HttpPost]
+        public async Task<IActionResult> CreateOrder(CheckoutDTO checkout)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(new Response { Status = "Error", Message = "Send Valid Data" });
 
+                var userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;
+                var user = await _unitOfWork.Users.FindSingle(u => u.Id == userId);
+                if (user == null)
+                    return Unauthorized(new Response { Status = "Error", Message = "Invalid token or email not found in token" });
+
+                // Use a single transaction for all database operations
+                using var transaction = await _unitOfWork.BeginTransactionAsync();
+                try
+                {
+                    //get tracking number numeric section from database
+                    var trackingNumberRecord = await _unitOfWork.TrackingNumbers.GetByIdAsync(1);
+                    int trackingNumber = trackingNumberRecord.UniversalTrackingNumber;
+
+                    // create the order
+                    Order order = new Order
+                    {
+                        UserId = userId,
+                        UserAddressId = checkout.userAddressId,
+                        TrackingNumber = $"{TrackingPrefix}{trackingNumber}",
+                        TotalPrice = checkout.totalPrice,
+                        Created = DateTime.UtcNow,
+                        Status = OrderStatus.Pending
+                    };
+
+                    // Update tracking number
+                    trackingNumberRecord.UniversalTrackingNumber += 1;
+                    _unitOfWork.TrackingNumbers.Update(trackingNumberRecord);
+                    await _unitOfWork.Orders.AddAsync(order);
+                    await _unitOfWork.Complete();
+
+                    // Create order items
+                    var orderItems = checkout.cartItems.Select(item => new OrderItem
+                    {
+                        ProductVariantId = item.productVariantId,
+                        OrderId = order.Id,
+                        UnitPrice = item.price ?? 0,
+                        Quantity = item.quantity ?? 0,
+                        Subtotal = (item.quantity ?? 1 * (item.price ?? 1))
+                    }).ToList();
+
+                    // Create payment
+                    Payment payment = new Payment
+                    {
+                        OrderId = order.Id,
+                        Amount = order.TotalPrice,
+                        Created = DateTime.UtcNow,
+                        AmountRefunded = 0,
+                        PaymentMethod = checkout.paymentMethod,
+                        PaymentStatus = PaymentStatus.Pending,
+                    };
+
+                    if (checkout.paymentMethod == "POD")
+                    {
+                        order.Status = OrderStatus.Shipped;
+                        var cart = await _unitOfWork.Carts.FindSingle(c => c.UserId == order.UserId);
+                        if (cart != null)
+                        {
+                            _unitOfWork.CartItems.RemoveRange(cart.CartItems);
+                        }
+
+                        foreach (var item in orderItems)
+                        {
+                            await _productService.UpdateStockQuantity(item.ProductVariantId ?? 0, item.Quantity);
+                        }
+
+                        var notification = new Notification
+                        {
+                            UserId = order.UserId,
+                            Message = $"Good news! Order {order.TrackingNumber} has been shipped.",
+                            Created = DateTime.Now,
+                            IsRead = false
+                        };
+
+                        await _unitOfWork.Notifications.AddAsync(notification);
+                        await _unitOfWork.OrderItems.AddRangeAsync(orderItems);
+                        await _unitOfWork.Payments.AddAsync(payment);
+                        await _unitOfWork.Complete();
+
+                        await transaction.CommitAsync();
+                        return Ok(new Response { Status="Succees",Message="order Confirmed!"});
+                    }
+
+                    await _unitOfWork.OrderItems.AddRangeAsync(orderItems);
+                    await _unitOfWork.Payments.AddAsync(payment);
+                    await _unitOfWork.Complete();
+
+                    await transaction.CommitAsync();
+
+                    string hash = Kashier.create_hash(order.TotalPrice.ToString(), order.Id.ToString());
+                    string redirectUrl = $"https://checkout.kashier.io/?merchantId=MID-29117-281&" +
+                                         $"orderId={order.Id}&" +
+                                         $"amount={order.TotalPrice}&" +
+                                         $"currency=EGP&" +
+                                         $"hash={hash}&" +
+                                         $"mode=test&" +
+                                         $"metaData={{\"metaData\":\"myData\"}}&" +
+                                         $"merchantRedirect=http://localhost:5250/api/WebHook&" +
+                                         $"allowedMethods=card,bank_installments,wallet&" +
+                                         $"failureRedirect=true&" +
+                                         $"redirectMethod=post&" +
+                                         $"brandColor=%23000000&" +
+                                         $"display=en";
+                    return Ok(new OrderResponse { Status = "Success", RedirectUrl = redirectUrl });
+                }
+                catch (Exception)
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                
+                return StatusCode(500, new Response { Status = "Error", Message = "An error occurred while processing your order" });
+            }
+        }
         private string GenerateNotificationMessage(OrderStatus newStatus, string trackingNumber)
         {
             return newStatus switch
