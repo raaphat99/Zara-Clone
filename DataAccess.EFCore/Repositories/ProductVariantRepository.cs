@@ -1,4 +1,5 @@
 ﻿using DataAccess.EFCore.Data;
+using Domain.Enums;
 using Domain.Interfaces;
 using Domain.Models;
 using Microsoft.EntityFrameworkCore;
@@ -57,7 +58,16 @@ namespace DataAccess.EFCore.Repositories
             _dbContext.ProductVariants.Remove(productVariant);
             await SaveChangesAsync(); // Save changes to the database
         }
-
+        public List<string> GetAllColors()
+        {
+            return Enum.GetNames(typeof(Color)).ToList();
+        }
+        public List<string> GetAllMaterial()
+        {
+            return Enum.GetNames(typeof(Material)).ToList();
+        }
+        // Get all available sizes
+      
         // Save changes asynchronously
         public async Task SaveChangesAsync()
         {

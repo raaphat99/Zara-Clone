@@ -16,36 +16,36 @@ namespace WebAPI.Controllers
         {
             _unitOfWork = unitOfWork;
         }
-        [HttpGet("{userId}")]
-        public async Task<IActionResult> GetAllItems(string userId)
-        {
-            var user = await _unitOfWork.Users.GetByIdAsync(userId);
-            var cart = user.Cart.CartItems.ToList();
-            // if(cart == null )
-            //return NotFound("User has No Cart");
-            if (!cart.Any())
-                return NotFound("No Items In This Cart");
-            List<CartItemDTO> cartItems = new List<CartItemDTO>();
-            foreach (var item in cart)
-            {
-                var images = item.ProductVariant.ProductImage.ToList();
-                var cartItemDTO = new CartItemDTO
-                {
-                    Id = item.Id,
-                    Quantity = item.Quantity,
-                    Color = item.ProductVariant.ProductColor,
-                    Size = item.ProductVariant.Size.Value,
-                    Title = item.ProductVariant.Product.Name,
-                    ImageUrl = await GetImgUrls(item),
-                    Price = item.UnitPrice
+        //[HttpGet("{userId}")]
+        //public async Task<IActionResult> GetAllItems(string userId)
+        //{
+        //    var user = await _unitOfWork.Users.GetByIdAsync(userId);
+        //    var cart = user.Cart.CartItems.ToList();
+        //    // if(cart == null )
+        //    //return NotFound("User has No Cart");
+        //    if (!cart.Any())
+        //        return NotFound("No Items In This Cart");
+        //    List<CartItemDTO> cartItems = new List<CartItemDTO>();
+        //    foreach (var item in cart)
+        //    {
+        //        var images = item.ProductVariant.ProductImage.ToList();
+        //        var cartItemDTO = new CartItemDTO
+        //        {
+        //            Id = item.Id,
+        //            Quantity = item.Quantity,
+        //            Color = item.ProductVariant.ProductColor,
+        //            Size = item.ProductVariant.Size.Value,
+        //            Title = item.ProductVariant.Product.Name,
+        //            ImageUrl = await GetImgUrls(item),
+        //            Price = item.UnitPrice
 
-                };
-                cartItems.Add(cartItemDTO);
-            }
+        //        };
+        //        cartItems.Add(cartItemDTO);
+        //    }
 
-            return Ok(cartItems);
+        //    return Ok(cartItems);
 
-        }
+        //}
 
         [HttpPost]
         public async Task<IActionResult> AddCartItem(int productVariantId, string userId)

@@ -2,6 +2,7 @@
 using Domain.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using WebAPI.DTOs;
 
 namespace WebAPI.Controllers
@@ -61,5 +62,34 @@ namespace WebAPI.Controllers
 
             return NoContent();
         }
+
+        [HttpGet("by-size-type/{sizeTypeId:int}")]
+        public async Task<IActionResult> GetSizesBySizeTypeId(int sizeTypeId)
+        {
+            // استرجاع جميع الأحجام المرتبطة بـ SizeTypeId المحدد
+            var sizes = await _unitOfWork.Sizes.FindAsync(s => s.SizeTypeId == sizeTypeId);
+
+            if (sizes == null || !sizes.Any())
+            {
+                return NotFound($"No sizes found for SizeTypeId {sizeTypeId}.");
+            }
+
+            var prosize = new List<SizeDTO>();
+            foreach (var size in sizes)
+            {
+                prosize.Add(new SizeDTO
+                {
+                    Id = size.Id,
+                    
+                    sizevalue = size.Value.ToString() ,// هنا نقوم بإرجاع القيمة كنص
+                    
+                });
+            }
+
+            return Ok(prosize);
+        }
+
+
+
     }
 }
