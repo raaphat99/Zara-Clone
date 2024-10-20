@@ -31,7 +31,10 @@ namespace DataAccess.EFCore.Repositories
             return await _dbContext.Sizes
                 .FirstOrDefaultAsync(size => size.Value == sizeValue);
         }
-
+        public async Task<List<Size>> GetAllSizesAsync()
+        {
+            return await _dbContext.Sizes.ToListAsync();
+        }
 
     }
 }

@@ -62,7 +62,7 @@ namespace WebAPI
                 };
             });
 
-         
+
 
             // Configure JSON Serialization Settings
             builder.Services.AddControllers()
@@ -140,13 +140,9 @@ namespace WebAPI
                 app.UseSwaggerUI();
             }
 
-            
-            app.UseCors("mypolicy");
-
             app.UseAuthentication();
 
             app.UseAuthorization();
-
 
             app.MapControllers();
 

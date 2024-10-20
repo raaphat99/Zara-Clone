@@ -4,6 +4,7 @@ using DataAccess.EFCore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.EFCore.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20241019182505_MakeCategorySizeTypeOneToOne")]
+    partial class MakeCategorySizeTypeOneToOne
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -103,7 +106,9 @@ namespace DataAccess.EFCore.Migrations
 
                     b.HasIndex("ParentCategoryId");
 
-                    b.HasIndex("SizeTypeId");
+                    b.HasIndex("SizeTypeId")
+                        .IsUnique()
+                        .HasFilter("[SizeTypeId] IS NOT NULL");
 
                     b.ToTable("Categories");
                 });
@@ -844,8 +849,8 @@ namespace DataAccess.EFCore.Migrations
                         .HasForeignKey("ParentCategoryId");
 
                     b.HasOne("Domain.Models.SizeType", "SizeType")
-                        .WithMany("Category")
-                        .HasForeignKey("SizeTypeId");
+                        .WithOne("Category")
+                        .HasForeignKey("Domain.Models.Category", "SizeTypeId");
 
                     b.Navigation("ParentCategory");
 
@@ -1104,7 +1109,8 @@ namespace DataAccess.EFCore.Migrations
 
             modelBuilder.Entity("Domain.Models.SizeType", b =>
                 {
-                    b.Navigation("Category");
+                    b.Navigation("Category")
+                        .IsRequired();
 
                     b.Navigation("Sizes");
                 });

@@ -39,6 +39,7 @@ namespace WebAPI.Controllers
                     Description = category.Description,
                     ParentCategoryId = category.ParentCategoryId,
                     SizeTypeId = category.SizeTypeId,
+                    ParentCategoryName=category.Name,
                 });
             }
             return Ok(categoryDtos);
@@ -62,6 +63,7 @@ namespace WebAPI.Controllers
                 Description = category.Description,
                 ParentCategoryId = category.ParentCategoryId,
                 SizeTypeId = category.SizeTypeId,
+                ParentCategoryName=category.Name,
             };
 
             return Ok(categorydto);

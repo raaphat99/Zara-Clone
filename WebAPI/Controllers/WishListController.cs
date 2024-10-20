@@ -50,8 +50,6 @@ namespace WebAPI.Controllers
         }
 
 
-
-
         [HttpPost("{productId:int}")]
         public async Task<IActionResult> AddToWishList(int productId)
         {
@@ -182,10 +180,30 @@ namespace WebAPI.Controllers
 
         private string GetImgUrl(Product product)
         {
+            if (product == null || product.ProductVariants == null || !product.ProductVariants.Any())
+            {
+                return "default-image-url";
+            }
+
             var variants = product.ProductVariants.ToList();
+
+            if (variants[0].ProductImage == null || !variants[0].ProductImage.Any())
+            {
+                return "default-image-url";
+            }
+
             var imgs = variants[0].ProductImage.ToList();
-            string imgUrl = imgs[0].ImageUrl;
-            return imgUrl;
+
+            return imgs[0].ImageUrl ?? "default-image-url";
         }
+
+
+        //private string GetImgUrl(Product product)
+        //{
+        //    var variants = product.ProductVariants.ToList();
+        //    var imgs = variants[0].ProductImage.ToList();
+        //    string imgUrl = imgs[0].ImageUrl;
+        //    return imgUrl;
+        //}
     }
 }

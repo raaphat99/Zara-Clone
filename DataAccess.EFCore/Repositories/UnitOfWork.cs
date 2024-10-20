@@ -31,6 +31,9 @@ namespace DataAccess.EFCore.Repositories
         private readonly Lazy<ITrackingNumberRepository> trackingNumbers;
         private readonly Lazy<IPaymentRepository> payments;
         private readonly Lazy<IFilterRepository> filters;
+        private readonly Lazy<IProductTypeRepository> sizeType;
+
+
         #endregion
 
 
@@ -56,6 +59,9 @@ namespace DataAccess.EFCore.Repositories
             trackingNumbers = new Lazy<ITrackingNumberRepository>(() => new TrackingNumberRepository(_context));
             payments = new Lazy<IPaymentRepository>(() => new PaymentRepository(_context));
             filters = new Lazy<IFilterRepository>(() => new FilterRepository(_context));
+
+            sizeType=new Lazy<IProductTypeRepository>(() => new ProductTypeRepository(_context));
+
         }
         #endregion
 
@@ -79,6 +85,7 @@ namespace DataAccess.EFCore.Repositories
         public ITrackingNumberRepository TrackingNumbers => trackingNumbers.Value;
         public IPaymentRepository Payments => payments.Value;
         public IFilterRepository Filters => filters.Value;
+        public IProductTypeRepository SizeType => sizeType.Value;
 
 
         #endregion

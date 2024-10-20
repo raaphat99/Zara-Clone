@@ -25,5 +25,18 @@ namespace DataAccess.EFCore.Repositories
             .Where(img => img.ProductVariantId == variantId)
             .ToListAsync();
         }
+        public async Task DeleteImagesByVariantIdAsync(int variantId)
+        {
+            var imagesToDelete = await _context.ProductImages
+                .Where(img => img.ProductVariantId == variantId)
+                .ToListAsync();
+
+            if (imagesToDelete.Any())
+            {
+                _context.ProductImages.RemoveRange(imagesToDelete);
+                await _context.SaveChangesAsync();
+            }
+        }
+
     }
 }

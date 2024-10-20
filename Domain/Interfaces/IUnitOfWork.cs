@@ -27,6 +27,7 @@ namespace Domain.Interfaces
         IPaymentRepository Payments { get; }
         IFilterRepository Filters { get; }
         Task<IDbContextTransaction> BeginTransactionAsync();
+        IProductTypeRepository SizeType { get; }
         Task<int> Complete();
     }
 }

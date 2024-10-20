@@ -310,6 +310,13 @@ namespace WebAPI.Controllers
             {
                 return NotFound();  // Handle case where the user is not found
             }
+            var notifications = _unitOfWork.Notifications.GetAll().Where(n => n.UserId == user.Id);
+            if (notifications != null)
+            {
+                _unitOfWork.Notifications.RemoveRange(notifications);
+                await _unitOfWork.Complete();
+
+            }
             var cart = await _unitOfWork.Carts.FindSingle(c => c.UserId == userId);
             if (cart != null)
             {

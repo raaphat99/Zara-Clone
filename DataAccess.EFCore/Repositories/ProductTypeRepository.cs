@@ -14,5 +14,6 @@ namespace DataAccess.EFCore.Repositories
         public ProductTypeRepository(ApplicationContext applicationContext) : base(applicationContext)
         {
         }
+
     }
 }

@@ -13,7 +13,7 @@
         public List<string>? DistinctColors { get; set; }
         public string? SizeType { get; set; }
         public string? CategoryName { get; set; }
-        public string MainImageUrl { get; set; }
+        public string? MainImageUrl { get; set; }
         public List<string>? FilterName { get; set; } = new List<string>();
 
 

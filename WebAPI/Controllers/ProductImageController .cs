@@ -1,4 +1,5 @@
-﻿using Domain.Interfaces;
+﻿using Amazon.S3;
+using Domain.Interfaces;
 using Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -30,67 +31,77 @@ namespace WebAPI.Controllers
 
         [AllowAnonymous]
         [HttpGet("variants/{variantId:int}")]
+        [HttpGet("{variantId}")]
         public async Task<ActionResult<IEnumerable<ProductImageDTO>>> GetImagesByVariant(int variantId)
         {
             var images = await _unitOfWork.ProductImages.GetImagesByVariantIdAsync(variantId);
+
             if (images == null || !images.Any())
             {
-                return NotFound();
+                return NotFound($"No images found for Product Variant ID {variantId}.");
             }
 
-            // Map ProductImage to ProductImageDTO
-            var imageDtos = images.Select(image => new ProductImageDTO
+            var pimage = images.Select(image => new ProductImageDTO
             {
                 Id = image.Id,
-                ImageUrl = image.ImageUrl,
                 AlternativeText = image.AlternativeText,
-                SortOrder = image.SortOrder,
-                Created = image.Created,
-                Updated = image.Updated,
-                ImageType = image.ImageType.ToString(),
+                ImageUrl = image.ImageUrl,
             }).ToList();
 
-            return Ok(imageDtos);
+            return Ok(pimage);
         }
 
 
 
+
         [HttpPost("/{variantId:int}")]
+        [AllowAnonymous]
         public async Task<ActionResult<ProductImage>> UploadImage(IFormFile file, int variantId)
         {
             if (file == null || file.Length == 0)
                 return BadRequest("No file uploaded.");
 
-            //var fileExtension = Path.GetExtension(file.FileName);
-            //var uniqueFileName = Guid.NewGuid().ToString() + fileExtension;
+            // Get the file name
             var fileName = Path.GetFileName(file.FileName);
 
             try
             {
                 using (var stream = new MemoryStream())
                 {
+                    // Copy the file to the stream and upload to S3
                     await file.CopyToAsync(stream);
                     await _s3Service.UploadFileAsync(file);
                 }
 
+                // Generate the public URL (replace with your actual S3 bucket name)
                 var publicUrl = $"https://{bucketName}.s3.amazonaws.com/{fileName}";
 
+                // Create a new ProductImage instance
                 ProductImage image = new ProductImage()
                 {
                     ProductVariantId = variantId,
                     ImageUrl = publicUrl,
                 };
 
+                // Add the image to the database and save changes
                 await _unitOfWork.ProductImages.AddAsync(image);
                 await _unitOfWork.Complete();
 
-                return Ok("Image added successfully.");
+                // Return the public URL of the uploaded image
+                return Ok(publicUrl);
+            }
+            catch (AmazonS3Exception s3Ex)
+            {
+                // Handle S3-specific errors
+                return StatusCode(500, $"S3 Error: {s3Ex.Message}");
             }
             catch (Exception ex)
             {
+                // Handle general errors
                 return BadRequest($"Error uploading file: {ex.Message}");
             }
         }
+
 
 
         [HttpPut("{id}")]
