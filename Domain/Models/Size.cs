@@ -19,5 +19,6 @@ namespace Domain.Models
         public virtual SizeType SizeType { get; set; }
         public virtual ICollection<ProductVariant> ProductVariant { get; set; } = new List<ProductVariant>();
         public SizeValue Value { get; set; }
+
     }
 }

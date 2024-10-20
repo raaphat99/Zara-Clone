@@ -1,5 +1,6 @@
 ﻿using Domain.Enums;
 using Domain.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,5 +13,7 @@ namespace Domain.Interfaces
     {
         Task<IEnumerable<Size>> GetSizesByType(Domain.Models.SizeType sizeType);
         Task<Size> GetSizeByValue(SizeValue sizeValue);
+        public  Task<List<Size>> GetAllSizesAsync();
+      
     }
 }

@@ -1,4 +1,5 @@
-﻿using Domain.Models;
+﻿using Domain.Enums;
+using Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,5 +16,10 @@ namespace Domain.Interfaces
         Task AddVariantAsync(ProductVariant productVariant);
         Task UpdateVariantAsync(ProductVariant productVariant);
         Task DeleteVariantAsync(ProductVariant productVariant);
+        public List<string> GetAllColors();
+
+        public List<string> GetAllMaterial();
+
+        // Get all available sizes
     }
 }

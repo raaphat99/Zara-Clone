@@ -7,5 +7,6 @@ namespace WebAPI.DTOs
         public int Id { get; set; }
         public string? SizeType { get; set; } // Assuming you need a readable name from SizeType
         public SizeValue Value { get; set; }
+        public string? sizevalue {  get; set; }
     }
 }
