@@ -11,7 +11,7 @@ using WebAPI.DTOs.ProductDTOs;
 
 namespace WebAPI.Controllers
 {
-    //[Route("api/[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public partial class ProductController : ControllerBase
     {

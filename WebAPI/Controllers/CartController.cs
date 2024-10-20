@@ -159,15 +159,27 @@ namespace WebAPI.Controllers
             else if (exist && product.StockQuantity > 0)
             {
                 var item = await _unitOfWork.CartItems.GetByIdAsync(itemId);
-                item.Quantity++;
-                _unitOfWork.CartItems.Update(item);
-                await _unitOfWork.Complete();
-                return Ok(new Response { Status = "success", Message = "Quantity Increased" });
+                if (item.Quantity < product.StockQuantity)
+                {
+                    item.Quantity++;
+                    _unitOfWork.CartItems.Update(item);
+                    await _unitOfWork.Complete();
+                    return Ok(new Response { Status = "success", Message = "Quantity Increased" });
+
+                }
+                else
+                {
+
+                    return NotFound(new Response { Status = "Failed", Message = "Out Of Stock" });
+
+                }
+
+               
 
             }
             else
             {
-                return Ok(new Response { Status = "success", Message = "Out Of Stock" });
+                return Ok(new Response { Status = "Failed", Message = "Out Of Stock" });
             }
 
         }

@@ -197,7 +197,7 @@ namespace WebAPI.Controllers
 
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
         }
-
+        [Authorize(Roles=UserRoles.Admin)]
         [HttpPost("register-admin")]
 
         public async Task<IActionResult> RegisterAdmin(RegisterModel model)
@@ -213,7 +213,7 @@ namespace WebAPI.Controllers
                 SecurityStamp = Guid.NewGuid().ToString(),
                 Name = model.Name,
                 Surname = model.Surname,
-                UserName = (model.Name + model.Surname)
+                UserName = model.Email
             };
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
@@ -228,10 +228,7 @@ namespace WebAPI.Controllers
             {
                 await _userManager.AddToRoleAsync(user, UserRoles.Admin);
             }
-            if (await _roleManager.RoleExistsAsync(UserRoles.Admin))
-            {
-                await _userManager.AddToRoleAsync(user, UserRoles.User);
-            }
+        
             return Ok(new Response { Status = "Success", Message = "Admin created successfully!" });
         }
 
