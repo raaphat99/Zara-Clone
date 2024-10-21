@@ -63,93 +63,12 @@ namespace WebAPI.Controllers
                 };
                 object value = _cache.Set(_cacheKeys.Useres, users, cacheEntryOptions);
             }
-            if(users.Any())
+
+            if (users.Any())
                 return Ok(users);
-            return BadRequest("Hamada");
-            //var users = _unitOfWork.Users.GetAll().ToList();
-            //var orders = _unitOfWork.Orders.GetAll().ToList();
-            //var addresses = _unitOfWork.UserAddress.GetAll().ToList();
-            //var userDTOs = new List<UserDTO>();
 
-            //foreach (var user in users)
-            //{
-            //    var userAddress = addresses.FirstOrDefault(a => (a.UserId == user.Id) && (a.Active == true));
-            //    // Check if userAddress exists
-            //    if (userAddress == null) continue;  // Skip this user if no active address found
-
-            //    var userOrders = orders.Where(o => o.UserId == user.Id);
-            //    var orderDTOs = new List<OrderDTO>();
-
-            //    foreach (var order in userOrders)
-            //    {
-            //        var orderitemDtOs = new List<OrderItemDTO>();
-
-            //        // Null check for OrderItems collection
-            //        if (order.OrderItems != null)
-            //        {
-            //            foreach (var orderitem in order.OrderItems)
-            //            {
-            //                // Null checks for nested properties
-            //                if (orderitem?.ProductVariant?.Product == null) continue;
-
-            //                var orderitemDTO = new OrderItemDTO
-            //                {
-            //                    name = orderitem.ProductVariant.Product.Name,
-            //                    // Null check for ProductImage collection
-            //                    productImage = orderitem.ProductVariant.ProductImage?.FirstOrDefault()?.ImageUrl,
-            //                    color = orderitem.ProductVariant.ProductColor.ToString(),
-            //                    quantity = orderitem.Quantity,
-            //                    size = orderitem.ProductVariant.Size?.Value.ToString(),
-            //                    subtotal = orderitem.Subtotal,
-            //                    unitPrice = orderitem.UnitPrice,
-            //                };
-            //                orderitemDtOs.Add(orderitemDTO);
-            //            }
-            //        }
-
-            //        var orderDTO = new OrderDTO
-            //        {
-            //            id = order.Id,
-            //            customerName = $"{user.Name} {user.Surname}".Trim(),
-            //            created = order.Created.ToString(),
-            //            items = orderitemDtOs,
-            //            status = order.Status.ToString(),
-            //            totalPrice = order.TotalPrice,
-            //            trackingNumber = order.TrackingNumber
-            //        };
-            //        orderDTOs.Add(orderDTO);
-            //    }
-
-            //    var userAddressDTO = new UserAddressDTO
-            //    {
-            //        Active = true,
-            //        City = userAddress.City,
-            //        Country = "Egypt",
-            //        Id = userAddress.Id,
-            //        State = userAddress.State,
-            //        Street = userAddress.Street,
-            //        UserId = userAddress.UserId
-            //    };
-
-            //    // Null check for UserMeasurements
-            //    var activeMeasurement = user.UserMeasurements?.FirstOrDefault(m => m.Active == true);
-
-            //    var userDTO = new UserDTO
-            //    {
-            //        ActiveAddress = userAddressDTO,
-            //        Id = user.Id,
-            //        ActiveMesurment = activeMeasurement?.SizeValue,
-            //        Email = user.Email,
-            //        Name = $"{user.Name} {user.Surname}".Trim(),
-            //        Orders = orderDTOs,
-            //        PhoneNumber = userAddress.PhoneNumber,
-            //    };
-            //    userDTOs.Add(userDTO);
-            //}
-
-            //if (userDTOs.Count > 0)
-            //    return Ok(userDTOs);
-            //return BadRequest();
+            return BadRequest();
+            
         }
 
         private IEnumerable<UserDTO> GetUsersDeatilsFromDB()
