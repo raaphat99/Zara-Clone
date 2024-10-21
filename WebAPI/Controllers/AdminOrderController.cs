@@ -1,4 +1,5 @@
-﻿using Domain.Enums;
+﻿using AutoMapper;
+using Domain.Enums;
 using Domain.Interfaces;
 using Domain.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -15,10 +16,13 @@ namespace WebAPI.Controllers
     public class AdminOrderController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public AdminOrderController(IUnitOfWork unitOfWork)
+        public AdminOrderController(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
+
         }
         [HttpGet]
         public async Task<ActionResult<IEnumerable<OrderDTO>>> GetOrders()
@@ -27,18 +31,14 @@ namespace WebAPI.Controllers
             {
                 return Unauthorized();
             }
+
             string userId = User.FindFirst(JwtRegisteredClaimNames.Sid).Value;
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
 
             if (user == null)
                 return NotFound("User not found!");
-            if (string.IsNullOrEmpty(userId))
-            {
-                return BadRequest("User ID cannot be null or empty.");
-            }
 
-            var orders
-                = await _unitOfWork.Orders.GetAll()
+            var orders = await _unitOfWork.Orders.GetAll()
                 .Where(o => o.UserId == userId)
                 .ToListAsync();
 
@@ -47,23 +47,11 @@ namespace WebAPI.Controllers
                 return NotFound();
             }
 
-            var orderDtos = orders.Select(order => new OrderDTO
-            {
-                trackingNumber = order.TrackingNumber,
-                created = order.Created.ToString(),
-                status = order.Status.ToString(),
-                totalPrice = order.TotalPrice,
-                items = order.OrderItems.Select(item => new OrderItemDTO
-                {
-                    name = item.ProductVariant?.Product?.Name ?? "Unknown Product",
-                    productImage = item.ProductVariant?.ProductImage?.FirstOrDefault()?.ImageUrl ?? "default-image-url.jpg",
-                    quantity = item.Quantity,
-                    unitPrice = item.UnitPrice
-                }).ToList()
-            }).ToList();
+            var orderDtos = _mapper.Map<List<OrderDTO>>(orders);
 
             return Ok(orderDtos);
         }
+
         [HttpGet("tracking/{trackingNumber}")]
         public async Task<ActionResult<OrderDetailsDTO>> GetOrderDetails(string trackingNumber)
         {
@@ -72,46 +60,17 @@ namespace WebAPI.Controllers
 
             if (user == null)
                 return NotFound("User not found!");
+
             var order = await _unitOfWork.Orders.GetOrderByTrackingNumberAsync(userId, trackingNumber);
 
             if (order == null)
             {
-                return null;
+                return NotFound("Order not found!");
             }
 
-            var orderDTO = new OrderDetailsDTO
-            {
-                trackingNumber = order.TrackingNumber,
-                status = order.Status.ToString(),
-                orderDate = order.Created.Value,
-                totalPrice = order.TotalPrice,
-                shippingCost = order.ShippingMethod?.ShippingCost ?? 0,
-                paymentMethod = order.Payment?.PaymentMethod ?? "Payment method not available",
-                customer = new CustomerDTO
-                {
-                    name = $"{order.User?.Name} {order.User?.Surname}",
-                    email = order.User?.Email,
-                    shippingAddress = order.User?.Adresses?.FirstOrDefault() != null
-                  ? $"{order.User.Adresses.FirstOrDefault()?.Street}, {order.User.Adresses.FirstOrDefault()?.City}, {order.User.Adresses.FirstOrDefault()?.Country}"
-                      : "Address not available"
-                },
+            var orderDetailsDto = _mapper.Map<OrderDetailsDTO>(order);
 
-
-
-                items = order.OrderItems?.Select(item => new OrderItemDTO
-                {
-                    name = item.ProductVariant?.Product?.Name ?? "Unknown",
-                    unitPrice = item.UnitPrice,
-                    quantity = item.Quantity,
-                    subtotal = item.Quantity * item.UnitPrice,
-                    productImage = item.ProductVariant?.ProductImage?.FirstOrDefault()?.ImageUrl ?? "Image not available",
-                    color = item.ProductVariant != null ? item.ProductVariant.ProductColor.ToString() : "N/A",
-                    size = item.ProductVariant?.Size?.ToString() ?? "N/A"
-                }).ToList()
-
-            };
-
-            return Ok(orderDTO);
+            return Ok(orderDetailsDto);
         }
         [HttpGet("all")]
         [Authorize]
@@ -123,22 +82,7 @@ namespace WebAPI.Controllers
             {
                 return NotFound("No orders found.");
             }
-            var orderDtos = orders.Select(order => new OrderDTO
-            {
-                id = order.Id,
-                trackingNumber = order.TrackingNumber,
-                created = order.Created.ToString(),
-                status = order.Status.ToString(),
-                totalPrice = order.TotalPrice,
-                items = order.OrderItems.Select(item => new OrderItemDTO
-                {
-                    name = item.ProductVariant?.Product?.Name ?? "Unknown Product",
-                    productImage = item.ProductVariant?.ProductImage?.FirstOrDefault()?.ImageUrl ?? "default-image-url.jpg",
-                    quantity = item.Quantity,
-                    unitPrice = item.UnitPrice
-                }).ToList(),
-                customerName = $"{order.User?.Name ?? "Unknown"} {order.User?.Surname ?? "Customer"}",
-            }).ToList();
+            var orderDtos = _mapper.Map<List<OrderDTO>>(orders);
 
             return Ok(orderDtos);
         }

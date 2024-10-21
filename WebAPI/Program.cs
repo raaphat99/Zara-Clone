@@ -14,6 +14,7 @@ using Microsoft.OpenApi.Models;
 
 using System.Text;
 using System.Text.Json.Serialization;
+using WebAPI.Mapping;
 using WebAPI.Services;
 
 namespace WebAPI
@@ -43,7 +44,8 @@ namespace WebAPI
             builder.Services.AddScoped<ProductService>();
             builder.Services.AddMemoryCache();
             builder.Services.AddSingleton<CacheKeys>();
-            
+            builder.Services.AddAutoMapper(typeof(OrderMappingProfile));
+
             // JWT configuration
             builder.Services.AddAuthentication(options =>
             {
