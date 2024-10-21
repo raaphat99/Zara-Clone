@@ -41,7 +41,9 @@ namespace WebAPI
             builder.Services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<ProductService>();
-
+            builder.Services.AddMemoryCache();
+            builder.Services.AddSingleton<CacheKeys>();
+            
             // JWT configuration
             builder.Services.AddAuthentication(options =>
             {
@@ -130,7 +132,7 @@ namespace WebAPI
             var app = builder.Build();
 
             app.UseCors("mypolicy");
-
+            
             app.UseDeveloperExceptionPage();
 
             // Configure the HTTP request pipeline.

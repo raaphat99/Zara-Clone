@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using WebAPI.DTOs;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+using WebAPI.Services;
 
 namespace WebAPI.Controllers
 {
@@ -25,21 +27,132 @@ namespace WebAPI.Controllers
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
         private readonly IUnitOfWork _unitOfWork;
+        private IMemoryCache _cache;
+        private CacheKeys _cacheKeys;
+
         public AuthenticateController(
             UserManager<User> userManager,
             RoleManager<IdentityRole> roleManager,
             IConfiguration configuration,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            IMemoryCache cache,
+            CacheKeys cacheKeys)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _configuration = configuration;
             _unitOfWork = unitOfWork;
+            _cache = cache;
+            _cacheKeys = cacheKeys;
         }
 
         [Authorize(Roles=UserRoles.Admin)]  
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
+        {
+
+            if (!_cache.TryGetValue(_cacheKeys.Useres, out IEnumerable<UserDTO> users))
+
+            {
+                users = GetUsersDeatilsFromDB(); // Get the data from database
+                var cacheEntryOptions = new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpiration = DateTime.Now.AddMinutes(5),
+                    SlidingExpiration = TimeSpan.FromMinutes(2),
+                    Size = 1024,
+                };
+                object value = _cache.Set(_cacheKeys.Useres, users, cacheEntryOptions);
+            }
+            if(users.Any())
+                return Ok(users);
+            return BadRequest("Hamada");
+            //var users = _unitOfWork.Users.GetAll().ToList();
+            //var orders = _unitOfWork.Orders.GetAll().ToList();
+            //var addresses = _unitOfWork.UserAddress.GetAll().ToList();
+            //var userDTOs = new List<UserDTO>();
+
+            //foreach (var user in users)
+            //{
+            //    var userAddress = addresses.FirstOrDefault(a => (a.UserId == user.Id) && (a.Active == true));
+            //    // Check if userAddress exists
+            //    if (userAddress == null) continue;  // Skip this user if no active address found
+
+            //    var userOrders = orders.Where(o => o.UserId == user.Id);
+            //    var orderDTOs = new List<OrderDTO>();
+
+            //    foreach (var order in userOrders)
+            //    {
+            //        var orderitemDtOs = new List<OrderItemDTO>();
+
+            //        // Null check for OrderItems collection
+            //        if (order.OrderItems != null)
+            //        {
+            //            foreach (var orderitem in order.OrderItems)
+            //            {
+            //                // Null checks for nested properties
+            //                if (orderitem?.ProductVariant?.Product == null) continue;
+
+            //                var orderitemDTO = new OrderItemDTO
+            //                {
+            //                    name = orderitem.ProductVariant.Product.Name,
+            //                    // Null check for ProductImage collection
+            //                    productImage = orderitem.ProductVariant.ProductImage?.FirstOrDefault()?.ImageUrl,
+            //                    color = orderitem.ProductVariant.ProductColor.ToString(),
+            //                    quantity = orderitem.Quantity,
+            //                    size = orderitem.ProductVariant.Size?.Value.ToString(),
+            //                    subtotal = orderitem.Subtotal,
+            //                    unitPrice = orderitem.UnitPrice,
+            //                };
+            //                orderitemDtOs.Add(orderitemDTO);
+            //            }
+            //        }
+
+            //        var orderDTO = new OrderDTO
+            //        {
+            //            id = order.Id,
+            //            customerName = $"{user.Name} {user.Surname}".Trim(),
+            //            created = order.Created.ToString(),
+            //            items = orderitemDtOs,
+            //            status = order.Status.ToString(),
+            //            totalPrice = order.TotalPrice,
+            //            trackingNumber = order.TrackingNumber
+            //        };
+            //        orderDTOs.Add(orderDTO);
+            //    }
+
+            //    var userAddressDTO = new UserAddressDTO
+            //    {
+            //        Active = true,
+            //        City = userAddress.City,
+            //        Country = "Egypt",
+            //        Id = userAddress.Id,
+            //        State = userAddress.State,
+            //        Street = userAddress.Street,
+            //        UserId = userAddress.UserId
+            //    };
+
+            //    // Null check for UserMeasurements
+            //    var activeMeasurement = user.UserMeasurements?.FirstOrDefault(m => m.Active == true);
+
+            //    var userDTO = new UserDTO
+            //    {
+            //        ActiveAddress = userAddressDTO,
+            //        Id = user.Id,
+            //        ActiveMesurment = activeMeasurement?.SizeValue,
+            //        Email = user.Email,
+            //        Name = $"{user.Name} {user.Surname}".Trim(),
+            //        Orders = orderDTOs,
+            //        PhoneNumber = userAddress.PhoneNumber,
+            //    };
+            //    userDTOs.Add(userDTO);
+            //}
+
+            //if (userDTOs.Count > 0)
+            //    return Ok(userDTOs);
+            //return BadRequest();
+        }
+
+        private IEnumerable<UserDTO> GetUsersDeatilsFromDB()
         {
             var users = _unitOfWork.Users.GetAll().ToList();
             var orders = _unitOfWork.Orders.GetAll().ToList();
@@ -121,13 +234,8 @@ namespace WebAPI.Controllers
                 };
                 userDTOs.Add(userDTO);
             }
-
-            if (userDTOs.Count > 0)
-                return Ok(userDTOs);
-            return BadRequest("fe haga ghalat");
+            return userDTOs;
         }
-
-
         [HttpPost("login")]
         [AllowAnonymous]
         public async Task<IActionResult> Login(LoginModel model)
@@ -193,6 +301,7 @@ namespace WebAPI.Controllers
                 //return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
 
             }
+            
             await _userManager.AddToRoleAsync(user, UserRoles.User);
 
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });

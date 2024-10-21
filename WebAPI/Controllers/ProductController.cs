@@ -134,7 +134,7 @@ namespace WebAPI.Controllers
             var productvariantdto = new ProductVariantforC_M_P()
             {
                 Id = productVariant.Id,
-                ProductId = productVariant.ProductId ?? 0,
+                productId = productVariant.ProductId ?? 0,
                 ProductName = productVariant.Product.Name,
                 Price = productVariant.Price,
                 ProductColor = productVariant.ProductColor,
@@ -157,7 +157,7 @@ namespace WebAPI.Controllers
 
             var productVariant = new ProductVariant
             {
-                ProductId = productVariantDto.ProductId,
+                ProductId = productVariantDto.productId,
                 //SizeId = productVariantDto.SizeId,
                 Price = productVariantDto.Price,
                 StockQuantity = productVariantDto.StockQuantity,
@@ -204,7 +204,7 @@ namespace WebAPI.Controllers
                 ProductColor = variant.ProductColor,
                 ProductMaterial = variant.ProductMaterial,
                 Price = variant.Price,
-                ProductId = variant.ProductId ?? 0,
+                productId = variant.ProductId ?? 0,
                 StockQuantity = variant.StockQuantity,
                 SizeId = variant.SizeId,
                 SizeValue = variant.Size.Value.ToString(),
