@@ -53,7 +53,6 @@ namespace WebAPI.Controllers
 
 
 
-
         [HttpPost("/{variantId:int}")]
         [AllowAnonymous]
         public async Task<ActionResult<ProductImage>> UploadImage(IFormFile file, int variantId)

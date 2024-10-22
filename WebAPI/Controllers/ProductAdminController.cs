@@ -1,4 +1,5 @@
 ﻿using Domain.Interfaces;
+using Domain.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -76,16 +77,45 @@ namespace WebAPI.Controllers
             return Ok(products);
         }
 
+        [HttpGet("{id:int}/colors")]
+        public async Task<IActionResult> GetProductDistinctColors(int id)
+        {
+            var distinctColors = await _unitOfWork.ProductVariant
+                .GetAll()
+                .Where(pv => pv.ProductId == id)
+                .Select(pv => pv.ProductColor.ToString())
+                .Distinct()
+                .ToListAsync();
+
+            return Ok(distinctColors);
+        }
+
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetProductByID(int id)
         {
+            // جلب المنتج بناءً على الـ id
             var product = await _unitOfWork.Products.GetByIdAsync(id);
 
+            // إذا لم يتم العثور على المنتج
             if (product == null)
             {
                 return NotFound();
             }
 
+            // قائمة لأسماء الفلاتر
+            List<string> filterNames = new List<string>();
+
+            // التحقق مما إذا كان للمنتج CategoryId
+            if (product.CategoryId.HasValue)
+            {
+                // جلب الفلاتر بناءً على CategoryId
+                var filters = await _unitOfWork.Filters.GetFiltersByCategoryIdAsync(product.CategoryId.Value);
+
+                // استخراج أسماء الفلاتر وإضافتها إلى القائمة
+                filterNames = filters.Select(f => f.Name).ToList();
+            }
+
+            // إنشاء الـ DTO للمنتج
             var productDto = new ProductDto
             {
                 Id = product.Id,
@@ -96,22 +126,27 @@ namespace WebAPI.Controllers
                 Created = product.Created,
                 Updated = product.Updated,
                 CategoryId = product.CategoryId,
+                FilterName = filterNames,  // تعيين أسماء الفلاتر
                 MainImageUrl = product.ProductVariants
                     .SelectMany(pv => pv.ProductImage)
-                    .FirstOrDefault()?.ImageUrl,
+                    .FirstOrDefault()?.ImageUrl,  // تعيين الرابط للصورة الأساسية
             };
 
+            // التحقق مما إذا كان المنتج ينتمي إلى فئة معينة
             if (product.CategoryId.HasValue)
             {
                 var category = await _unitOfWork.Categories.GetByIdAsync(product.CategoryId.Value);
 
+                // إذا كانت الفئة موجودة ولها فئة أب
                 if (category != null && category.ParentCategoryId.HasValue)
                 {
                     var parentCategoryId = category.ParentCategoryId.Value;
                     var parentCategory = await _unitOfWork.Categories.GetByIdAsync(parentCategoryId);
 
+                    // إذا كانت الفئة الأب موجودة
                     if (parentCategory != null)
                     {
+                        // التحقق مما إذا كانت الفئة الأب لها فئة أب أخرى
                         if (parentCategory.ParentCategoryId.HasValue)
                         {
                             var parentCategory2 = await _unitOfWork.Categories.GetByIdAsync(parentCategory.ParentCategoryId.Value);
@@ -125,8 +160,10 @@ namespace WebAPI.Controllers
                 }
             }
 
+            // إرجاع المنتج DTO
             return Ok(productDto);
         }
+
         [HttpGet("{id:int}/variants")]
         public async Task<IActionResult> GetProductVariants(int id)
         {

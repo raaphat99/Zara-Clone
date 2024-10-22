@@ -1,4 +1,5 @@
-﻿using DataAccess.EFCore.Repositories;
+﻿using DataAccess.EFCore.Data;
+using DataAccess.EFCore.Repositories;
 using Domain.Enums;
 using Domain.Interfaces;
 using Domain.Models;
@@ -141,6 +142,102 @@ namespace WebAPI.Controllers
             return Ok(productDtos);
         }
 
+        [HttpGet("subcategory/{categoryId}")]
+        public async Task<ActionResult<IEnumerable<ProductDto>>> GetProductsBySubCategory(int categoryId)
+        {
+            // البحث عن الفئة باستخدام ID
+            var category = await _unitOfWork.Categories.FindSingle(s => s.Id == categoryId);
+
+            if (category == null)
+            {
+                return NotFound("Category not found.");
+            }
+
+            // قائمة لحفظ كل المنتجات الخاصة بالفئات الفرعية
+            List<ProductDto> productsList = new List<ProductDto>();
+
+            // البحث عن جميع الفئات الفرعية التي ParentCategoryId يساوي parentId للفئة الرئيسية
+            var subcategories = await _unitOfWork.Categories.FindAsync(c => c.ParentCategoryId == category.ParentCategoryId);
+
+            if (!subcategories.Any())
+            {
+                return NotFound("No subcategories found for the given category.");
+            }
+
+            foreach (var subcategory in subcategories)
+            {
+                var products = await _unitOfWork.Products.FindAsync(p => p.CategoryId == subcategory.Id);
+
+                if (products != null && products.Any())
+                {
+                    var productDtos = products.Select(prd => new ProductDto
+                    {
+                        Id = prd.Id,
+                        Name = prd.Name,
+                        Description = prd.Description,
+                        Price = prd.Price,
+                        StockQuantity = prd.StockQuantity,
+                        Created = prd.Created,
+                        Updated = prd.Updated,
+                        CategoryId = prd.CategoryId,
+                        MainImageUrl = prd.ProductVariants
+                            .SelectMany(pv => pv.ProductImage)
+                            .FirstOrDefault()?.ImageUrl
+                    }).ToList();
+
+                    productsList.AddRange(productDtos);
+                }
+            }
+
+            if (!productsList.Any())
+            {
+                return NotFound("No products found for the given subcategories.");
+            }
+
+            return Ok(productsList);
+        }
+
+
+        [HttpPut("deactivate/{productId}")]
+        public async Task<IActionResult> DeactivateProductStock(int productId)
+        {
+            // البحث عن المنتج باستخدام ID
+            var product = await _unitOfWork.Products.GetByIdAsync(productId);
+
+            if (product == null)
+            {
+                return NotFound("Product not found.");
+            }
+
+            // تعيين StockQuantity إلى 0
+            product.StockQuantity = 0;
+
+            // تحديث المنتج في قاعدة البيانات
+            _unitOfWork.Products.Update(product);
+            await _unitOfWork.Complete(); // تأكد من حفظ التغييرات
+
+            return Ok("Product stock quantity set to zero.");
+        }
+        [HttpPut("deactivateVariant/{productVId}")]
+        public async Task<IActionResult> DeactivateProductVariantStock(int productVId)
+        {
+            // البحث عن المنتج باستخدام ID
+            var productVariant = await _unitOfWork.ProductVariant.GetByIdAsync(productVId);
+
+            if (productVariant == null)
+            {
+                return NotFound("Product variant not found.");
+            }
+
+            // تعيين StockQuantity إلى 0
+            productVariant.StockQuantity = 0;
+
+            // تحديث المنتج في قاعدة البيانات
+            _unitOfWork.ProductVariant.Update(productVariant);
+            await _unitOfWork.Complete(); // تأكد من حفظ التغييرات
+
+            return Ok("Product variant stock quantity set to zero.");
+        }
 
 
         [HttpGet("{productId:int}/sizes")]
