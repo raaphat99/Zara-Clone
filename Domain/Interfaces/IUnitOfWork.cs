@@ -28,6 +28,7 @@ namespace Domain.Interfaces
         IFilterRepository Filters { get; }
         Task<IDbContextTransaction> BeginTransactionAsync();
         IProductTypeRepository SizeType { get; }
+        IShippingMethod ShippingMethods { get; }
         Task<int> Complete();
     }
 }

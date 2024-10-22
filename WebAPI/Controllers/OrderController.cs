@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;
+using System.Numerics;
 using System.Security.Policy;
 using WebAPI.DTOs;
 using WebAPI.Services;
@@ -92,6 +93,26 @@ namespace WebAPI.Controllers
                     var trackingNumberRecord = await _unitOfWork.TrackingNumbers.GetByIdAsync(1);
                     int trackingNumber = trackingNumberRecord.UniversalTrackingNumber;
 
+                    //create shipping method
+                    ShippingMethod method = new ShippingMethod();
+                    if (checkout.shippingMethod == "StandardHome" && checkout.totalPrice > 4000)
+                    {
+                        method.Type = ShippingType.StandardHome;
+                        method.ShippingCost = 0;
+                    }
+                    else if (checkout.shippingMethod == "StandardHome" && checkout.totalPrice < 4000)
+                    {
+                        method.Type = ShippingType.StandardHome;
+                        method.ShippingCost = 89;
+                    }
+                    if (checkout.shippingMethod == "ZaraStore")
+                    {
+                        method.Type = ShippingType.ZaraStore;
+                        method.ShippingCost = 0;
+                    };
+                    await _unitOfWork.ShippingMethods.AddAsync(method);
+                    await _unitOfWork.Complete();
+
                     // create the order
                     Order order = new Order
                     {
@@ -100,9 +121,10 @@ namespace WebAPI.Controllers
                         TrackingNumber = $"{TrackingPrefix}{trackingNumber}",
                         TotalPrice = checkout.totalPrice,
                         Created = DateTime.UtcNow,
-                        Status = OrderStatus.Pending
+                        Status = OrderStatus.Pending,
+                        ShippingMethodId = method.Id,
                     };
-
+                    
                     // Update tracking number
                     trackingNumberRecord.UniversalTrackingNumber += 1;
                     _unitOfWork.TrackingNumbers.Update(trackingNumberRecord);
@@ -129,7 +151,7 @@ namespace WebAPI.Controllers
                         PaymentMethod = checkout.paymentMethod,
                         PaymentStatus = PaymentStatus.Pending,
                     };
-
+                    
                     if (checkout.paymentMethod == "POD")
                     {
                        

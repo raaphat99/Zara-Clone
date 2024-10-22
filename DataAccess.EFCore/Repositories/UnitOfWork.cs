@@ -32,6 +32,7 @@ namespace DataAccess.EFCore.Repositories
         private readonly Lazy<IPaymentRepository> payments;
         private readonly Lazy<IFilterRepository> filters;
         private readonly Lazy<IProductTypeRepository> sizeType;
+        private readonly Lazy<IShippingMethod> shippingMethods;
 
 
         #endregion
@@ -61,7 +62,7 @@ namespace DataAccess.EFCore.Repositories
             filters = new Lazy<IFilterRepository>(() => new FilterRepository(_context));
 
             sizeType=new Lazy<IProductTypeRepository>(() => new ProductTypeRepository(_context));
-
+            shippingMethods = new Lazy<IShippingMethod>(() => new ShippingMethodRepository(_context));
         }
         #endregion
 
@@ -86,7 +87,7 @@ namespace DataAccess.EFCore.Repositories
         public IPaymentRepository Payments => payments.Value;
         public IFilterRepository Filters => filters.Value;
         public IProductTypeRepository SizeType => sizeType.Value;
-
+        public IShippingMethod ShippingMethods   => shippingMethods.Value;
 
         #endregion
 
