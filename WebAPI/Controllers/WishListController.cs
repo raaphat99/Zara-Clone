@@ -40,7 +40,8 @@ namespace WebAPI.Controllers
                     Id = item.Id,
                     Name = item.Name,
                     Price = item.Price,
-                    ImageUrl = GetImgUrl(item)
+                    ImageUrl = GetImgUrl(item),
+                    description = item.Description
                 };
                 wishListItemDTOs.Add(wishListItemDTO);
 

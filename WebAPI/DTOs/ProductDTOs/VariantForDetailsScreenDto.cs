@@ -13,6 +13,7 @@
         public string ProductMaterial { get; set; }
         public int SizeId { get; set; }
         public string SizeName { get; set; }
+        public int? CategoryId { get; set; }
         public List<string> ImageUrls { get; set; } = new List<string>();
     }
 }

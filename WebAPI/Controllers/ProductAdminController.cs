@@ -163,7 +163,6 @@ namespace WebAPI.Controllers
             // إرجاع المنتج DTO
             return Ok(productDto);
         }
-
         [HttpGet("{id:int}/variants")]
         public async Task<IActionResult> GetProductVariants(int id)
         {
@@ -176,7 +175,6 @@ namespace WebAPI.Controllers
             if (product == null)
                 return NotFound();
 
-            // Map the product variants to DTOs
             var productVariantDtos = product.ProductVariants.Select(pv => new VariantForDetailsScreenDto
             {
                 Id = pv.Id,
@@ -188,12 +186,45 @@ namespace WebAPI.Controllers
                 Updated = pv.Updated,
                 ProductColor = pv.ProductColor.ToString(),
                 ProductMaterial = pv.ProductMaterial.ToString(),
-                SizeName = pv.Size.Value.ToString(),
+                SizeId = pv.SizeId, // Make sure this is set correctly
+                SizeName = pv.Size?.Value.ToString() ?? string.Empty, // Assuming Size has a Name property
+                CategoryId = product.CategoryId, // Extracting CategoryId from the product
                 ImageUrls = pv.ProductImage.Select(img => img.ImageUrl).ToList()
             }).ToList();
 
             return Ok(productVariantDtos);
         }
+
+        //[HttpGet("{id:int}/variants")]
+        //public async Task<IActionResult> GetProductVariants(int id)
+        //{
+        //    var product = await _unitOfWork.Products
+        //        .Find(prd => prd.Id == id)
+        //        .Include(prd => prd.ProductVariants)
+        //        .ThenInclude(pv => pv.ProductImage)
+        //        .FirstOrDefaultAsync();
+
+        //    if (product == null)
+        //        return NotFound();
+
+        //    var x = _unitOfWork.Products.FindSingle(s => s.Id == id);
+        //    var productVariantDtos = product.ProductVariants.Select(pv => new VariantForDetailsScreenDto
+        //    {
+        //        Id = pv.Id,
+        //        Price = pv.Price,
+        //        DiscountPercentage = pv.DiscountPercentage,
+        //        DiscountedPrice = pv.DiscountedPrice,
+        //        StockQuantity = pv.StockQuantity,
+        //        Created = pv.Created,
+        //        Updated = pv.Updated,
+        //        ProductColor = pv.ProductColor.ToString(),
+        //        ProductMaterial = pv.ProductMaterial.ToString(),
+        //        SizeName = pv.Size.Value.ToString(),
+        //        ImageUrls = pv.ProductImage.Select(img => img.ImageUrl).ToList()
+        //    }).ToList();
+
+        //    return Ok(productVariantDtos);
+        //}
 
         [HttpPost]
         public async Task<IActionResult> CreateProduct([FromBody] ProductDto product)
