@@ -169,7 +169,7 @@ namespace WebAPI.Controllers
                         var notification = new Notification
                         {
                             UserId = order.UserId,
-                            Message = $"Good news! Order {order.TrackingNumber} has been shipped.",
+                            Message = $"Order {order.TrackingNumber}  is pending. We are processing it.",
                             Created = DateTime.Now,
                             IsRead = false
                         };
