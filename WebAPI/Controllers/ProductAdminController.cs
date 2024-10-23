@@ -37,7 +37,7 @@ namespace WebAPI.Controllers
                     MainImageUrl = p.ProductVariants
                         .SelectMany(v => v.ProductImage)
                         .Select(i => i.ImageUrl)
-                        .FirstOrDefault()
+                        .FirstOrDefault(),
                 })
                 .ToListAsync();
             foreach (var product in products)

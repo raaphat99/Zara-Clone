@@ -40,6 +40,7 @@ namespace WebAPI.Controllers
                     Created = p.Created,
                     Updated = p.Updated,
                     CategoryId = p.CategoryId,
+
                     MainImageUrl = p.ProductVariants
                     .SelectMany(v => v.ProductImage)
                     .Select(i => i.ImageUrl)
