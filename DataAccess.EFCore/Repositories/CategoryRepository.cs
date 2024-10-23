@@ -14,6 +14,9 @@ namespace DataAccess.EFCore.Repositories
     {
         public CategoryRepository(ApplicationContext applicationContext) : base(applicationContext)
         { }
+
+        // checks whether the given category or any of its ancestors is "Beauty".
+        // The recursion stops when there’s no parent or the "Beauty" category is found.
         public async Task<IEnumerable<Category>> GetSubCategoriesByParentIdAsync(int id)
         {
             return await _dbContext.Categories
@@ -21,6 +24,36 @@ namespace DataAccess.EFCore.Repositories
                 .ToListAsync();
         }
 
+        public async Task<bool> IsBeautyAncestor(int categoryId)
+        {
+            var category = await _dbContext.Categories
+                .Include(c => c.ParentCategory)
+                .FirstOrDefaultAsync(c => c.Id == categoryId);
+
+            if (category == null)
+            {
+                return false;
+            }
+
+            // Check if this category or any parent is "Beauty"
+            return await CheckBeautyAncestor(category);
+        }
+
+        public async Task<bool> CheckBeautyAncestor(Category category)
+        {
+            if (category.Name == "BEAUTY")
+            {
+                return true;
+            }
+
+            if (category.ParentCategory == null)
+            {
+                return false;
+            }
+
+            // Recursively check parent
+            return await IsBeautyAncestor(category.ParentCategory.Id);
+        }
 
     }
 }

@@ -21,7 +21,7 @@ namespace WebAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts()
         {
-            var productsQuery = _unitOfWork.Products.GetAllWithVariantsAndImages();
+            var productsQuery = _unitOfWork.Products.GetAllWithVariantsAndImages().Where(p => p.StockQuantity > 0);
 
             var products = await productsQuery
                 .Select(p => new ProductDto
@@ -315,7 +315,7 @@ namespace WebAPI.Controllers
             _unitOfWork.Products.Remove(existingProduct);
             await _unitOfWork.Complete();
 
-            return Ok("Product Deleted"); 
+            return Ok("Product Deleted");
         }
 
         [HttpGet("colors")]

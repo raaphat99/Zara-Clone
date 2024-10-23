@@ -165,5 +165,21 @@ namespace WebAPI.Controllers
             }
             return Ok(categorydto);
         }
+
+
+        [HttpGet("{categoryId:int}/has-beauty-ancestor")]
+        public async Task<IActionResult> HasBeautyAncestor(int categoryId)
+        {
+            try
+            {
+                var result = await _unitOfWork.Categories.IsBeautyAncestor(categoryId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred", details = ex.Message });
+            }
+        }
+
     }
 }

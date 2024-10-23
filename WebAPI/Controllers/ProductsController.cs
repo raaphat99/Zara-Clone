@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Reflection.Metadata.Ecma335;
 using WebAPI.DTOs;
 using WebAPI.DTOs.ProductDTOs;
+using WebAPI.Filters;
 
 namespace WebAPI.Controllers
 {
@@ -22,6 +23,119 @@ namespace WebAPI.Controllers
         {
             _unitOfWork = unitOfWork;
         }
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts()
+        {
+            var productsQuery = _unitOfWork.Products.GetAllWithVariantsAndImages().Where(p => p.StockQuantity > 0);
+
+            var products = await productsQuery
+                .Select(p => new ProductDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Price = p.Price,
+                    StockQuantity = p.StockQuantity,
+                    Created = p.Created,
+                    Updated = p.Updated,
+                    CategoryId = p.CategoryId,
+                    MainImageUrl = p.ProductVariants
+                    .SelectMany(v => v.ProductImage)
+                    .Select(i => i.ImageUrl)
+                    .FirstOrDefault()
+                })
+                .ToListAsync();
+            foreach (var product in products)
+            {
+                if (product.CategoryId.HasValue)
+                {
+                    var category = await _unitOfWork.Categories.GetByIdAsync(product.CategoryId.Value); // استخدم .Value للوصول لقيمة int
+                    product.CategoryName = category?.Name; // احصل على اسم الفئة
+                }
+            }
+            return Ok(products);
+        }
+
+
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetProductByID(int id)
+        {
+            var product = await _unitOfWork.Products.GetByIdAsync(id);
+            string productSizeType = _unitOfWork.Products.GetSizeTypeByProductId(id);
+
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            var productDto = new ProductDto
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                StockQuantity = product.StockQuantity,
+                Created = product.Created,
+                Updated = product.Updated,
+                CategoryId = product.CategoryId,
+                MainImageUrl = product.ProductVariants
+                    .SelectMany(pv => pv.ProductImage)
+                    .FirstOrDefault()?.ImageUrl,
+                SizeType = productSizeType
+            };
+
+            return Ok(productDto);
+        }
+
+
+
+        [HttpGet("{id:int}/colors")]
+        public async Task<IActionResult> GetProductDistinctColors(int id)
+        {
+            var distinctColors = await _unitOfWork.ProductVariant
+                .GetAll()
+                .Where(pv => pv.ProductId == id)
+                .Select(pv => pv.ProductColor.ToString())
+                .Distinct()
+                .ToListAsync();
+
+            return Ok(distinctColors);
+        }
+
+
+
+        [HttpGet("{id:int}/variants")]
+        public async Task<IActionResult> GetProductVariants(int id)
+        {
+            var product = await _unitOfWork.Products
+                .Find(prd => prd.Id == id)
+                .Include(prd => prd.ProductVariants)
+                .ThenInclude(pv => pv.ProductImage)
+                .FirstOrDefaultAsync();
+
+            if (product == null)
+                return NotFound();
+
+            // Map the product variants to DTOs
+            var productVariantDtos = product.ProductVariants.Select(pv => new VariantForDetailsScreenDto
+            {
+                Id = pv.Id,
+                Price = pv.Price,
+                DiscountPercentage = pv.DiscountPercentage,
+                DiscountedPrice = pv.DiscountedPrice,
+                StockQuantity = pv.StockQuantity,
+                Created = pv.Created,
+                Updated = pv.Updated,
+                ProductColor = pv.ProductColor.ToString(),
+                ProductMaterial = pv.ProductMaterial.ToString(),
+                SizeName = pv.Size.Value.ToString(),
+                ImageUrls = pv.ProductImage.Select(img => img.ImageUrl).ToList()
+            }).ToList();
+
+            return Ok(productVariantDtos);
+        }
+
 
 
         [HttpGet("category/{categoryId:int}")]
