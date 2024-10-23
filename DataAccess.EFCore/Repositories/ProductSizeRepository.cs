@@ -32,6 +32,15 @@ namespace DataAccess.EFCore.Repositories
                 .FirstOrDefaultAsync(size => size.Value == sizeValue);
         }
 
+        public IEnumerable<Size> GetSizesByVariantId(int variantId)
+        {
+            return _dbContext.Sizes
+                           .Include(s => s.ProductVariant)
+                           .Where(s => s.ProductVariant.Any(pv => pv.Id == variantId))
+                           .ToList();
+        }
+
+
 
     }
 }

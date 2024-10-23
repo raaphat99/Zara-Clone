@@ -14,6 +14,7 @@ using Microsoft.OpenApi.Models;
 
 using System.Text;
 using System.Text.Json.Serialization;
+using WebAPI.Filters;
 using WebAPI.Services;
 
 namespace WebAPI
@@ -72,6 +73,9 @@ namespace WebAPI
                 // Optionally, ignore null values
                 //options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
             });
+
+            // Register the custom action filter
+            builder.Services.AddScoped<ProductStockValidationFilter>();
 
             // Register the S3 Service
             builder.Services.AddTransient<S3Service>();

@@ -35,6 +35,7 @@ namespace WebAPI.Controllers
             List<WishListItemDTO> wishListItemDTOs = new List<WishListItemDTO>();
             foreach (var item in wishlist)
             {
+
                 WishListItemDTO wishListItemDTO = new WishListItemDTO()
                 {
                     Id = item.Id,

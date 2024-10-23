@@ -73,6 +73,10 @@ namespace DataAccess.EFCore.Data
             .Property(type => type.Type)
             .HasConversion<string>();
 
+            builder.Entity<Size>()
+                .Property(size => size.Value)
+                .HasConversion<string>();
+
             builder.Entity<Payment>()
             .Property(payment => payment.PaymentStatus)
             .HasConversion<string>();
@@ -88,6 +92,7 @@ namespace DataAccess.EFCore.Data
 
             base.OnModelCreating(builder);
         }
+
     }
 }
 

@@ -12,5 +12,6 @@ namespace Domain.Interfaces
     {
         Task<IEnumerable<Size>> GetSizesByType(Domain.Models.SizeType sizeType);
         Task<Size> GetSizeByValue(SizeValue sizeValue);
+        IEnumerable<Size> GetSizesByVariantId(int variantId);
     }
 }

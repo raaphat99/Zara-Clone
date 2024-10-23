@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Reflection.Metadata.Ecma335;
 using WebAPI.DTOs;
 using WebAPI.DTOs.ProductDTOs;
+using WebAPI.Filters;
 
 namespace WebAPI.Controllers
 {
@@ -25,7 +26,7 @@ namespace WebAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts()
         {
-            var productsQuery = _unitOfWork.Products.GetAllWithVariantsAndImages();
+            var productsQuery = _unitOfWork.Products.GetAllWithVariantsAndImages().Where(p => p.StockQuantity > 0);
 
             var products = await productsQuery
                 .Select(p => new ProductDto
@@ -54,7 +55,6 @@ namespace WebAPI.Controllers
             }
             return Ok(products);
         }
-
 
 
         [HttpGet("{id:int}")]
@@ -286,12 +286,12 @@ namespace WebAPI.Controllers
         }
 
 
-
         [HttpGet("filter")]
         public async Task<IActionResult> FilterProductVariants(
             [FromQuery] int? productId,   // معلمة productId
             [FromQuery] int? categoryId,  // إضافة معلمة categoryId
-            [FromQuery] List<string>? colors, [FromQuery] List<string>? materials,
+            [FromQuery] List<string>? colors,
+            [FromQuery] List<string>? materials,
             [FromQuery] double? priceFrom, [FromQuery] double? priceTo,
             [FromQuery] List<string>? sizes)
         {

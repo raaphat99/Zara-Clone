@@ -80,7 +80,8 @@ namespace WebAPI.Controllers
                 SizeValue = mesurment.SizeValue,
                 Height = mesurment.Height,
                 Weight = mesurment.Weight,
-                Age = mesurment.Age
+                Age = mesurment.Age,
+                Active = mesurment.Active
             };
 
             return Ok(mesurmentDTO);
@@ -110,6 +111,7 @@ namespace WebAPI.Controllers
                 Weight = measurementDTO.Weight,
                 FavoriteSection = measurementDTO.FavoriteSection,
                 SizeValue = size,
+                Active = measurementDTO.Active,
                 Created = DateTime.Now
             };
 

@@ -1,7 +1,10 @@
-﻿using Domain.Interfaces;
+﻿using DataAccess.EFCore.Repositories;
+using Domain.Interfaces;
 using Domain.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using WebAPI.DTOs;
 using WebAPI.DTOs.ProductDTOs;
 
 namespace WebAPI.Controllers
@@ -111,5 +114,20 @@ namespace WebAPI.Controllers
             return Ok(new { message = "Product successfully deleted.", deletedProductId = id });
             //return NoContent();
         }
+
+        [HttpGet("{variantId}/sizes")]
+        public IActionResult GetSizesByVariantId(int variantId)
+        {
+            var sizes = _unitOfWork.Sizes.GetSizesByVariantId(variantId)
+                                        .Select(s => new SizeDTO
+                                        {
+                                            Id = s.Id,
+                                            stringifiedValue = s.Value.ToString(),
+                                        }).ToList();
+
+            return Ok(sizes);
+        }
+
+
     }
 }
