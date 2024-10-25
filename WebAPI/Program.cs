@@ -2,7 +2,21 @@
 using DataAccess.EFCore.Data;
 using DataAccess.EFCore.Repositories;
 using Domain.Interfaces;
+using Domain.Models;
+
+
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+
+using System.Text;
+using System.Text.Json.Serialization;
+using WebAPI.Mapping;
+using WebAPI.Filters;
+using WebAPI.Services;
 
 namespace WebAPI
 {
@@ -22,18 +36,110 @@ namespace WebAPI
                     optionsBuilder => optionsBuilder.MigrationsAssembly(typeof(ApplicationContext).Assembly.FullName));
             });
 
+            //Identity
+            builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<ApplicationContext>().AddDefaultTokenProviders();
 
-
-            builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-            //builder.Services.AddScoped<IProductRepository, ProductRepository>();
+            // Register Generic Repository & UnitOfWork services
+            builder.Services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped<ProductService>();
+            builder.Services.AddMemoryCache();
+            builder.Services.AddSingleton<CacheKeys>();
+            builder.Services.AddAutoMapper(typeof(OrderMappingProfile));
 
-            builder.Services.AddControllers();
+            // JWT configuration
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = builder.Configuration["Jwt:ValidIssuer"],
+                    ValidAudience = builder.Configuration["Jwt:ValidAudience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]))
+                };
+            });
+
+
+
+            // Configure JSON Serialization Settings
+            builder.Services.AddControllers()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+                // Optionally, ignore null values
+                //options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+            });
+
+            // Register the custom action filter
+            builder.Services.AddScoped<ProductStockValidationFilter>();
+
+            // Register the S3 Service
+            builder.Services.AddTransient<S3Service>();
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            //swagger docs configuration
+            builder.Services.AddSwaggerGen(swagger =>
+            {
+
+                swagger.SwaggerDoc("v1", new OpenApiInfo()
+                {
+                    Version = "v1",
+                    Title = "",
+                    Description = ""
+                });
+
+                // To enable Authorization using Swagger (JWT)
+                swagger.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Enter 'Bearer' [space] and then your valid token. Example: 'Bearer [YourToken]'"
+                });
+
+                swagger.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme()
+                        {
+                            Reference = new OpenApiReference()
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[] {}
+                    }
+                });
+            });
+
+            // Add CORS Policy
+            builder.Services.AddCors(CorsOptions =>
+            {
+                CorsOptions.AddPolicy("mypolicy", CorsPolicyBuilder =>
+                {
+                    CorsPolicyBuilder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+                });
+            });
+
             var app = builder.Build();
+
+            app.UseCors("mypolicy");
+
+            app.UseDeveloperExceptionPage();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -42,8 +148,9 @@ namespace WebAPI
                 app.UseSwaggerUI();
             }
 
-            app.UseAuthorization();
+            app.UseAuthentication();
 
+            app.UseAuthorization();
 
             app.MapControllers();
 

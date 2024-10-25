@@ -10,57 +10,69 @@ using System.Threading.Tasks;
 
 namespace DataAccess.EFCore.Repositories
 {
-    public class GenericRepository<T> : IGenericRepository<T> where T : class
+    public class GenericRepository<TEntity, TKey> : IGenericRepository<TEntity, TKey> where TEntity : class
     {
         protected readonly ApplicationContext _dbContext;
-        protected readonly DbSet<T> _dbSet;
+        protected readonly DbSet<TEntity> _dbSet;
         public GenericRepository(ApplicationContext applicationContext)
         {
             _dbContext = applicationContext;
-            _dbSet = _dbContext.Set<T>();
+            _dbSet = _dbContext.Set<TEntity>();
         }
-
-        public async Task<IEnumerable<T>> GetAllAsync()
-        {
-            return await _dbSet.ToListAsync();
-        }
-
-        public async Task<T> GetByIdAsync(int id)
-        {
-            return await _dbSet.FindAsync(id);
-        }
-
-        public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> expression)
+        public async Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>> expression)
         {
             return await _dbSet.Where(expression).ToListAsync();
         }
 
-        public async Task AddAsync(T entity)
+        public IQueryable<TEntity> Find(Expression<Func<TEntity, bool>> predicate)
+        {
+            return _dbSet.Where(predicate).AsQueryable();
+        }
+        public async Task<TEntity> FindSingle(Expression<Func<TEntity, bool>> predicate)
+        {
+            return await _dbSet.SingleOrDefaultAsync(predicate);
+        }
+
+
+        public IQueryable<TEntity> GetAll()
+        {
+            return _dbSet.AsQueryable();
+        }
+
+        public async Task<TEntity> GetByIdAsync(TKey id)
+        {
+              return await _dbSet.FindAsync(id).ConfigureAwait(false);
+        }
+
+        public async Task AddAsync(TEntity entity)
         {
             await _dbSet.AddAsync(entity);
         }
 
-        public async Task AddRangeAsync(IEnumerable<T> entities)
+        public async Task AddRangeAsync(IEnumerable<TEntity> entities)
         {
             await _dbSet.AddRangeAsync(entities);
         }
 
-        public void Update(T entity)
+        public void Update(TEntity entity)
         {
             _dbSet.Attach(entity);
             _dbContext.Entry(entity).State = EntityState.Modified;
         }
 
-        public void Remove(T entity)
+        public void Remove(TEntity entity)
         {
             _dbSet.Remove(entity);
         }
 
-        public void RemoveRange(IEnumerable<T> entities)
+        public void RemoveRange(IEnumerable<TEntity> entities)
         {
             _dbSet.RemoveRange(entities);
         }
-
+        public async Task<int> CountAsync()
+        {
+            return await _dbSet.CountAsync();
+        }
 
     }
 }
